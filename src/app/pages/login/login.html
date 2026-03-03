@@ -1,0 +1,83 @@
+<section class="section-lg-t-space section-b-space">
+    <div class="custom-container">
+      <div class="auth-title">
+        <h2>Iniciar Sesión</h2>
+      </div>
+  
+      <!-- Reactive Form -->
+      <form class="auth-form" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+        <!-- Email -->
+        <div class="form-group mt-0">
+          <label class="form-label mb-2" for="Inputemail">Usuario</label>
+          <div class="form-input">
+            <input
+              type="email"
+              class="form-control"
+              id="Inputemail"
+              placeholder="Ingrese su email"
+              formControlName="email"
+              autocomplete="email"
+            />
+            <i class="iconsax" data-icon="mail"></i>
+          </div>
+          <div class="invalid" *ngIf="submitted() && f.email.errors">
+            <small *ngIf="f.email.errors['required']">El email es obligatorio.</small>
+            <small *ngIf="f.email.errors['email']">Formato de email inválido.</small>
+          </div>
+        </div>
+  
+        <!-- Password -->
+        <div class="form-group mt-3">
+          <label class="form-label mb-2" for="Inputpassword">Contraseña</label>
+          <div class="form-input">
+            <input
+              [type]="showPassword() ? 'text' : 'password'"
+              class="form-control"
+              id="Inputpassword"
+              placeholder="Ingrese su contraseña"
+              formControlName="password"
+              autocomplete="current-password"
+            />
+            <i class="iconsax" data-icon="lock-2"></i>
+          </div>
+  
+          <!-- Toggler ojo -->
+          <button type="button" class="show-hide toggler btn btn-outline-primary" (click)="togglePassword()" aria-label="Mostrar/ocultar contraseña">
+            <i class="bi bi-eye" style="color: #f9680f;" data-icon="eye" [style.display]="!showPassword() ? 'inline-block' : 'none'"></i>
+            <i class="bi bi-eye-slash" data-icon="eye-slash" [style.display]="showPassword() ? 'inline-block' : 'none'"></i>
+          </button>
+  
+          <div class="invalid" *ngIf="submitted() && f.password.errors">
+            <small *ngIf="f.password.errors['required']">La contraseña es obligatoria.</small>
+            <small *ngIf="f.password.errors['minlength']">Mínimo 6 caracteres.</small>
+          </div>
+        </div>
+  
+        <!-- Olvidó contraseña -->
+        <a class="forgot" href="forgot-password.html">¿Olvidaste tu contraseña?</a>
+
+        <!-- <a href="home.html" class="btn theme-btn w-100 auth-btn">Iniciar Sesión</a>
+
+        <h5 class="content-color fw-medium mt-3 text-center"> No tienes una cuenta ?
+            <a routerLink="/register" class="theme-color fw-semibold">Registrate</a>
+        </h5> -->
+  
+        <!-- Submit -->
+        <button class="btn theme-btn w-100 auth-btn" type="submit" [disabled]="loading() || form.invalid">
+          <span *ngIf="!loading()">Iniciar Sesión</span>
+          <span *ngIf="loading()">Ingresando…</span>
+        </button>
+  
+        <!-- Mensajes -->
+        <div class="mt-3 text-center" *ngIf="errorMsg()">
+          <small class="text-danger">{{ errorMsg() }}</small>
+        </div>
+  
+        <h5 class="content-color fw-medium mt-3 text-center">
+          No tienes una cuenta ?
+          <a routerLink="/register" class="theme-color fw-semibold">Registrate</a>
+        </h5>
+      </form>
+    </div>
+  </section>
+  

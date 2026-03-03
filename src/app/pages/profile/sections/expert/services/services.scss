@@ -1,0 +1,217 @@
+.fixed-btn {
+    position: fixed;
+    bottom: 0;
+    padding: 20px 0;
+    left: 50%;
+    transform: translate(-50%);
+    right: 0;
+    background: white;
+    padding: 1rem 0;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    
+   
+}
+    .custom-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+  
+    .auth-btn {
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+  
+      &[disabled] {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+    }
+  
+    .save-message {
+      margin-top: 0.5rem;
+      text-align: center;
+      font-size: 0.875rem;
+      color: #666;
+    }
+  
+   
+  /* spinner local */
+  .local-spinner {
+    display:inline-block;
+    width:16px;
+    height:16px;
+    border:2px solid rgba(255,255,255,0.4);
+    border-left-color: rgba(255,255,255,1);
+    border-radius:50%;
+    margin-right:8px;
+    animation: spin .9s linear infinite;
+  }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    /* destacar categoría seleccionada */
+.package-service-list li.selected {
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    border-radius: 8px;
+    background: rgb(255 242 18 / 15%);
+    outline: 2px solid rgb(47 90 158);
+    padding: 5px;
+    margin: 2px;
+  }
+  
+  /* chips */
+  .selected-chips .chips-wrap {
+    display:flex;
+    flex-wrap: wrap;
+    gap:8px;
+  }
+  .chip {
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:6px 10px;
+    border-radius:18px;
+    background:#f3f4f6;
+    color:#111827;
+    font-size:13px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .chip .chip-label { max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .chip .chip-remove {
+    background:transparent;
+    border:none;
+    color:#666;
+    font-weight:700;
+    cursor:pointer;
+    padding:0 6px;
+    line-height:1;
+  }
+  .chip-cat { background:#fff7e6; }
+  
+  
+  
+  /* contenedor */
+.categories-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  
+  /* bloque por categoría */
+  .category-block {
+    border-radius: 10px;
+    padding: 8px;
+    background: transparent;
+  }
+  
+  /* header con imagen + título */
+  .category-header {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 6px 10px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background .12s, box-shadow .12s;
+  }
+  .category-header .left {
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .categories-icon {
+    width:44px;
+    height:44px;
+    border-radius:8px;
+    object-fit:cover;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .category-title {
+    margin:0;
+    font-size:16px;
+    color: #111827;
+  }
+  
+  /* estilo cuando está abierto */
+  .category-header.open {
+    background: rgba(109, 69, 254, 0.06); /* sutil */
+    outline: 2px solid rgba(109, 69, 254, 0.12);
+  }
+  
+  /* fila de tags */
+  .tags-row {
+    margin-top:10px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  
+  /* tag (no seleccionada) */
+  .tag {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:7px 12px;
+    border-radius:16px;
+    background: #ffffff;
+    border: 1.5px solid #f9680f; /* azul borde */
+    color: #f9680f; /* texto azul */
+    font-size:13px;
+    cursor:pointer;
+    transition: background .12s, color .12s, transform .06s;
+    user-select:none;
+  }
+  
+  /* tag seleccionada: fondo azul + texto blanco */
+  .tag.selected {
+    background: #f9680f;
+    color: #ffffff;
+    border-color: transparent;
+  }
+  
+  /* hover */
+  .tag:hover { transform: translateY(-1px); }
+  
+  /* accesibilidad: foco */
+  .tag:focus {
+    outline: 3px solid rgba(37,99,235,0.16);
+    outline-offset: 2px;
+  }
+  
+  /* pequeño texto cuando no hay subs */
+  .muted { color:#6b7280; font-size:13px; margin:6px 0; }
+  .tag {
+    position: relative;
+    border: 1px solid #ccc;
+    background: #fff;
+    color: #333;
+    padding: 6px 12px;
+    margin: 4px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.2s ease;
+  
+    &:hover {
+      background: #f7f7f7;
+    }
+  
+    &.selected {
+      background: #e6f7e6;
+      border-color: #52c41a;
+      color: #237804;
+      font-weight: 500;
+    }
+  
+    .check-icon {
+      font-size: 13px;
+      margin-right: 6px;
+    }
+  }
+  

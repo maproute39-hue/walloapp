@@ -1,0 +1,99 @@
+/* Contenedor del precio */
+.subscription-plan-box .price-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+/* Precio grande */
+.subscription-plan-box .price-header .price-main {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.subscription-plan-box .price-header .amount {
+  font-size: 28px;           /* agradable para móvil */
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.5px;
+  color:#fff;            /* puedes cambiar a tu primario */
+}
+
+.subscription-plan-box .price-header .currency {
+  font-size: 14px;
+  top: -0.4em;
+  position: relative;
+  font-weight: 700;
+  margin-right: 2px;
+  opacity: 0.9;
+}
+
+.subscription-plan-box .price-header .period {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+/* Lado derecho: descuento y precio anterior */
+.subscription-plan-box .price-header .price-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+/* Badge de descuento */
+.subscription-plan-box .badge-off {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 999px;
+  background: #607D8B;          /* fondo suave */
+  color: #f58218;                  /* acento */
+  border: 1px solid #1f6bff33;     /* borde tenue */
+}
+
+/* Precio anterior */
+.subscription-plan-box .old-price {
+  font-size: 11px;
+  color: #fff;
+}
+
+/* Opcional: una ligera separación del resto del card */
+.subscription-plan-box .line-box {
+  margin-top: 10px;
+}
+.plan-slider .swiper-wrapper .swiper-slide .subscription-plan-box .plan-price-box::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 155px;
+    height: 90px;
+    border-radius: 10%;
+    z-index: -1;
+    background-color: rgba(var(--theme-color), 1);
+    border: 5px solid rgba(var(--title-color), 0.1);
+}
+
+.subscription-plan-box {
+  position: relative;
+}
+
+.subscription-plan-box .promo-seal {
+  position: absolute;
+  top: -68px;
+  right: 100px;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #ffecb3;   /* amarillo suave */
+  color: #6b5200;
+  border: 1px solid #f5d67a;
+}

@@ -1,0 +1,61 @@
+<!-- profile section starts -->
+<section class="section-b-space" *ngIf="isLoggedIn">
+  <div class="custom-container">
+    <div *ngIf="!isGalleryRoute()">
+
+    <div *ngIf="!router.isActive(router.url + '/(panel:biografy)' || router.url + '/(panel:gallery)', false)">
+
+    <!-- Header del perfil -->
+    <div class="profile-background">
+      <img class="img-fluid profile-bg" src="assets/images/background/profile-bg.png" alt="profile-bg" />
+
+      <div class="profile-part mt-3">
+        <div class="profile-image">
+          <img class="img-fluid profile-pic" [src]="avatarSrc()" alt="profile" />
+          <span class="material-symbols-rounded edit-icon" (click)="navigateToBiography()" >edit</span>
+          <!-- <input id="file" type="file" /> -->
+        </div>
+
+        <!-- Switch de roles solo para proveedor -->
+        <!-- <div *ngIf="user?.type === 'proveedor'" class="role-switch mt-2">
+          <span class="role-label" [class.active]="role === 'client'">Cliente</span>
+          <input
+            id="roleSwitch"
+            type="checkbox"
+            class="sr-only"
+            [checked]="role === 'provider'"
+            (change)="onRoleToggle($event)"
+            role="switch"
+            aria-label="Cambiar entre Cliente y Prestador"
+          />
+          <label for="roleSwitch" class="switch"></label>
+          <span class="role-label" [class.active]="role === 'provider'">Prestador</span>
+        </div> -->
+
+        <h3>{{ userName }}</h3>
+        <h4>{{ userEmail }}</h4>
+      </div>
+
+      <!-- Balance -->
+      <div *ngIf="role === 'provider'" class="balance-background mt-3">
+        <a [routerLink]="['/profile', { outlets: { panel: ['wallet'] } }]" class="balance-details">
+          <h5 class="fw-medium">Saldo disponible :</h5>
+          <div class="d-flex align-items-center gap-1">
+            <h4>$0.00</h4>
+            <span class="material-symbols-rounded arrow-icon">arrow_forward</span>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Contenido según rol -->
+    <app-expert *ngIf="role === 'provider'"  [user]="user"></app-expert>
+    <app-client *ngIf="role === 'client'"></app-client>
+
+  </div>
+  </div>
+  <router-outlet name="panel"></router-outlet>
+
+</div>
+</section>
+

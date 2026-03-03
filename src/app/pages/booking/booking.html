@@ -1,0 +1,671 @@
+   <!-- header starts -->
+    <header class="main-header">
+        <div class="custom-container">
+            <div class="header-panel">
+                  <a (click)="router.navigate(['/home'])" class="back-link" style="color: #f9680f;">
+                <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                </svg>       
+                </a>
+                <h3>Solicitudes</h3>
+             <a (click)="router.navigate(['/notifications'])" class="back-link" style="color: #f9680f;">
+
+                <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg> 
+                </a> 
+            </div>
+        </div>
+    </header>
+    <!-- header end -->
+
+    <!-- booking section starts -->
+    <section class="section-b-space section-lg-t-space">
+        <div class="custom-container">
+            <form class="auth-form mt-0 p-0 bg-transparent">
+                <div class="form-group mt-0">
+                    <div class="form-input">
+                        <input type="search" class="form-control search with-filter" id="inputusername"
+                            placeholder="Buscar solicitud">
+                        <i class="iconsax search-icon" data-icon="search-normal-2"> </i>
+                        <a href="booking.html#filter" data-bs-toggle="offcanvas">
+                            <i class="iconsax filter-icon" data-icon="setting-3"> </i>
+                        </a>
+                    </div>
+                </div>
+            </form>
+
+            <h3 class="mt-3 inner-sub-title">Todas las solicitudes</h3>
+            <ul class="booking-list">
+                <li class="booking-box">
+                    <div class="booking-details">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="service-content">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <h5 class="theme-color fw-medium">#58961</h5>
+                                </div>
+                                <a href="pending-booking-details.html">
+                                    <h4 class="title-color fw-medium">Curtain Cleaning</h4>
+                                </a>
+                                <div class="d-flex align-items-center gap-2 mt-1">
+                                    <h3 class="title-color fw-bold ">$22.00</h3>
+                                    <h6 class="error-color fw-medium">(10% off)</h6>
+                                </div>
+                            </div>
+                            <div class="service-img">
+                                <img class="img-fluid img" src="../../assets/images/vertical-service/3.jpg" alt="1">
+                            </div>
+                        </div>
+
+                        <div class="line-box">
+                            <div class="dot1"></div>
+                            <div class="dot2"></div>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between mt-1">
+                            <h6 class="fw-medium content-color">Status</h6>
+                            <h6 class="booking-tag pending-bg">Pending</h6>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between mt-2">
+                            <h6 class="fw-medium content-color">Selected servicemen</h6>
+                            <h6 class="fw-medium title-color">1 servicemen</h6>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between mt-2">
+                            <h6 class="fw-medium content-color">Date & Time</h6>
+                            <h6 class="fw-medium title-color">6 Aug, 2024 - 5:20 pm</h6>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between mt-2">
+                            <h6 class="fw-medium content-color">Location</h6>
+                            <h6 class="fw-medium title-color">California - USA</h6>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between mt-2">
+                            <h6 class="fw-medium content-color">Payment</h6>
+                            <h6 class="fw-medium success-color">Not paid yet</h6>
+                        </div>
+
+                        <ul class="booking-provider-list">
+                            <li class="booking-provider-box">
+                                <div class="provider-image">
+                                    <img class="img-fluid provider-pic" src="../../assets/images/profile/p17.png"
+                                        alt="p17">
+                                </div>
+                                <div class="provider-content">
+                                    <div>
+                                        <h6 class="content-color fw-medium">Customer</h6>
+                                        <h5 class="name fw-medium title-color">Stella Milevski</h5>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+
+                        <div class="d-flex align-items-center gap-3 mt-3">
+                            <a href="booking.html#" data-bs-toggle="modal" class="btn btn-sm outline-btn w-50">Reject</a>
+                            <a href="booking.html#" class="btn btn-sm theme-btn w-50">Accept</a>
+                        </div>
+                    </div>
+                </li>
+
+                <li class="booking-box">
+                    <div class="booking-details">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="service-content">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <h5 class="theme-color fw-medium">#58962</h5>
+                                </div>
+                                <a href="accepted-booking-details.html">
+                                    <h4 class="title-color fw-medium">House Hold Cook</h4>
+                                </a>
+                                <div class="d-flex align-items-center gap-2 mt-1">
+                                    <h3 class="title-color fw-bold ">$20.00</h3>
+                                    <h6 class="error-color fw-medium">(10% off)</h6>
+                                </div>
+                            </div>
+                            <div class="service-img">
+                                <img class="img-fluid img" src="../../assets/images/vertical-service/4.jpg" alt="1">
+                            </div>
+                        </div>
+
+                        <div class="line-box">
+                            <div class="dot1"></div>
+                            <div class="dot2"></div>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between mt-1">
+                            <h6 class="fw-medium content-color">Status</h6>
+                            <h6 class="booking-tag accepted-bg">Accepted</h6>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between mt-2">
+                            <h6 class="fw-medium content-color">Selected servicemen</h6>
+                            <h6 class="fw-medium title-color">1 servicemen</h6>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between mt-2">
+                            <h6 class="fw-medium content-color">Date & Time</h6>
+                            <h6 class="fw-medium title-color">7 Aug, 2024 - 11:00 am</h6>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between mt-2">
+                            <h6 class="fw-medium content-color">Payment</h6>
+                            <h6 class="fw-medium success-color">Not paid yet</h6>
+                        </div>
+
+                        <ul class="booking-provider-list">
+                            <li class="booking-provider-box">
+                                <div class="provider-image">
+                                    <img class="img-fluid provider-pic" src="../../assets/images/profile/p13.png"
+                                        alt="p17">
+                                </div>
+                                <div class="provider-content">
+                                    <div>
+                                        <h6 class="content-color fw-medium">Customer</h6>
+                                        <h5 class="name fw-medium title-color">Kate Tanner</h5>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                <li class="booking-box">
+                    <div class="booking-details">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="service-content">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <h5 class="theme-color fw-medium">#58962</h5>
+                                </div>
+                                <a href="assigned-booking-details.html">
+                                    <h4 class="title-color fw-medium">Security Guard</h4>
+                                </a>
+                                <div class="d-flex align-items-center gap-2 mt-1">
+                                    <h3 class="title-color fw-bold ">$20.00</h3>
+                                    <h6 class="error-color fw-medium">(10% off)</h6>
+                                </div>
+                            </div>
+                            <div class="service-img">
+                                <img class="img-fluid img" src="../../assets/images/vertical-service/7.jpg" alt="1">
+                            </div>
+                        </div>
+
+                        <div class="line-box">
+                            <div class="dot1"></div>
+                            <div class="dot2"></div>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between mt-1">
+                            <h6 class="fw-medium content-color">Status</h6>
+                            <h6 class="booking-tag assigned-bg">Assigned</h6>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between mt-2">
+                            <h6 class="fw-medium content-color">Selected servicemen</h6>
+                            <h6 class="fw-medium title-color">1 servicemen</h6>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between mt-2">
+                            <h6 class="fw-medium content-color">Date & Time</h6>
+                            <h6 class="fw-medium title-color">7 Aug, 2024 - 11:00 am</h6>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between mt-2">
+                            <h6 class="fw-medium content-color">Payment</h6>
+                            <h6 class="fw-medium success-color">Paid</h6>
+                        </div>
+
+                        <ul class="booking-provider-list">
+                            <li class="booking-provider-box">
+                                <div class="provider-image">
+                                    <img class="img-fluid provider-pic" src="../../assets/images/profile/p13.png"
+                                        alt="p17">
+                                </div>
+                                <div class="provider-content">
+                                    <div>
+                                        <h6 class="content-color fw-medium">Customer</h6>
+                                        <h5 class="name fw-medium title-color">Kate Tanner</h5>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <li class="booking-box">
+                    <div class="booking-details">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="service-content">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <h5 class="theme-color fw-medium">#58964</h5>
+                                </div>
+                                <a href="onging-booking-details.html">
+                                    <h4 class="title-color fw-medium">Hair Cutting & Spa</h4>
+                                </a>
+                                <div class="d-flex align-items-center gap-2 mt-1">
+                                    <h3 class="title-color fw-bold ">$30.00</h3>
+                                    <h6 class="error-color fw-medium">(10% off)</h6>
+                                </div>
+                            </div>
+                            <div class="service-img">
+                                <img class="img-fluid img" src="../../assets/images/vertical-service/6.jpg" alt="1">
+                            </div>
+                        </div>
+
+                        <div class="line-box">
+                            <div class="dot1"></div>
+                            <div class="dot2"></div>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between mt-1">
+                            <h6 class="fw-medium content-color">Status</h6>
+                            <h6 class="booking-tag ongoing-bg">Ongoing</h6>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between mt-2">
+                            <h6 class="fw-medium content-color">Selected servicemen</h6>
+                            <h6 class="fw-medium title-color">1 servicemen</h6>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between mt-2">
+                            <h6 class="fw-medium content-color">Date & Time</h6>
+                            <h6 class="fw-medium title-color">7 Aug, 2024 - 2:00 pm</h6>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between mt-2">
+                            <h6 class="fw-medium content-color">Payment</h6>
+                            <h6 class="fw-medium success-color">Not paid yet</h6>
+                        </div>
+
+                        <ul class="booking-provider-list">
+                            <li class="booking-provider-box">
+                                <div class="provider-image">
+                                    <img class="img-fluid provider-pic" src="../../assets/images/profile/p7.png"
+                                        alt="p17">
+                                </div>
+                                <div class="provider-content">
+                                    <div>
+                                        <h6 class="content-color fw-medium">Customer</h6>
+                                        <h5 class="name fw-medium title-color">Jane Cooper</h5>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <li class="booking-box">
+                    <div class="booking-details">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="service-content">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <h5 class="theme-color fw-medium">#58962</h5>
+                                </div>
+                                <a href="hold-booking-details.html">
+                                    <h4 class="title-color fw-medium">Full Body Massage</h4>
+                                </a>
+                                <div class="d-flex align-items-center gap-2 mt-1">
+                                    <h3 class="title-color fw-bold ">$20.00</h3>
+                                    <h6 class="error-color fw-medium">(10% off)</h6>
+                                </div>
+                            </div>
+                            <div class="service-img">
+                                <img class="img-fluid img" src="../../assets/images/vertical-service/11.jpg" alt="11">
+                            </div>
+                        </div>
+
+                        <div class="line-box">
+                            <div class="dot1"></div>
+                            <div class="dot2"></div>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between mt-1">
+                            <h6 class="fw-medium content-color">Status</h6>
+                            <h6 class="booking-tag hold-bg">Hold</h6>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between mt-2">
+                            <h6 class="fw-medium content-color">Selected servicemen</h6>
+                            <h6 class="fw-medium title-color">1 servicemen</h6>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between mt-2">
+                            <h6 class="fw-medium content-color">Date & Time</h6>
+                            <h6 class="fw-medium title-color">7 Aug, 2024 - 11:00 am</h6>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between mt-2">
+                            <h6 class="fw-medium content-color">Payment</h6>
+                            <h6 class="fw-medium success-color">Paid</h6>
+                        </div>
+
+                        <ul class="booking-provider-list">
+                            <li class="booking-provider-box">
+                                <div class="provider-image">
+                                    <img class="img-fluid provider-pic" src="../../assets/images/profile/p13.png"
+                                        alt="p17">
+                                </div>
+                                <div class="provider-content">
+                                    <div>
+                                        <h6 class="content-color fw-medium">Customer</h6>
+                                        <h5 class="name fw-medium title-color">Kate Tanner</h5>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                <li class="booking-box">
+                    <div class="booking-details">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="service-content">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <h5 class="theme-color fw-medium">#58966</h5>
+                                </div>
+                                <a href="completed-booking-details.html">
+                                    <h4 class="title-color fw-medium">Furnishing & Carpentry</h4>
+                                </a>
+                                <div class="d-flex align-items-center gap-2 mt-1">
+                                    <h3 class="title-color fw-bold ">$50.20</h3>
+                                </div>
+                            </div>
+                            <div class="service-img">
+                                <img class="img-fluid img" src="../../assets/images/vertical-service/2.jpg" alt="1">
+                            </div>
+                        </div>
+
+                        <div class="line-box">
+                            <div class="dot1"></div>
+                            <div class="dot2"></div>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between mt-1">
+                            <h6 class="fw-medium content-color">Status</h6>
+                            <h6 class="booking-tag theme-bg">Completed</h6>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between mt-2">
+                            <h6 class="fw-medium content-color">Selected servicemen</h6>
+                            <h6 class="fw-medium title-color">2 servicemen</h6>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between mt-2">
+                            <h6 class="fw-medium content-color">Date & Time</h6>
+                            <h6 class="fw-medium title-color">7 Aug, 2024 - 9:00 am</h6>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between mt-2">
+                            <h6 class="fw-medium content-color">Payment</h6>
+                            <h6 class="fw-medium success-color">Not paid yet</h6>
+                        </div>
+
+                        <ul class="booking-provider-list">
+                            <li class="booking-provider-box">
+                                <div class="provider-image">
+                                    <img class="img-fluid provider-pic" src="../../assets/images/profile/p5.png"
+                                        alt="p17">
+                                </div>
+                                <div class="provider-content">
+                                    <div>
+                                        <h6 class="content-color fw-medium">Customer</h6>
+                                        <h5 class="name fw-medium title-color">Zain Dorwart</h5>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <li class="booking-box">
+                    <div class="booking-details">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="service-content">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <h5 class="theme-color fw-medium">#58968</h5>
+                                </div>
+                                <a href="cancelled-booking-details.html">
+                                    <h4 class="title-color fw-medium">Chimney Sweeping</h4>
+                                </a>
+                                <div class="d-flex align-items-center gap-2 mt-1">
+                                    <h3 class="title-color fw-bold ">$15.50</h3>
+                                </div>
+                            </div>
+                            <div class="service-img">
+                                <img class="img-fluid img" src="../../assets/images/vertical-service/8.jpg" alt="1">
+                            </div>
+                        </div>
+
+                        <div class="line-box">
+                            <div class="dot1"></div>
+                            <div class="dot2"></div>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between mt-1">
+                            <h6 class="fw-medium content-color">Status</h6>
+                            <h6 class="booking-tag error-bg">Cancelled</h6>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between mt-2">
+                            <h6 class="fw-medium content-color">Date & Time</h6>
+                            <h6 class="fw-medium title-color">8 Aug, 2024 - 10:00 am</h6>
+                        </div>
+
+                        <ul class="booking-provider-list">
+                            <li class="booking-provider-box">
+                                <div class="provider-image">
+                                    <img class="img-fluid provider-pic" src="../../assets/images/profile/p10.png"
+                                        alt="p17">
+                                </div>
+                                <div class="provider-content">
+                                    <div>
+                                        <h6 class="content-color fw-medium">Customer</h6>
+                                        <h5 class="name fw-medium title-color">Lynn Tanner</h5>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </section>
+    <!-- booking section end -->
+
+    <!-- filter offcanvas starts -->
+    <div class="offcanvas offcanvas-bottom filter-offcanvas" tabindex="-1" id="filter">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasBottomLabel">Filtrar por</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="custom-container">
+            <ul class="nav nav-pills tab-style1 mt-3 mb-2" id="Default-tab" role="tablist">
+
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="status-tab" data-bs-toggle="pill" data-bs-target="#status"
+                        type="button" role="tab">Estado</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="date-tab" data-bs-toggle="pill" data-bs-target="#date" type="button"
+                        role="tab">Fecha</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="home-tab" data-bs-toggle="pill" data-bs-target="#home" type="button"
+                        role="tab">Categoria</button>
+                </li>
+            </ul>
+        </div>
+        <div class="offcanvas-body pt-2">
+            <div class="tab-content" id="myTabContent1">
+                <div class=" tab-pane fade show active" id="status" role="tabpanel" tabindex="0">
+                    <ul class="categories-listing">
+                        <li class="listing-categories">
+                            <div class="form-check form-check-reverse text-start">
+                                <label class="form-check-label" for="booking1">
+                                    <span class="d-flex align-items-center">
+                                        <span class="categories-name ps-0 border-0">Todo</span>
+                                    </span>
+                                </label>
+                                <input class="form-check-input" type="radio" name="booking" id="booking1" checked>
+                            </div>
+                        </li>
+                        <li class="listing-categories">
+                            <div class="form-check form-check-reverse text-start">
+                                <label class="form-check-label" for="booking2">
+                                    <span class="d-flex align-items-center">
+                                        <span class="categories-name ps-0 border-0">Pending Booking</span>
+                                    </span>
+                                </label>
+                                <input class="form-check-input" type="radio" name="booking" id="booking2">
+                            </div>
+                        </li>
+                        <li class="listing-categories">
+                            <div class="form-check form-check-reverse text-start">
+                                <label class="form-check-label" for="booking3">
+                                    <span class="d-flex align-items-center">
+                                        <span class="categories-name ps-0 border-0">Accepted Booking</span>
+                                    </span>
+                                </label>
+                                <input class="form-check-input" type="radio" name="booking" id="booking3">
+                            </div>
+                        </li>
+                        <li class="listing-categories">
+                            <div class="form-check form-check-reverse text-start">
+                                <label class="form-check-label" for="booking4">
+                                    <span class="d-flex align-items-center">
+                                        <span class="categories-name ps-0 border-0">Ongoing Booking</span>
+                                    </span>
+                                </label>
+                                <input class="form-check-input" type="radio" name="booking" id="booking4">
+                            </div>
+                        </li>
+                        <li class="listing-categories">
+                            <div class="form-check form-check-reverse text-start">
+                                <label class="form-check-label" for="booking5">
+                                    <span class="d-flex align-items-center">
+
+                                        <span class="categories-name ps-0 border-0">Complete Booking</span>
+                                    </span>
+                                </label>
+                                <input class="form-check-input" type="radio" name="booking" id="booking5">
+                            </div>
+                        </li>
+                        <li class="listing-categories">
+                            <div class="form-check form-check-reverse text-start">
+                                <label class="form-check-label" for="booking6">
+                                    <span class="d-flex align-items-center">
+                                        <span class="categories-name ps-0 border-0">Cancelled Booking</span>
+                                    </span>
+                                </label>
+                                <input class="form-check-input" type="radio" name="booking" id="booking6">
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="tab-pane fade" id="date" role="tabpanel" tabindex="0">
+                    <div class="demo-range-select w-100">
+                        <div id="demo-range-selection"></div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="home" role="tabpanel" tabindex="0">
+                    <h5 class="content-color fw-normal">Categoria</h5>
+
+                    <form class="auth-form mt-0 p-0 bg-transparent">
+                        <div class="form-group">
+                            <div class="form-input">
+                                <input type="search" class="form-control search wo-filter" placeholder="Search here..">
+                                <i class="iconsax search-icon" data-icon="search-normal-2"> </i>
+                            </div>
+                        </div>
+                    </form>
+
+                    <ul class="categories-listing">
+                        <li class="listing-categories">
+                            <div class="form-check form-check-reverse text-start">
+                                <label class="form-check-label" for="categories1">
+                                    <span class="d-flex align-items-center">
+                                        <img class="categories-icon" src="../../assets/images/categories/ac-repair.svg"
+                                            alt="ac-repair">
+                                        <span class="categories-name">Ac Repair</span>
+                                    </span>
+                                </label>
+                                <input class="form-check-input" type="checkbox" name="categories" id="categories1"
+                                    checked>
+                            </div>
+                        </li>
+                        <li class="listing-categories">
+                            <div class="form-check form-check-reverse text-start">
+                                <label class="form-check-label" for="categories2">
+                                    <span class="d-flex align-items-center">
+                                        <img class="categories-icon" src="../../assets/images/categories/cleaning.svg"
+                                            alt="ac-repair">
+                                        <span class="categories-name">Cleaning</span>
+                                    </span>
+                                </label>
+                                <input class="form-check-input" type="checkbox" name="categories" id="categories2"
+                                    checked>
+                            </div>
+                        </li>
+                        <li class="listing-categories">
+                            <div class="form-check form-check-reverse text-start">
+                                <label class="form-check-label" for="categories4">
+                                    <span class="d-flex align-items-center">
+                                        <img class="categories-icon" src="../../assets/images/categories/carpenter.svg"
+                                            alt="ac-repair">
+                                        <span class="categories-name">Carpenter</span>
+                                    </span>
+                                </label>
+                                <input class="form-check-input" type="checkbox" name="categories" id="categories4"
+                                    checked>
+                            </div>
+                        </li>
+                        <li class="listing-categories">
+                            <div class="form-check form-check-reverse text-start">
+                                <label class="form-check-label" for="categories5">
+                                    <span class="d-flex align-items-center">
+                                        <img class="categories-icon" src="../../assets/images/categories/cooking.svg"
+                                            alt="ac-repair">
+                                        <span class="categories-name">Cooking</span>
+                                    </span>
+                                </label>
+                                <input class="form-check-input" type="checkbox" name="categories" id="categories5">
+                            </div>
+                        </li>
+                        <li class="listing-categories">
+                            <div class="form-check form-check-reverse text-start">
+                                <label class="form-check-label" for="categories6">
+                                    <span class="d-flex align-items-center">
+                                        <img class="categories-icon"
+                                            src="../../assets/images/categories/electrician.svg" alt="ac-repair">
+                                        <span class="categories-name">Electrician</span>
+                                    </span>
+                                </label>
+                                <input class="form-check-input" type="checkbox" name="categories" id="categories6">
+                            </div>
+                        </li>
+                        <li class="listing-categories">
+                            <div class="form-check form-check-reverse text-start">
+                                <label class="form-check-label" for="categories7">
+                                    <span class="d-flex align-items-center">
+                                        <img class="categories-icon" src="../../assets/images/categories/painter.svg"
+                                            alt="ac-repair">
+                                        <span class="categories-name">Painter</span>
+                                    </span>
+                                </label>
+                                <input class="form-check-input" type="checkbox" name="categories" id="categories7">
+                            </div>
+                        </li>
+                        <li class="listing-categories">
+                            <div class="form-check form-check-reverse text-start">
+                                <label class="form-check-label" for="categories8">
+                                    <span class="d-flex align-items-center">
+                                        <img class="categories-icon" src="../../assets/images/categories/plumber.svg"
+                                            alt="ac-repair">
+                                        <span class="categories-name">Plumber</span>
+                                    </span>
+                                </label>
+                                <input class="form-check-input" type="checkbox" name="categories" id="categories8">
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="grid-btn fixed-button position-relative">
+            <div class="custom-container">
+                <div class="d-flex align-items-center gap-3">
+                    <a  class="btn outline-btn w-50">Limpiar todo</a>
+                    <a  class="btn theme-btn w-50">Aplicar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- filter offcanvas end -->

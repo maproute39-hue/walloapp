@@ -1,0 +1,92 @@
+
+<!-- sidebar starts -->
+<div class="offcanvas sidebar-offcanvas offcanvas-start" tabindex="-1" id="sidebar">
+    <div class="offcanvas-header sidebar-header">
+        <div class="sidebar-logo">
+            <img class="img-fluid logo" src="assets/images/logo/logo.png" alt="logo">
+            <img class="img-fluid logo-dark" src="assets/images/logo/logo-white.png" alt="logo">
+        </div>
+    </div>
+    <div class="offcanvas-body">
+        <div class="profile-background">
+            <div class="profile-part p-0">
+                <div class="profile-image">
+                    <img id="output" class="img-fluid profile-pic" src="assets/images/profile/profile2.png"
+                        alt="11">
+                </div>
+  
+                <h3>Smitha Williams</h3>
+                <h4>smithwilliams452@gmail.com</h4>
+            </div>
+        </div>
+  
+  
+        <ul class="profile-list">
+          <!-- Sidebar Cliente – PMV -->
+  <li>
+      <a href="" class="setting-box">
+        <div class="setting-icon">
+          <i class="iconsax main-icon" data-icon="document-text-1"></i>
+        </div>
+        <div class="setting-content">
+          <h5>Términos y privacidad</h5>
+          <i class="iconsax arrow" data-icon="chevron-right"></i>
+        </div>
+      </a>
+    </li>
+     <li>
+                    <div class="setting-box">
+                        <div class="setting-icon">
+                            <i class="iconsax main-icon" data-icon="brush-3"> </i>
+                        </div>
+                        <div class="setting-content">
+                            <h5>Dark</h5>
+                            <div class="switch-btn">
+                                <input id="dark-switch" type="checkbox">
+                            </div>
+                        </div>
+                    </div>
+                </li>
+    
+  
+    
+  
+            <!-- <li>
+                <div class="setting-box">
+                    <div class="setting-icon">
+                        <i class="iconsax main-icon" data-icon="repeat"> </i>
+                    </div>
+                    <div class="setting-content">
+                        <h5>RTL</h5>
+                        <div class="switch-btn">
+                            <input id="dir-switch" type="checkbox">
+                        </div>
+                    </div>
+                </div>
+            </li> -->
+  
+            <!-- <li>
+                <div class="setting-box">
+                    <div class="setting-icon">
+                        <i class="iconsax main-icon" data-icon="brush-3"> </i>
+                    </div>
+                    <div class="setting-content">
+                        <h5>Dark</h5>
+                        <div class="switch-btn">
+                            <input id="dark-switch" type="checkbox">
+                        </div>
+                    </div>
+                </div>
+            </li> -->
+        </ul>
+  
+        <div class="bottom-sidebar" [hidden]="!isLogged()">
+            <a (click)="logout()" class="pages">
+                <i class="iconsax sidebar-icon" data-icon="logout-2"> </i>
+                <h3>Salir</h3>
+            </a>
+        </div>
+    </div>
+  </div>
+  <!-- sidebar end -->
+  

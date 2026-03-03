@@ -1,0 +1,111 @@
+<header class="main-header">
+  <div class="custom-container">
+    <div class="header-panel">
+      <a (click)="router.navigate(['/profile'])" class="back-link" style="color:#f9680f;">
+        <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+      </a>
+      <h3>Identificación</h3>
+    </div>
+  </div>
+</header>
+
+<section class="section-b-space section-lg-t-space" *ngIf="!loading">
+  <div class="custom-container">
+
+    <!-- ===== Documentos subidos (miniatura real o ícono PDF) ===== -->
+    <h5 class="inner-sub-title mb-2" *ngIf="existingDniUrl || existingLicenceUrl">Documentos subidos</h5>
+    <ul class="document-list" *ngIf="existingDniUrl || existingLicenceUrl">
+      <!-- DNI existente -->
+      <li class="id-verification-box update" *ngIf="existingDniUrl">
+        <div class="document-image">
+          <img class="img-fluid document-pic"
+               [src]="isPdf(existingDniUrl) ? 'assets/images/document/pdf.png' : existingDniUrl"
+               alt="dni">
+        </div>
+        <div class="document-details">
+          <h5>
+            <img class="img-fluid tick-img" src="assets/images/svg/tick-circle.svg" alt="tick">
+            DNI
+          </h5>
+          <h6 class="d-flex gap-3 align-items-center">
+            <a [href]="existingDniUrl" target="_blank" rel="noopener">Ver archivo</a>
+            <a class="theme-color" (click)="openPicker('dni')">Reemplazar</a>
+          </h6>
+        </div>
+      </li>
+
+      <!-- Licencia existente -->
+      <li class="id-verification-box update" *ngIf="existingLicenceUrl">
+        <div class="document-image">
+          <img class="img-fluid document-pic"
+               [src]="isPdf(existingLicenceUrl) ? 'assets/images/document/pdf.png' : existingLicenceUrl"
+               alt="licencia">
+        </div>
+        <div class="document-details">
+          <h5>
+            <img class="img-fluid tick-img" src="assets/images/svg/tick-circle.svg" alt="tick">
+            Licencia de conducir
+          </h5>
+          <h6 class="d-flex gap-3 align-items-center">
+            <a [href]="existingLicenceUrl" target="_blank" rel="noopener">Ver archivo</a>
+            <a class="theme-color" (click)="openPicker('licence')">Reemplazar</a>
+          </h6>
+        </div>
+      </li>
+    </ul>
+
+    <!-- ===== Previews locales (por subir) ===== -->
+    <h5 class="inner-sub-title mt-3 mb-2" *ngIf="fileDniPreview || fileLicencePreview">Por subir</h5>
+    <ul class="document-list" *ngIf="fileDniPreview || fileLicencePreview">
+      <li class="id-verification-box" *ngIf="fileDniPreview">
+        <div class="document-image">
+          <img class="img-fluid document-pic" [src]="fileDniPreview" alt="dni-preview">
+        </div>
+        <div class="document-details">
+          <h5>DNI (nuevo)</h5>
+          <h6>Listo para guardar</h6>
+        </div>
+      </li>
+
+      <li class="id-verification-box" *ngIf="fileLicencePreview">
+        <div class="document-image">
+          <img class="img-fluid document-pic" [src]="fileLicencePreview" alt="lic-preview">
+        </div>
+        <div class="document-details">
+          <h5>Licencia (nuevo)</h5>
+          <h6>Listo para guardar</h6>
+        </div>
+      </li>
+    </ul>
+
+    <!-- ===== Documentos pendientes (actúa como botón para abrir file picker) ===== -->
+    <h5 class="inner-sub-title mt-3 mb-2" *ngIf="pendingList().length">Documentos pendientes</h5>
+    <ul class="document-list" *ngIf="pendingList().length">
+      <li class="id-verification-box pending-doc" *ngFor="let p of pendingList()" (click)="openPicker(p.kind)">
+        <div class="add-icon">
+          <i class="iconsax icon" data-icon="add"></i>
+        </div>
+        <div class="pending-doc-details">
+          <h5>{{ p.title }}</h5>
+          <i class="iconsax arrow-icon" data-icon="chevron-right"></i>
+        </div>
+      </li>
+    </ul>
+
+    <!-- Inputs ocultos -->
+    <input #dniInput type="file" accept="image/*,application/pdf" hidden (change)="onPickFile('dni',$event)" />
+    <input #licInput type="file" accept="image/*,application/pdf" hidden (change)="onPickFile('licence',$event)" />
+
+    <!-- Botón guardar (solo si hay algo por subir) -->
+    <div class="fixed-btn" *ngIf="fileDni || fileLicence">
+      <div class="custom-container">
+        <a class="btn theme-btn w-100 auth-btn mt-0" (click)="saveAll()">Guardar documentos</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="section-b-space section-lg-t-space" *ngIf="loading">
+  <div class="custom-container">Cargando…</div>
+</section>

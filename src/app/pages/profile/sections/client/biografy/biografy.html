@@ -1,0 +1,136 @@
+<!-- biografy.html -->
+<header class="main-header">
+  <div class="custom-container">
+    <div class="header-panel">
+      <a (click)="router.navigate(['/profile'])" class="back-link" style="color: #f9680f;">
+        <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+        </svg>       
+      </a>
+      <h3>Datos y biografía</h3>
+    </div>
+  </div>
+</header>
+
+<section class="section-b-space section-lg-t-space">
+  <div class="custom-container">
+    <div class="profile-background">
+      <img class="img-fluid profile-bg" src="assets/images/background/profile-bg.png" alt="profile-bg">
+      <div class="profile-part mt-3">
+        <div class="profile-image">
+          <div class="avatar-container">
+            <img [src]="avatarSrc()" 
+                 class="img-fluid profile-pic" 
+                 alt="profile"
+                 (error)="avatarSrc.set(defaultAvatar)">
+            <div class="avatar-overlay" (click)="triggerFileInput()">
+              <i class="iconsax" data-icon="camera"></i>
+              <span>Cambiar foto</span>
+            </div>
+          </div>
+          <input type="file" 
+                 id="avatar" 
+                 (change)="onFileSelected($event)" 
+                 style="display: none;" 
+                 accept="image/*">
+        </div>
+        <div class="mt-2 text-center">
+          <button type="button" 
+                  class="btn btn-sm btn-outline-secondary"
+                  (click)="removeAvatar()"
+                  *ngIf="avatarSrc() !== defaultAvatar">
+            <i class="bi bi-trash me-1"></i> Eliminar foto
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="auth-form mt-0 rounded-top-0">
+      <div class="form-group mt-0">
+        <label class="form-label mb-2" for="name">Nombre completo</label>
+        <div class="form-input">
+          <input type="text" 
+                 class="form-control without-icon" 
+                 id="name" 
+                 formControlName="name"
+                 placeholder="Tu nombre completo">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label mb-2" for="email">Correo electrónico</label>
+        <div class="form-input">
+          <input type="email" 
+                 class="form-control without-icon" 
+                 id="email"
+                 formControlName="email"
+                 placeholder="tucorreo@ejemplo.com"
+                 [disabled]="true">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label mb-2" for="phone">Número de teléfono</label>
+        <div class="form-input">
+          <input type="tel" 
+                 class="form-control without-icon" 
+                 id="phone"
+                 formControlName="phone"
+                 placeholder="Tu número de teléfono">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label mb-2" for="address">Ubicación</label>
+        <div class="form-input">
+          <input type="text" 
+                 class="form-control without-icon" 
+                 id="address"
+                 formControlName="address"
+                 placeholder="Tu ubicación">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label mb-2" for="dni">DNI</label>
+        <div class="form-input">
+          <input type="text" 
+                 class="form-control without-icon" 
+                 id="dni"
+                 formControlName="dni"
+                 placeholder="Tu número de DNI">
+        </div>
+      </div>
+
+      <!-- Documentos subidos -->
+      <div *ngIf="existingDniUrl" class="mt-4">
+        <h5 class="inner-sub-title mb-3">Documentos subidos</h5>
+        <div class="id-verification-box update">
+          <div class="document-image">
+            <img class="img-fluid document-pic"
+                 [src]="isPdf(existingDniUrl) ? 'assets/images/document/pdf.png' : existingDniUrl"
+                 alt="DNI">
+          </div>
+          <div class="document-details">
+            <h5>
+              <img class="img-fluid tick-img" src="assets/images/svg/tick-circle.svg" alt="tick">
+              Documento de identidad
+            </h5>
+            <h6 class="d-flex gap-3 align-items-center">
+              <a [href]="existingDniUrl" target="_blank" rel="noopener">Ver archivo</a>
+              <a class="theme-color" (click)="openPicker('dni')">Reemplazar</a>
+            </h6>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" 
+              class="btn theme-btn w-100 auth-btn mt-4"
+              [disabled]="profileForm.invalid || isLoading">
+        <span *ngIf="!isLoading">Guardar cambios</span>
+        <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        <span *ngIf="isLoading" class="ms-2">Guardando...</span>
+      </button>
+    </form>
+  </div>
+</section>

@@ -1,0 +1,251 @@
+
+    <!-- PERFIL PROFESIONAL -->
+    <div *ngIf="shouldShowMenu()" class="expert-menu">
+
+    <div class="profile-list">
+        <h5 class="inner-sub-title theme-color text-capitalize mb-2">Perfil profesional</h5>
+        <ul class="setting-listing">
+          <li class="w-100"> 
+            <a [routerLink]="['/profile', { outlets: { panel: ['biografy'] } }]" class="setting-box">
+              <div class="setting-icon" style="position: relative;">
+                <span class="material-symbols-rounded msr">account_circle</span>
+                <!-- Círculo de alerta solo si falta info -->
+                <span *ngIf="isUserIncomplete()" class="alert-badge">!</span>
+              </div>
+              <div class="setting-content">
+                <h5>Datos y biografía</h5>
+                <span class="material-symbols-rounded msr arrow">chevron_right</span>
+              </div>
+            </a>
+            
+          </li>
+          <li class="w-100">
+            <a [routerLink]="['/profile', { outlets: { panel: ['emergency-info'] } }]" class="setting-box">
+              <div class="setting-icon">
+                <span class="material-symbols-rounded msr">emergency</span>
+              </div>
+              <div class="setting-content">
+                <h5>Datos de emergencia</h5>
+                <span class="material-symbols-rounded msr arrow">chevron_right</span>
+              </div>
+            </a>
+          </li>
+  
+          <li class="w-100">
+            <a [routerLink]="['/profile', { outlets: { panel: ['gallery'] } }]" class="setting-box">
+              <div class="setting-icon">
+                <span class="material-symbols-rounded msr">photo_library</span>
+              </div>
+              <div class="setting-content">
+                <h5>Galería de trabajos (vitrina)</h5>
+                <span class="material-symbols-rounded msr arrow">chevron_right</span>
+              </div>
+            </a>
+          </li>
+  
+          <li class="w-100">
+            <a [routerLink]="['/profile', { outlets: { panel: ['documents'] } }]" class="setting-box">
+              <div class="setting-icon">
+                <span class="material-symbols-rounded msr">description</span>
+              </div>
+              <div class="setting-content">
+                <h5>Documentos y certificados</h5>
+                <span class="material-symbols-rounded msr arrow">chevron_right</span>
+              </div>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <!-- SERVICIOS Y TARIFAS -->
+      <div class="profile-list">
+        <h5 class="inner-sub-title theme-color text-capitalize mb-2">Servicios</h5>
+        <ul class="setting-listing">
+          <li class="w-100">
+            <a [routerLink]="['/profile', { outlets: { panel: ['services'] } }]" class="setting-box">
+              <div class="setting-icon">
+                <span class="material-symbols-rounded msr">design_services</span>
+                <span *ngIf="isSubCategoryIncomplete()" class="alert-badge">!</span>
+            
+              </div>
+              <div class="setting-content">
+                <h5>Servicios ofrecidos</h5>
+                <span class="material-symbols-rounded msr arrow">chevron_right</span>
+              </div>
+            </a>
+          </li>
+  
+          <!-- <li class="w-100">
+            <a href="provider-pricing.html" class="setting-box">
+              <div class="setting-icon">
+                <span class="material-symbols-rounded msr">price_change</span>
+              </div>
+              <div class="setting-content">
+                <h5>Tarifas y promociones</h5>
+                <span class="material-symbols-rounded msr arrow">chevron_right</span>
+              </div>
+            </a>
+          </li> -->
+        </ul>
+      </div>
+  
+      <!-- DISPONIBILIDAD Y AGENDA -->
+      <!-- <div class="profile-list">
+        <h5 class="inner-sub-title theme-color text-capitalize mb-2">Disponibilidad y agenda</h5>
+        <ul class="setting-listing">
+          <li class="w-100">
+            <a href="provider-availability.html" class="setting-box">
+              <div class="setting-icon">
+                <span class="material-symbols-rounded msr">event_available</span>
+              </div>
+              <div class="setting-content">
+                <h5>Disponibilidad (días y horarios)</h5>
+                <span class="material-symbols-rounded msr arrow">chevron_right</span>
+              </div>
+            </a>
+          </li>
+  
+          <li class="w-100">
+            <a href="provider-calendar.html" class="setting-box">
+              <div class="setting-icon">
+                <span class="material-symbols-rounded msr">schedule</span>
+              </div>
+              <div class="setting-content">
+                <h5>Agenda / Calendario</h5>
+                <span class="material-symbols-rounded msr arrow">chevron_right</span>
+              </div>
+            </a>
+          </li>
+        </ul>
+      </div> -->
+  
+      <!-- PAGOS Y FINANZAS -->
+      <div class="profile-list">
+        <h5 class="inner-sub-title theme-color text-capitalize mb-2">Pagos y finanzas</h5>
+        <ul class="setting-listing">
+          <li class="w-100">
+            <a [routerLink]="['/profile', { outlets: { panel: ['payment'] } }]" class="setting-box">
+              <div class="setting-icon">
+                <span class="material-symbols-rounded msr">account_balance</span>
+              </div>
+              <div class="setting-content">
+                <h5>Método de cobro (cuenta bancaria)</h5>
+                <span class="material-symbols-rounded msr arrow">chevron_right</span>
+              </div>
+            </a>
+          </li>
+  
+          <li class="w-100">
+            <a [routerLink]="['/profile', { outlets: { panel: ['wallet'] } }]" class="setting-box">
+              <div class="setting-icon">
+                <span class="material-symbols-rounded msr">account_balance_wallet</span>
+              </div>
+              <div class="setting-content">
+                <h5>Balance e ingresos</h5>
+                <span class="material-symbols-rounded msr arrow">chevron_right</span>
+              </div>
+            </a>
+          </li>
+           <li class="w-100">
+                        <a [routerLink]="['/profile', { outlets: { panel: ['suscription-plan'] } }]" class="setting-box">
+                            <div class="setting-icon">
+                            <span class="material-symbols-rounded msr">workspace_premium</span>                            </div>
+                            <div class="setting-content">
+                                <h5>Plan de suscripción </h5>
+                                <span class="material-symbols-rounded msr arrow">chevron_right</span>
+                            </div>
+                        </a>
+                    </li>
+                    
+  
+        </ul>
+      </div>
+  
+      <!-- RESEÑAS -->
+      <div class="profile-list">
+        <h5 class="inner-sub-title theme-color text-capitalize mb-2">Valoraciones</h5>
+        <ul class="setting-listing">
+          <li class="w-100">
+            <a [routerLink]="['/profile', { outlets: { panel: ['reviews'] } }]" class="setting-box">
+              <div class="setting-icon">
+                <span class="material-symbols-rounded msr">reviews</span>
+              </div>
+              <div class="setting-content">
+                <h5>Reseñas de clientes</h5>
+                <span class="material-symbols-rounded msr arrow">chevron_right</span>
+              </div>
+            </a>
+          </li>
+        </ul>
+      </div>
+       
+      <!-- AJUSTES -->
+      <div class="profile-list">
+        <h5 class="inner-sub-title theme-color text-capitalize mb-2">Ajustes</h5>
+        <ul class="setting-listing">
+          <li class="w-100">
+            <a href="provider-notifications.html" class="setting-box">
+              <div class="setting-icon">
+                <span class="material-symbols-rounded msr">notifications</span>
+              </div>
+              <div class="setting-content">
+                <h5>Notificaciones</h5>
+                <span class="material-symbols-rounded msr arrow">chevron_right</span>
+              </div>
+            </a>
+          </li>
+  
+          <li class="w-100">
+            <a href="provider-security.html" class="setting-box">
+              <div class="setting-icon">
+                <span class="material-symbols-rounded msr">lock</span>
+              </div>
+              <div class="setting-content">
+                <h5>Seguridad (contraseña y 2FA)</h5>
+                <span class="material-symbols-rounded msr arrow">chevron_right</span>
+              </div>
+            </a>
+          </li>
+        </ul>
+      </div>
+  
+      <!-- ALERTAS -->
+      <div class="profile-list">
+        <h5 class="inner-sub-title error-color text-capitalize mb-2">Zona de alerta</h5>
+        <ul class="setting-listing alert-list">
+          <li class="w-100">
+            <a href="provider-profile.html#deactivate" class="setting-box" data-bs-toggle="modal">
+              <div class="setting-icon">
+                <span class="material-symbols-rounded msr">block</span>
+              </div>
+              <div class="setting-content">
+                <h5 class="error-color">Desactivar perfil (pausar)</h5>
+              </div>
+            </a>
+          </li>
+  
+          <li class="w-100">
+            <a href="provider-profile.html#delete" class="setting-box" data-bs-toggle="modal">
+              <div class="setting-icon">
+                <span class="material-symbols-rounded msr">delete_forever</span>
+              </div>
+              <div class="setting-content">
+                <h5 class="error-color">Eliminar cuenta</h5>
+              </div>
+            </a>
+          </li>
+  
+          <li class="w-100">
+            <a (click)="logout()" class="setting-box" data-bs-toggle="modal">
+              <div class="setting-icon">
+                <span class="material-symbols-rounded msr">logout</span>
+              </div>
+              <div class="setting-content">
+                <h5 class="error-color">Salir</h5>
+              </div>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+    <router-outlet></router-outlet>

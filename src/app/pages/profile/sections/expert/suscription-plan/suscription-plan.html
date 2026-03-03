@@ -1,0 +1,289 @@
+<!-- header starts -->
+<header class="main-header">
+  <div class="custom-container">
+    <div class="header-panel">
+      <a [routerLink]="['/profile', { outlets: { panel: ['expert'] } }]" onclick="history.back();">
+        <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+        </svg>
+      </a>
+      <h3>Plan EXPERTO PREMIUM</h3>
+    </div>
+  </div>
+</header>
+<!-- header end -->
+
+<!-- subscription plan section start -->
+<section class="">
+  <div class="custom-container">
+
+  <!--   <div class="text-center">
+      <div class="plan-select">
+        <input type="checkbox" class="switch-box order-1" id="1">
+        <label class="monthly order-0" for="1">Mensual</label>
+      </div>
+    </div> -->
+
+    <div class="swiper plan-slider">
+      <div class="swiper-wrapper">
+
+        <!-- PLAN PREMIUM -->
+        <div class="swiper-slide">
+          <div class="subscription-plan-box premium-box">
+            <span class="promo-seal">Precio Promo</span>
+            <div class="plan-price-box price-header">
+                <div class="price-main">
+                    <span class="amount"><sup class="currency">S/</sup>45</span>
+                    <span class="period" style="color: #fff;">* mes</span>
+                </div>
+
+                <div class="price-side">
+                    <span class="badge-off">-50%</span>
+                    <small class="old-price">Antes <s>S/90</s></small>
+                </div>
+                </div>
+
+            <h2 class="plan-title">EXPERTOPREMIUM RECOMENDADO</h2>
+
+            <ul class="plan-details-list">
+              <li>
+                <img class="img-fluid icon" src="../../assets/images/svg/theme-shield-tick.svg" alt="shield">
+                <img class="img-fluid white-icon" src="../../assets/images/svg/shield-tick.svg" alt="shield">
+                <h5>La app recomienda tu perfil en cada oferta de trabajo</h5>
+              </li>
+              <li>
+                <img class="img-fluid icon" src="../../assets/images/svg/theme-shield-tick.svg" alt="shield">
+                <img class="img-fluid white-icon" src="../../assets/images/svg/shield-tick.svg" alt="shield">
+                <h5>Visualiza las ofertas 1 minuto antes que los demás</h5>
+              </li>
+              <li>
+                <img class="img-fluid icon" src="../../assets/images/svg/theme-shield-tick.svg" alt="shield">
+                <img class="img-fluid white-icon" src="../../assets/images/svg/shield-tick.svg" alt="shield">
+                <h5>Tu oferta aparece primero a los usuarios</h5>
+              </li>
+              <li>
+                <img class="img-fluid icon" src="../../assets/images/svg/theme-shield-tick.svg" alt="shield">
+                <img class="img-fluid white-icon" src="../../assets/images/svg/shield-tick.svg" alt="shield">
+                <h5>Agrega fotos a tu perfil profesional</h5>
+              </li>
+              <li>
+                <img class="img-fluid icon" src="../../assets/images/svg/theme-shield-tick.svg" alt="shield">
+                <img class="img-fluid white-icon" src="../../assets/images/svg/shield-tick.svg" alt="shield">
+                <h5>Marco de avatar con logo Don Reparador</h5>
+              </li>
+              <li>
+                <img class="img-fluid icon" src="../../assets/images/svg/theme-shield-tick.svg" alt="shield">
+                <img class="img-fluid white-icon" src="../../assets/images/svg/shield-tick.svg" alt="shield">
+                <h5>Selecciona +2 oficios adicionales</h5>
+              </li>
+              <li>
+                <img class="img-fluid icon" src="../../assets/images/svg/theme-shield-tick.svg" alt="shield">
+                <img class="img-fluid white-icon" src="../../assets/images/svg/shield-tick.svg" alt="shield">
+                <h5>Califica a los usuarios después de un servicio</h5>
+              </li>
+              <li>
+                <img class="img-fluid icon" src="../../assets/images/svg/theme-shield-tick.svg" alt="shield">
+                <img class="img-fluid white-icon" src="../../assets/images/svg/shield-tick.svg" alt="shield">
+                <h5>Acceso al directorio exclusivo de expertos</h5>
+              </li>
+            </ul>
+            <p class="content-color text-center mt-3" *ngIf="subStatus === 'pending'">
+              Tu activación está <strong>en revisión</strong>. Te notificaremos cuando sea aprobada.
+            </p>
+            <p class="text-center text-success mt-3" *ngIf="subStatus === 'approved'">
+             Tu plan está <strong>activo</strong>. ¡Disfruta de los beneficios!
+            </p>
+            <p class="text-center text-success mt-3" *ngIf="subStatus === 'approved'">
+             Valido hasta <strong>{{ subscription?.endDate | date:'dd/MM/yyyy' }}</strong>
+            </p>
+            <p class="text-center text-warning mt-3" *ngIf="subStatus === 'expired'">
+            ⚠️ Tu plan expiró el <strong>{{ subscription?.endDate | date:'dd/MM/yyyy' }}</strong>.  
+            Renueva para seguir disfrutando de los beneficios.
+            </p>
+
+            <p class="text-center text-danger mt-3" *ngIf="subStatus === 'rejected'">
+            Tu comprobante fue <strong>rechazado</strong>. Sube uno nuevo o contáctanos.
+            </p>
+
+
+            <div class="line-box">
+              <div class="dot1"></div>
+              <div class="dot2"></div>
+            </div>
+
+            <div *ngIf="subStatus !== 'approved' && subStatus !== 'expired'">
+              <p class="content-color text-center">
+                Para adquirir EXPERTOPREMIUM, transfiere vía <strong>Yape</strong> o <strong>Plin</strong> desde tu cuenta.
+                El nombre de la cuenta debe coincidir con el registrado en la app. Comparte la captura de la transferencia.
+                El proceso puede demorar hasta 24 horas.
+              </p>
+
+              <div class="payment-info text-center mt-3">
+                <p><strong>Número:</strong> 951335320</p>
+                <button class="btn btn-outline-primary btn-sm">Copiar</button>
+              </div>
+            </div>
+
+
+            <div class="text-center">
+  <div class="text-center mt-2" *ngIf="subStatus !== 'none'">
+    <span class="badge"
+      [ngClass]="{
+        'bg-warning': subStatus === 'pending',
+        'bg-success': subStatus === 'approved',
+        'bg-danger': subStatus === 'rejected'
+      }">
+      {{ subStatus === 'pending' ? 'En revisión' :
+         subStatus === 'approved' ? 'Plan activo' : 'Rechazado' }}
+    </span>
+  </div>
+
+  <button class="btn btn-md plan-btn mt-4"
+          data-bs-toggle="offcanvas"
+          data-bs-target="#premiumPaymentOffcanvas"
+          [disabled]="subStatus === 'approved'">
+    {{ subStatus === 'approved'
+        ? 'Plan activo'
+        : (subStatus === 'pending'
+            ? 'Ver estado / Subir otro comprobante'
+            : 'Subir comprobante y activar') }}
+  </button>
+</div>
+
+
+          </div>
+        </div>
+        <!-- END PREMIUM -->
+
+      </div>
+    </div>
+  </div>
+
+  <div class="fixed-btn box-background">
+    <div class="custom-container">
+      <h5 class="text-center content-color lh-base">
+        Nota: puedes actualizar tu plan en cualquier momento desde la configuración de tu cuenta.
+      </h5>
+    </div>
+  </div>
+</section>
+<!-- subscription plan section end -->
+ <!-- offcanvas: Activar EXPERTOPREMIUM -->
+<div class="offcanvas offcanvas-bottom service-booking-offcanvas"
+     tabindex="-1" id="premiumPaymentOffcanvas" aria-labelledby="premiumPaymentLabel">
+  <div class="offcanvas-header">
+    <h3 class="offcanvas-title" id="premiumPaymentLabel">Activar EXPERTOPREMIUM</h3>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+  </div>
+
+  <div class="offcanvas-body">
+    <div class="service-booking-box align-items-start flex-column p-3 w-100">
+      <p class="content-color mb-3">
+         Transfiere <strong>S/45</strong> vía <strong>Yape</strong> o <strong>Plin</strong> al número
+        <strong id="payNumber" #payNumber>951335320</strong>.
+        El nombre de tu cuenta debe coincidir con tu nombre en la app.
+        El proceso puede demorar hasta <strong>24h</strong>.
+      </p>
+
+      <div class="d-flex gap-2 mb-3">
+         <button
+          type="button"
+          class="btn btn-outline-primary btn-sm"
+          (click)="copyText(payNumber.textContent)"
+        >
+          Copiar número
+        </button>
+        <span class="small text-success" *ngIf="copied">¡Copiado!</span>
+      </div>
+
+      <!-- Método de pago -->
+      <h5 class="title-color fw-medium">Método</h5>
+      <ul class="option-list d-flex align-items-center gap-3 w-100 mb-3 p-0 border-0 shadow-none">
+        <li class="py-0 border-0">
+          <div class="form-check gap-2">
+            <input class="form-check-input" type="radio" name="paymentMethod" id="payYape"
+                   [(ngModel)]="form.paymentMethod" [value]="'yape'">
+            <label class="form-check-label" for="payYape">
+              <span class="check-box"></span>
+              <span class="name title-color">Yape</span>
+            </label>
+          </div>
+        </li>
+        <li class="py-0 border-0">
+          <div class="form-check gap-2">
+            <input class="form-check-input" type="radio" name="paymentMethod" id="payPlin"
+                   [(ngModel)]="form.paymentMethod" [value]="'plin'">
+            <label class="form-check-label" for="payPlin">
+              <span class="check-box"></span>
+              <span class="name title-color">Plin</span>
+            </label>
+          </div>
+        </li>
+      </ul>
+
+      <!-- Importe fijo -->
+      <div class="form-group w-100 mb-3">
+        <label class="form-label fw-medium without-line mb-2">Importe</label>
+        <div class="form-input">
+          <input type="text" class="form-control border-0" [value]="'S/ 45.00'" readonly>
+          <i class="iconsax" data-icon="money-in"></i>
+        </div>
+      </div>
+
+      <!-- Carga de comprobante -->
+      <div class="form-group w-100 mb-3">
+        <label class="form-label fw-medium without-line mb-2">Comprobante (imagen)</label>
+        <input
+          type="file"
+          class="form-control"
+          accept="image/*"
+          (change)="onFileSelected($event)"
+        />
+        <small class="content-color d-block mt-1">Formatos: JPG/PNG · Máx: 5MB</small>
+
+        <!-- preview -->
+        <div class="mt-3" *ngIf="previewUrl">
+          <img [src]="previewUrl" alt="Comprobante" class="img-fluid rounded border" style="max-height:180px;">
+        </div>
+      </div>
+
+      <!-- Datos opcionales -->
+      <div class="form-group w-100 mb-3">
+        <label class="form-label mb-2 without-line">Notas (opcional)</label>
+        <textarea rows="3" class="form-control textarea-with-icon white-background w-100"
+                  [(ngModel)]="form.note" placeholder="Ej: Transferí desde mi cuenta BCP, 12/10 10:34am"></textarea>
+        <i class="iconsax textarea-icon" data-icon="document-text-1"></i>
+      </div>
+
+      <!-- Declaración -->
+      <div class="form-check mb-2">
+        <input class="form-check-input" type="checkbox" id="agree"
+               [(ngModel)]="form.agree">
+        <label class="form-check-label" for="agree">
+          Declaro que el nombre del titular de la transferencia coincide con mi nombre en la app.
+        </label>
+      </div>
+
+      <div class="d-flex align-items-center gap-3 mt-3 w-100">
+      <div class="d-flex align-items-center gap-3 mt-3 w-100">
+  <button type="button" class="btn outline-btn w-50" data-bs-dismiss="offcanvas">
+    Cancelar
+  </button>
+
+  <button type="button"
+          class="btn theme-btn w-50"
+          [disabled]="!canSubmit || !file || subStatus === 'approved'"
+          (click)="submitProof()">
+    {{ subStatus === 'approved' ? 'Plan activo' : 'Enviar comprobante' }}
+  </button>
+</div>
+        </div>      
+
+      <!-- estado -->
+      <div class="mt-3" *ngIf="statusMsg">
+        <span class="small" [class.text-success]="statusOk" [class.text-danger]="!statusOk">{{ statusMsg }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+

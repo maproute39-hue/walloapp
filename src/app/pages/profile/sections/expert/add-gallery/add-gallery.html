@@ -1,0 +1,148 @@
+<header class="main-header">
+    <div class="custom-container">
+      <div class="header-panel">
+        <a (click)="router.navigate(['/profile', { outlets: { panel: ['gallery'] } }])" class="back-link" style="color: #f9680f;">
+          <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+               viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+          </svg>
+        </a>
+        <h3>Agregar galeria de trabajos</h3>
+      </div>
+    </div>
+  </header>
+  
+  <!-- add package section starts -->
+  <section class="section-lg-t-space section-lg-b-space">
+    <div class="custom-container">
+      <form class="auth-form mt-0" (submit)="$event.preventDefault()">
+        <div class="row g-0">
+          <!-- Nombre del trabajo -->
+          <div class="col-12">
+            <div class="form-group mt-0">
+              <label class="form-label mb-2" for="Inputname">Nombre de tu trabajo</label>
+              <div class="form-input with-icon">
+                <input type="text"
+                       id="Inputname"
+                       name="title"
+                       class="form-control"
+                       [(ngModel)]="title"
+                       placeholder="Nombre de tu trabajo"/>
+                <i class="iconsax" icon-name="main-component"></i>
+              </div>
+            </div>
+          </div>
+  
+          <!-- Imágenes -->
+          <div class="col-12">
+            <div class="form-group">
+              <div class="d-flex align-items-center justify-content-between">
+                <label class="form-label mb-2" for="fileInput">Imagenes</label>
+  
+                <!-- Botón que dispara el input[file] oculto -->
+                <a class="theme-color fw-medium edit-service" (click)="file.click()">
+                  <i class="iconsax icon" icon-name="add" style="color: #f9680f;"></i>
+                  <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                       viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                       stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                  Agregar</a>
+                <input #file type="file" id="fileInput" multiple accept="image/*" (change)="onImageSelected($event)" hidden>
+              </div>
+  
+              <!-- Lista de previews (diseño igual) -->
+              <ul class="package-service-list custom-scrollbar">
+                <li *ngFor="let preview of imagePreviews; let i = index">
+                  <div class="service-img">
+                    <img class="img-fluid img" [src]="preview" alt="preview">
+                    <div class="close-icon" (click)="removeImage(i)">
+                       <span class="material-symbols-rounded" style="color: #ff4444; font-size: 1.5rem;">close</span>
+
+                    </div>
+                  </div>
+                  <h6 class="title-color fw-normal text-center mt-1">Imagen {{ i + 1 }}</h6>
+                </li>
+              </ul>
+            </div>
+          </div>
+  
+          <!-- Descripción -->
+          <div class="col-12">
+            <div class="form-group">
+              <label class="form-label mb-2" for="Inputnotes">Descripción</label>
+              <div class="form-input">
+                <textarea rows="5"
+                          id="Inputnotes"
+                          name="description"
+                          class="form-control textarea-with-icon white-background"
+                          [(ngModel)]="description"
+                          placeholder="Enter details.."></textarea>
+                <i class="iconsax textarea-icon" icon-name="document-text-1"></i>
+              </div>
+            </div>
+          </div>
+  
+        </div>
+      </form>
+    </div>
+  
+    <!-- Botón fijo Guardar -->
+    <div class="fixed-btn">
+      <div class="custom-container">
+        <a class="btn theme-btn w-100 auth-btn mt-0" (click)="onSubmit()">Guardar</a>
+      </div>
+    </div>
+    <!-- Imágenes existentes (modo edición) -->
+<div class="col-12" *ngIf="isEdit && existingImages.length">
+    <div class="form-group">
+      <label class="form-label mb-2">Imágenes actuales</label>
+      <ul class="package-service-list custom-scrollbar">
+        <li *ngFor="let img of existingImages; let i = index">
+          <div class="service-img">
+            <img class="img-fluid img" [src]="img.url" alt="existente">
+            <div class="close-icon" (click)="removeExistingImage(img, i)">
+               <span class="material-symbols-rounded" style="color: #ff4444; font-size: 1.5rem;">close</span>
+
+            </div>
+          </div>
+          <h6 class="title-color fw-normal text-center mt-1">Actual {{ i + 1 }}</h6>
+        </li>
+      </ul>
+    </div>
+  </div>
+  
+  <!-- Imágenes NUEVAS (previews locales) -->
+ <!--  <div class="col-12">
+    <div class="form-group">
+      <div class="d-flex align-items-center justify-content-between">
+        <label class="form-label mb-2" for="fileInput">Agregar imágenes</label>
+        <a class="theme-color fw-medium edit-service" (click)="file.click()">Agregar</a>
+        <input #file type="file" id="fileInput" multiple accept="image/*" (change)="onImageSelected($event)" hidden>
+      </div>
+      <ul class="package-service-list custom-scrollbar" *ngIf="imagePreviews.length">
+        <li *ngFor="let preview of imagePreviews; let i = index">
+          <div class="service-img">
+            <img class="img-fluid img" [src]="preview" alt="preview">
+            <div class="close-icon" (click)="removeNewImage(i)">
+              <i class="iconsax icon" icon-name="add"></i>
+            </div>
+          </div>
+          <h6 class="title-color fw-normal text-center mt-1">Nueva {{ i + 1 }}</h6>
+        </li>
+      </ul>
+    </div>
+  </div> -->
+  
+  <!-- Botón Guardar: cambia el texto si edita -->
+  <div class="fixed-btn">
+    <div class="custom-container">
+      <a class="btn theme-btn w-100 auth-btn mt-0" (click)="onSubmit()">
+        {{ isEdit ? 'Guardar cambios' : 'Guardar' }}
+      </a>
+    </div>
+  </div>
+  
+  </section>
+  

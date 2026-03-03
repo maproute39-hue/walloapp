@@ -1,0 +1,32 @@
+<section class="section-b-space box-background">
+    <div class="custom-container">
+        <div class="title">
+            <h2>Expertos recomendados</h2>
+            <a routerLink="/expert">Ver todos    </a>
+        </div>
+  
+        <ul class="servicer-list"  *ngIf="topExperts$ | async as experts">
+            <li class="servicer-box" *ngFor="let expert of experts" (click)="goToExpert(expert)">
+                <div class="servicer-profile">
+                <img class="profile-img" [src]="expert.avatarUrl || 'assets/images/profile/profile2.png'">
+                </div>
+                <div class="servicer-details">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <a >
+                        <h4 class="fw-medium title-color">{{ expert.displayName }}</h4>
+                        </a>
+                        <h6 class="rating"> <img class="img-fluid star" src="assets/images/svg/star-fill.svg"
+                                alt="star">
+                            4.2</h6>
+                    </div>
+                    <h6 class="fw-normal title-color">Painting Service</h6>
+
+                    <div class="location">
+                        <i class="iconsax icon" data-icon="location"></i>
+                        <h6> Santa Ana, New York</h6>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+  </section> 

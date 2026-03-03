@@ -1,0 +1,199 @@
+<!-- notification section starts (Cliente) -->
+<section class="section-b-space section-lg-t-space" *ngIf="getRole() === 'cliente'">
+    <div class="custom-container">
+      <ul class="notification-list">
+  
+        <li>
+          <div class="notification-box unread">
+            <div class="notification-title">
+              <div class="d-flex align-items-center justify-content-between gap-2">
+                <div class="notification-icon">
+                  <i class="bi bi-calendar-check icon"></i>
+                </div>
+                <h5>Reserva confirmada</h5>
+              </div>
+              <span>hace 1 min</span>
+            </div>
+            <p>Tu servicio de <b>plomería</b> fue confirmado para hoy a las <b>6:30 pm</b>.</p>
+          </div>
+        </li>
+  
+        <li>
+          <div class="notification-box unread">
+            <div class="notification-title">
+              <div class="d-flex align-items-center justify-content-between gap-2">
+                <div class="notification-icon">
+                  <i class="bi bi-geo-alt icon"></i>
+                </div>
+                <h5>Técnico en camino</h5>
+              </div>
+              <span>hace 5 min</span>
+            </div>
+            <p><b>Juan Pérez</b> va en camino. ETA aproximado: <b>15 min</b>.</p>
+          </div>
+        </li>
+  
+        <li>
+          <div class="notification-box">
+            <div class="notification-title">
+              <div class="d-flex align-items-center justify-content-between gap-2">
+                <div class="notification-icon">
+                  <i class="bi bi-chat-dots icon"></i>
+                </div>
+                <h5>Nuevo mensaje</h5>
+              </div>
+              <span>hace 18 min</span>
+            </div>
+            <p>El técnico dejó un mensaje: “¿Hay parqueadero cercano?”</p>
+          </div>
+        </li>
+  
+        <li>
+          <div class="notification-box">
+            <div class="notification-title">
+              <div class="d-flex align-items-center justify-content-between gap-2">
+                <div class="notification-icon">
+                  <i class="bi bi-file-earmark-text icon"></i>
+                </div>
+                <h5>Presupuesto enviado</h5>
+              </div>
+              <span>hace 1 hora</span>
+            </div>
+            <p>Recibiste un presupuesto por <b>$120.000</b> para “Cambio de grifería”.</p>
+          </div>
+        </li>
+  
+        <li>
+          <div class="notification-box">
+            <div class="notification-title">
+              <div class="d-flex align-items-center justify-content-between gap-2">
+                <div class="notification-icon">
+                  <i class="bi bi-credit-card icon"></i>
+                </div>
+                <h5>Pago aprobado</h5>
+              </div>
+              <span>hace 2 horas</span>
+            </div>
+            <p>Tu pago por el servicio “Limpieza de tanque” fue aprobado.</p>
+          </div>
+        </li>
+  
+        <li>
+          <div class="notification-box">
+            <div class="notification-title">
+              <div class="d-flex align-items-center justify-content-between gap-2">
+                <div class="notification-icon">
+                  <i class="bi bi-star icon"></i>
+                </div>
+                <h5>Califica tu experiencia</h5>
+              </div>
+              <span>ayer</span>
+            </div>
+            <p>El servicio “Revisión eléctrica” ha finalizado. ¡Deja tu reseña!</p>
+          </div>
+        </li>
+  
+      </ul>
+    </div>
+  </section>
+  <!-- notification section end -->
+<!-- notification section starts (Prestador) -->
+<section class="section-b-space section-lg-t-space" *ngIf="getRole() === 'proveedor'">
+    <div class="custom-container">
+      <ul class="notification-list">
+  
+        <li>
+          <div class="notification-box unread">
+            <div class="notification-title">
+              <div class="d-flex align-items-center justify-content-between gap-2">
+                <div class="notification-icon">
+                  <i class="bi bi-briefcase icon"></i>
+                </div>
+                <h5>Nueva solicitud cerca de ti</h5>
+              </div>
+              <span>hace 2 min</span>
+            </div>
+            <p>Cliente solicita <b>Instalación de lámpara</b> a 1.2 km de tu ubicación.</p>
+          </div>
+        </li>
+  
+        <li>
+          <div class="notification-box unread">
+            <div class="notification-title">
+              <div class="d-flex align-items-center justify-content-between gap-2">
+                <div class="notification-icon">
+                  <i class="bi bi-calendar-check icon"></i>
+                </div>
+                <h5>Reserva asignada</h5>
+              </div>
+              <span>hace 10 min</span>
+            </div>
+            <p>Fuiste asignado al servicio “Sellado de fuga” para hoy a las <b>4:00 pm</b>.</p>
+          </div>
+        </li>
+  
+        <li>
+          <div class="notification-box">
+            <div class="notification-title">
+              <div class="d-flex align-items-center justify-content-between gap-2">
+                <div class="notification-icon">
+                  <i class="bi bi-chat-dots icon"></i>
+                </div>
+                <h5>Mensaje del cliente</h5>
+              </div>
+              <span>hace 20 min</span>
+            </div>
+            <p>“Estoy en el apartamento 302. El portero te deja pasar.”</p>
+          </div>
+        </li>
+  
+        <li>
+          <div class="notification-box">
+            <div class="notification-title">
+              <div class="d-flex align-items-center justify-content-between gap-2">
+                <div class="notification-icon">
+                  <i class="bi bi-calendar-event icon"></i>
+                </div>
+                <h5>Reprogramación solicitada</h5>
+              </div>
+              <span>hace 1 hora</span>
+            </div>
+            <p>El cliente pidió mover la cita a mañana a las <b>9:00 am</b>.</p>
+          </div>
+        </li>
+  
+        <li>
+          <div class="notification-box">
+            <div class="notification-title">
+              <div class="d-flex align-items-center justify-content-between gap-2">
+                <div class="notification-icon">
+                  <i class="bi bi-wallet2 icon"></i>
+                </div>
+                <h5>Pago liberado</h5>
+              </div>
+              <span>hace 3 horas</span>
+            </div>
+            <p>Se liberaron <b>$180.000</b> por “Mantenimiento de lavadora”.</p>
+          </div>
+        </li>
+  
+        <li>
+          <div class="notification-box">
+            <div class="notification-title">
+              <div class="d-flex align-items-center justify-content-between gap-2">
+                <div class="notification-icon">
+                  <i class="bi bi-star-fill icon"></i>
+                </div>
+                <h5>Nueva calificación</h5>
+              </div>
+              <span>ayer</span>
+            </div>
+            <p>Recibiste <b>5 estrellas</b> en “Instalación de tomacorriente”.</p>
+          </div>
+        </li>
+  
+      </ul>
+    </div>
+  </section>
+  <!-- notification section end -->
+    

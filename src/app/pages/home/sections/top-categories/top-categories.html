@@ -1,0 +1,26 @@
+<!-- src/app/components/top-categories/top-categories.html -->
+<section>
+  <div class="custom-container">
+    <div class="title">
+      <h2>Top categories</h2>
+      <a routerLink="/category-grid">Ver  todos</a>
+    </div>
+
+    <div class="row g-3">
+      <ng-container *ngFor="let cat of categories">
+        <div class="col-3">
+          <a [routerLink]="['/category', cat.slug || cat.id]">
+            <div class="categories-box">
+              <img class="categories-icon"
+                   [src]="iconUrlFn(cat)"
+                   [alt]="cat.name || 'category'">
+            </div>
+            <h5 class="categories-name mt-2 text-center title-color">
+              {{ cat.name }}
+            </h5>
+          </a>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</section>

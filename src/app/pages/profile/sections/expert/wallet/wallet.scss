@@ -1,0 +1,30 @@
+.payment-history-list .payment-history-box .bill-box .bottom-design {
+    position: absolute;
+    bottom: -1px;
+    width: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+.transactions-scroll {
+  max-height: 60vh; /* o el alto que quieras */
+  overflow-y: scroll;
+  -ms-overflow-style: none;  /* IE y Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
+.transactions-scroll::-webkit-scrollbar {
+  display: none; /* Chrome, Safari y Opera */
+}
+
+.transactions-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.transactions-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+.transactions-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+}

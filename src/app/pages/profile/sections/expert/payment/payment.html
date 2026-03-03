@@ -1,0 +1,228 @@
+<header class="main-header">
+    <div class="custom-container">
+      <div class="header-panel">
+        <a (click)="router.navigate(['/profile'])" class="back-link" style="color: #f9680f;">
+            <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+        </a>
+        <h3>Medios de pago</h3>
+        <a (click)="showForm = !showForm" class="back-link" style="color: #f9680f;">
+            <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <line *ngIf="!showForm" x1="12" y1="5" x2="12" y2="19"></line>
+            </svg>
+          </a>
+      </div>
+    </div>
+  </header>
+  
+  <section class="section-b-space section-lg-t-space">
+    <div class="custom-container">
+  
+      <!-- Lista de métodos guardados -->
+      <div *ngIf="loading" class="text-center py-3">Cargando...</div>
+  
+      <ul class="populer-service-list" *ngIf="!loading && payments.length">
+        <li class="populer-service-box" *ngFor="let p of payments; trackBy: trackByPayment">
+          <div class="populer-service-details">
+            <div class="d-flex align-items-center justify-content-between">
+              <h5 class="fw-medium title-color">
+                {{ labelOf(p) }}
+                <span *ngIf="p.isDefault" class="badge ms-2">Predeterminado</span>
+              </h5>
+              <div class="d-flex gap-2">
+                <button class="btn outline-btn sm" (click)="edit(p)">Editar</button>
+                <button class="btn theme-btn sm" (click)="remove(p)">Eliminar</button>
+              </div>
+            </div>
+  
+            <div class="mt-2 content-color small">
+              <ng-container [ngSwitch]="p.type">
+                <!-- YAPE -->
+                <ng-container *ngSwitchCase="'yape'">
+                  <div>Teléfono: {{ $any(p).phone }}</div>
+                  <div *ngIf="$any(p).documentType">
+                    Doc: {{ $any(p).documentType }} {{ $any(p).documentNumber }}
+                  </div>
+                  <div *ngIf="$any(p).qr?.url" class="mt-2">
+                    <img [src]="$any(p).qr.url" alt="QR Yape" style="width:110px;border-radius:10px;">
+                  </div>
+                </ng-container>
+  
+                <!-- PLIN -->
+                <ng-container *ngSwitchCase="'plin'">
+                  <div>Teléfono: {{ $any(p).phone }}</div>
+                  <div *ngIf="$any(p).documentType">
+                    Doc: {{ $any(p).documentType }} {{ $any(p).documentNumber }}
+                  </div>
+                  <div *ngIf="$any(p).qr?.url" class="mt-2">
+                    <img [src]="$any(p).qr.url" alt="QR Plin" style="width:110px;border-radius:10px;">
+                  </div>
+                </ng-container>
+  
+                <!-- BANK -->
+                <ng-container *ngSwitchCase="'bank'">
+                  <div>{{ $any(p).bankName }} — {{ $any(p).accountType | titlecase }}</div>
+                  <div>Cuenta: {{ $any(p).accountNumber }}</div>
+                  <div *ngIf="$any(p).cci">CCI: {{ $any(p).cci }}</div>
+<small class="content-color d-block mt-1" *ngIf="!form.holderName && userName">
+ {{ userName }} (nombre de tu perfil)
+</small>
+                  <div>Doc: {{ $any(p).documentType }} {{ $any(p).documentNumber }}</div>
+                </ng-container>
+              </ng-container>
+            </div>
+  
+            <div class="d-flex gap-2 mt-2">
+              <button class="btn outline-btn w-50" [disabled]="p.isDefault" (click)="setDefault(p)">
+                Marcar como predeterminado
+              </button>
+            </div>
+          </div>
+        </li>
+      </ul>
+  
+      <!-- Si no hay métodos -->
+      <div *ngIf="!loading && !payments.length" class="text-center py-4">
+        <h5 class="title-color">Aún no agregas medios de pago</h5>
+        <p class="content-color">Registra Yape, Plin o una cuenta bancaria para recibir pagos.</p>
+      </div>
+      <div *ngIf="showForm" class="card mb-4">
+        <div class="card-body position-relative">
+          <button (click)="cancelEdit()" class="btn btn-sm btn-icon position-absolute" style="top: 10px; right: 10px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+          <h2 class="h5 mb-3">{{ editId ? 'Editar' : 'Agregar' }} método de pago</h2>
+      
+            <!-- Formulario (crea/edita UNO; puedes repetir para N) -->
+            <form class="auth-form mt-3" (submit)="$event.preventDefault()">
+                <div class="form-group">
+                <label class="form-label mb-2">Tipo de método</label>
+                <select class="form-select w-100" [(ngModel)]="form.type" name="type" (change)="onTypeChange()">
+                    <option value="yape">Yape</option>
+                    <option value="plin">Plin</option>
+                    <option value="bank">Cuenta bancaria</option>
+                </select>
+                </div>
+        
+                <div class="form-group">
+                <label class="form-label mb-2">Alias (opcional)</label>
+                <div class="form-input">
+                    <input type="text" class="form-control without-icon" [(ngModel)]="form.alias" name="alias" placeholder="Ej: Yape personal / BCP sueldos" />
+                </div>
+                </div>
+        
+                <!-- Yape / Plin -->
+                <ng-container *ngIf="form.type === 'yape' || form.type === 'plin'">
+                <div class="form-group">
+                    <label class="form-label mb-2">Teléfono (9 dígitos)</label>
+                    <div class="form-input">
+                    <input type="tel" class="form-control without-icon" [(ngModel)]="form.phone" name="phone" maxlength="9" placeholder="9XXXXXXXX" />
+                    </div>
+                </div>
+        
+                <div class="form-group">
+                    <label class="form-label mb-2">Documento (opcional)</label>
+                    <div class="d-flex gap-2">
+                    <select class="form-select" [(ngModel)]="form.documentType" name="wDocType" style="min-width: 140px;">
+                        <option [ngValue]="undefined">Tipo</option>
+                        <option value="DNI">DNI</option>
+                        <option value="CE">CE</option>
+                        <option value="RUC">RUC</option>
+                    </select>
+                    <input type="text" class="form-control without-icon" [(ngModel)]="form.documentNumber" name="wDocNumber" placeholder="Número" />
+                    </div>
+                    <small class="content-color d-block mt-1" *ngIf="!form.documentNumber && !!userDni">
+                    Sugerido: tu DNI del perfil es {{ userDni }}.
+                    </small>
+                </div>
+        
+                <div class="form-group">
+                    <div class="d-flex align-items-center justify-content-between">
+                    <label class="form-label mb-2">QR (opcional)</label>
+                    <a class="theme-color fw-medium edit-service" (click)="qrFileInput.click()">Subir</a>
+                    <input #qrFileInput type="file" accept="image/*" hidden (change)="onQrSelected($event)" />
+                    </div>
+                    <div *ngIf="qrPreview" class="mt-2">
+                    <img [src]="qrPreview" alt="QR" style="width:130px;border-radius:12px;">
+                    <a class="theme-color ms-2" (click)="removeQr()">Quitar</a>
+                    </div>
+                </div>
+                </ng-container>
+        
+                <!-- Bank -->
+                <ng-container *ngIf="form.type === 'bank'">
+                <div class="form-group">
+                    <label class="form-label mb-2">Banco</label>
+                    <select class="form-select w-100" [(ngModel)]="form.bankName" name="bankName">
+                    <option value="">Seleccione banco</option>
+                    <option>BCP</option><option>BBVA</option><option>Interbank</option><option>Scotiabank</option>
+                    <option>BanBif</option><option>Banco Pichincha</option><option>Banco de la Nación</option>
+                    <option>Banco Ripley</option><option>Falabella</option><option>Otros</option>
+                    </select>
+                </div>
+        
+                <div class="form-group">
+                    <label class="form-label mb-2">Tipo de cuenta</label>
+                    <select class="form-select w-100" [(ngModel)]="form.accountType" name="accountType">
+                    <option value="ahorro">Ahorro</option>
+                    <option value="corriente">Corriente</option>
+                    </select>
+                </div>
+        
+                <div class="form-group">
+                    <label class="form-label mb-2">Número de cuenta</label>
+                    <div class="form-input">
+                    <input type="text" class="form-control without-icon" [(ngModel)]="form.accountNumber" name="accountNumber" placeholder="Número de cuenta" />
+                    </div>
+                </div>
+        
+                <div class="form-group">
+                    <label class="form-label mb-2">CCI (20 dígitos)</label>
+                    <div class="form-input">
+                    <input type="text" class="form-control without-icon" [(ngModel)]="form.cci" name="cci" maxlength="20" placeholder="Interbancario (CCI)" />
+                    </div>
+                </div>
+        
+                <div class="form-group">
+                    <label class="form-label mb-2">Titular y documento</label>
+                    <div class="form-input">
+                  <input 
+                    type="text" 
+                    class="form-control without-icon mb-2" 
+                    [(ngModel)]="form.holderName" 
+                    name="holderName" 
+                    [placeholder]="userName || 'Nombre del titular'"
+                  />
+                  <small class="content-color d-block mt-1" *ngIf="form.holderName === userName">
+                    Usando el nombre de tu perfil
+                  </small>
+                    <div class="d-flex gap-2">
+                        <select class="form-select" [(ngModel)]="form.documentType" name="bDocType" style="min-width:140px;">
+                        <option value="DNI">DNI</option>
+                        <option value="CE">CE</option>
+                        <option value="RUC">RUC</option>
+                        </select>
+                        <input type="text" class="form-control without-icon" [(ngModel)]="form.documentNumber" name="bDocNumber" placeholder="Número de documento" />
+                    </div>
+                    <small class="content-color d-block mt-1" *ngIf="!form.documentNumber && !!userDni">
+                        Sugerido: tu DNI del perfil es {{ userDni }}.
+                    </small>
+                    </div>
+                </div>
+                </ng-container>
+        
+                <div class="d-flex gap-2 mt-3">
+                <button class="btn theme-btn w-100" (click)="save()">Guardar</button>
+                <button *ngIf="editId" class="btn outline-btn w-100" (click)="cancelEdit()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+      </div>
+    </div>
+  </section>
+  

@@ -1,0 +1,157 @@
+
+<header class="main-header">
+  <div class="custom-container">
+      <div class="header-panel">
+        <a (click)="router.navigate(['/profile'])" class="back-link" style="color: #f9680f;">
+          <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+          </svg>       
+        </a>
+          <h3>Datos y biografía</h3>
+      </div>
+  </div>
+</header>
+<section class="section-b-space section-lg-t-space">
+    <div class="custom-container">
+      
+      
+      <div class="profile-background">
+        <img class="img-fluid profile-bg" src="assets/images/background/profile-bg.png" alt="profile-bg">
+        <div class="profile-part mt-3">
+          <div class="profile-image">
+            <div class="avatar-container">
+              <img [src]="avatarSrc()" 
+                   class="img-fluid profile-pic" 
+                   alt="profile"
+                   (error)="avatarSrc.set(defaultAvatar)">
+              <div class="avatar-overlay" (click)="triggerFileInput()">
+                <i class="iconsax" data-icon="camera"></i>
+                <span>Cambiar foto</span>
+              </div>
+            </div>
+            <input type="file" 
+                   id="avatar" 
+                   (change)="onFileSelected($event)" 
+                   style="display: none;" 
+                   accept="image/*">
+          </div>
+          <div class="mt-2 text-center">
+            <button type="button" 
+                    class="btn btn-sm btn-outline-secondary"
+                    (click)="removeAvatar()"
+                    *ngIf="avatarSrc() !== defaultAvatar">
+              <i class="bi bi-trash me-1"></i> Eliminar foto
+            </button>
+          </div>
+        </div>
+      </div>
+     <!--  <div class="profile-image">
+        <div class="avatar-container" (click)="triggerFileInput()">
+          <img [src]="avatarSrc()" 
+               class="img-fluid profile-pic" 
+               alt="profile"
+               (error)="avatarSrc.set(defaultAvatar)">
+          <div class="avatar-overlay">
+            <i class="iconsax" data-icon="camera"></i>
+            <span>Cambiar foto</span>
+          </div>
+        </div>
+        <input type="file" 
+               id="avatar" 
+               (change)="onFileSelected($event)" 
+               style="display: none;" 
+               accept="image/*"
+               aria-label="Seleccionar imagen de perfil">
+      </div> -->
+  
+      <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="auth-form mt-0 rounded-top-0">
+        <div class="form-group mt-0">
+          <label class="form-label mb-2" for="name">Nombre completo</label>
+          <div class="form-input">
+            <input type="text" 
+                   class="form-control without-icon" 
+                   id="name" 
+                   formControlName="name"
+                   placeholder="Tu nombre completo">
+          </div>
+        </div>
+  
+        <div class="form-group">
+          <label class="form-label mb-2" for="email">Correo electrónico</label>
+          <div class="form-input">
+            <input type="email" 
+                   class="form-control without-icon" 
+                   id="email"
+                   formControlName="email"
+                   placeholder="tucorreo@ejemplo.com"
+                   [disabled]="true">
+          </div>
+        </div>
+  
+        <div class="form-group">
+          <label class="form-label" for="phone">Número de teléfono</label>
+          <div class="d-flex gap-2">
+            <select class="form-select" style="max-width: 120px;">
+              <option selected>+57</option>
+              <option>+1</option>
+              <option>+34</option>
+            </select>
+            <div class="form-input w-100">
+              <input type="tel" 
+                     class="form-control without-icon" 
+                     id="phone"
+                     formControlName="phone"
+                     placeholder="Tu número de teléfono" 
+                     required>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="dni">DNI</label>
+            <div class="d-flex gap-2">
+              <div class="form-input w-100">
+                <input type="tel" 
+                       class="form-control without-icon" 
+                       id="dni"
+                       formControlName="dni"
+                       placeholder="Tu número de DNI" 
+                       required>
+              </div>
+            </div>
+          </div>
+  
+        <!-- <div class="form-group">
+          <label class="form-label">Ubicación</label>
+          <select class="form-select w-100" formControlName="location">
+            <option value="">Selecciona una ubicación</option>
+            <option value="Bogotá">Bogotá</option>
+            <option value="Medellín">Medellín</option>
+            <option value="Cali">Cali</option>
+            <option value="Barranquilla">Barranquilla</option>
+            <option value="Otra">Otra ciudad</option>
+          </select>
+        </div> -->
+  
+        <div class="form-group">
+          <label class="form-label fw-medium mb-2" for="bio">Biografía</label>
+          <div class="form-input">
+            <textarea rows="4" 
+                      class="form-control without-icon white-background" 
+                      id="bio"
+                      formControlName="bio"
+                      placeholder="Cuéntanos sobre ti y tus habilidades"></textarea>
+          </div>
+        </div>
+
+       
+  
+        <button type="submit" 
+                class="btn theme-btn w-100 auth-btn mt-4"
+                [disabled]="profileForm.invalid || isLoading">
+          <span *ngIf="!isLoading">Guardar cambios</span>
+          <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          <span *ngIf="isLoading" class="ms-2">Guardando...</span>
+        </button>
+      </form>
+    </div>
+  </section>

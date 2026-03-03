@@ -1,0 +1,15 @@
+/* notifications.scss */
+.notification-icon .iconsax {
+    display: inline-block;
+    width: auto;
+    height: auto;
+    font-size: 1.25rem;   // ajusta tamaño
+    line-height: 1;
+    vertical-align: middle;
+  }
+  
+  .notification-icon .icon { // si no puedes quitar la clase 'icon'
+    display: inline-block !important;
+    font-size: 1.25rem !important;
+  }
+  

@@ -1,0 +1,153 @@
+
+<header class="main-header">
+  <div class="custom-container">
+      <div class="header-panel">
+        <a (click)="router.navigate(['/profile'])" class="back-link" style="color: #f9680f;">
+          <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+          </svg>       
+        </a>
+          <h3>Datos de emergencia</h3>
+      </div>
+  </div>
+</header>
+<section class="section-b-space  ">
+    <div class="custom-container">
+ 
+<form [formGroup]="emergencyForm" (ngSubmit)="onSubmit()" class="auth-form mt-0 rounded-top-0">         <!-- Sección de Datos de Emergencia -->
+        <div class="emergency-data mt-4 pt-3 border-top">
+          <h5 class="mb-3 fw-bold">Datos en caso de emergencia</h5>
+          
+          <div class="row g-3">
+            <!-- Contacto de Emergencia 1 -->
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="form-label" for="emergencyContact1Name">Nombre de contacto (1)</label>
+                <input type="text" 
+                      class="form-control" 
+                      id="emergencyContact1Name"
+                      formControlName="emergencyContact1Name"
+                      placeholder="Nombre completo">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="form-label" for="emergencyContact1Phone">Celular de contacto (1)</label>
+                <input type="tel" 
+                      class="form-control" 
+                      id="emergencyContact1Phone"
+                      formControlName="emergencyContact1Phone"
+                      placeholder="Número de teléfono">
+              </div>
+            </div>
+
+            <!-- Contacto de Emergencia 2 -->
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="form-label" for="emergencyContact2Name">Nombre de contacto (2)</label>
+                <input type="text" 
+                      class="form-control" 
+                      id="emergencyContact2Name"
+                      formControlName="emergencyContact2Name"
+                      placeholder="Nombre completo">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="form-label" for="emergencyContact2Phone">Celular de contacto (2)</label>
+                <input type="tel" 
+                      class="form-control" 
+                      id="emergencyContact2Phone"
+                      formControlName="emergencyContact2Phone"
+                      placeholder="Número de teléfono">
+              </div>
+            </div>
+
+            <!-- Información Médica -->
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="form-label" for="bloodType">Grupo sanguíneo</label>
+                <select class="form-select" id="bloodType" formControlName="bloodType">
+                  <option value="">Seleccionar</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="form-label" for="rhFactor">Factor RH</label>
+                <select class="form-select" id="rhFactor" formControlName="rhFactor">
+                  <option value="">Seleccionar</option>
+                  <option value="Positivo">Positivo (+)</option>
+                  <option value="Negativo">Negativo (-)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="form-group">
+                <label class="form-label" for="preexistingConditions">Enfermedades preexistentes</label>
+                <textarea class="form-control" 
+                         id="preexistingConditions" 
+                         rows="2"
+                         formControlName="preexistingConditions"
+                         placeholder="Ej: Diabetes tipo 2, Hipertensión"></textarea>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="form-group">
+                <label class="form-label" for="allergies">Reacciones alérgicas</label>
+                <input type="text" 
+                      class="form-control" 
+                      id="allergies"
+                      formControlName="allergies"
+                      placeholder="Ej: Penicilina, Mariscos, Polvo">
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="form-group">
+                <label class="form-label" for="currentMedication">Medicación actual</label>
+                <input type="text" 
+                      class="form-control" 
+                      id="currentMedication"
+                      formControlName="currentMedication"
+                      placeholder="Medicamentos que toma regularmente">
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="form-group">
+                <label class="form-label" for="medicalNotes">Nota médica</label>
+                <textarea class="form-control" 
+                         id="medicalNotes" 
+                         rows="2"
+                         formControlName="medicalNotes"
+                         placeholder="Ej: Estoy asegurado en EsSalud, llamar al Dr. Díaz"></textarea>
+                <div class="form-text">Información adicional que consideres importante en caso de emergencia.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+       
+  
+        <button type="submit" 
+                class="btn theme-btn w-100 auth-btn mt-4"
+                [disabled]="emergencyForm.invalid || isLoading">
+        <span *ngIf="!isLoading">Guardar cambios</span>
+        <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        <span *ngIf="isLoading" class="ms-2">Guardando...</span>
+        </button>
+      </form>
+    </div>
+  </section>

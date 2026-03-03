@@ -1,0 +1,31 @@
+.iconsax.icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    font-size: 18px; /* fallback si la librería usa font */
+    color: rgba(var(--theme-color), 1); /* o un hex directo */
+  }
+  .setting-icon { background: rgba(var(--theme-color), .09); }
+  .setting-icon {
+    position: relative; /* Necesario para posicionar el badge */
+  }
+  
+  .alert-badge {
+    position: absolute;
+    top: 0;       /* esquina superior */
+    right: 0;     /* esquina superior derecha */
+    width: 16px;  /* tamaño del círculo */
+    height: 16px;
+    background-color: red;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 50%; /* hace el círculo */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform: translate(25%, -25%); /* opcional, para que quede fuera del borde */
+  }
+  

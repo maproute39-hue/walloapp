@@ -1,0 +1,13 @@
+.section-title { margin: 16px 0; font-size: 1.25rem; }
+.grid {
+  display: grid; gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+}
+.card {
+  display: flex; gap: 10px; align-items: center;
+  padding: 12px; border: 1px solid #e5e7eb; border-radius: 14px; background: #fff;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  text-decoration: none; color: inherit;
+}
+.card:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,.06); border-color: #d1d5db; }
+.icon { width: 28px; height: 28px; object-fit: contain; }

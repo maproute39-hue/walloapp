@@ -1,0 +1,130 @@
+<header class="main-header">
+    <div class="custom-container">
+      <div class="header-panel">
+        <a (click)="router.navigate(['/profile'])" class="back-link" style="color: #f9680f;">
+          <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+          </svg>
+        </a>
+  
+        <h3>Galería</h3>
+  
+        <a (click)="router.navigate(['../add-gallery'], { relativeTo: route })" class="back-link" style="color: #f9680f;">
+          <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+  
+  <section>
+    <div class="custom-container">
+  
+      <!-- Estado de carga -->
+      <div *ngIf="loading" class="text-center py-4">
+        <p>Cargando galerías...</p>
+      </div>
+  
+      <!-- Sin galerías -->
+      <div *ngIf="!loading && galleries.length === 0" class="text-center py-5">
+        <h5 class="title-color">Aún no tienes galerías creadas.</h5>
+        <p class="content-color">Haz clic en el botón “+” para agregar tu primer trabajo.</p>
+      </div>
+  
+      <!-- Lista de galerías -->
+      <ul class="populer-service-list" *ngIf="!loading && galleries.length > 0">
+        <li class="populer-service-box" *ngFor="let gallery of galleries; trackBy: trackByGallery">
+
+            <!-- Portada que abre el lightbox -->
+            <a (click)="openLightbox(gallery, 0)">
+              <img class="img-fluid service-img" [src]="coverOf(gallery)" alt="imagen galería">
+            </a>
+          
+            <div class="populer-service-details">
+              <div class="d-flex align-items-center justify-content-between">
+                <a>
+                  <h5 class="fw-medium title-color">{{ gallery.title }}</h5>
+                </a>
+                <h6 class="fw-semibold content-color">{{ gallery.images.length || 0 }} fotos</h6>
+              </div>
+          
+              <div class="mt-2">
+                <p class="content-color">{{ gallery.description || 'Sin descripción' }}</p>
+              </div>
+          
+              <!-- Mini galería -->
+              <div class="gallery-thumbs mt-2" *ngIf="(gallery.images?.length || 0) > 1">
+                <img
+                  *ngFor="let img of (gallery.images || []).slice(0,4); let i = index"
+                  [src]="img.url"
+                  alt="thumb"
+                  class="thumb-img"
+                  (click)="openLightbox(gallery, i)" />
+                <div class="more" *ngIf="(gallery.images?.length || 0) > 4" (click)="openLightbox(gallery, 4)">
+                  +{{ (gallery.images.length || 0) - 4 }}
+                </div>
+              </div>
+          
+              <div class="status-part mt-3">
+                <h6>Creado el {{ gallery.createdAt | date:'shortDate' }}</h6>
+              </div>
+          
+              <!-- 🔘 Botones de acción -->
+              <div class="d-flex gap-2 mt-2 card-actions">
+                
+                <button class="btn outline-btn w-50" (click)="goToAddGallery(gallery.id)">Editar</button>
+
+                <button class="btn theme-btn w-50" (click)="onDeleteGallery(gallery)">Eliminar</button>
+              </div>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  
+    <!-- Lightbox Modal -->
+    <div class="lightbox-backdrop" *ngIf="lightboxOpen" (click)="closeLightbox()"></div>
+  
+    <div class="lightbox-modal" *ngIf="lightboxOpen" role="dialog" aria-modal="true" (click)="closeLightbox()">
+        <button type="button" class="lightbox-close" aria-label="Cerrar" (click)="closeLightbox()">
+            ✕
+          </button>
+          
+        <div class="lightbox-header" (click)="$event.stopPropagation()">
+        <h5 class="title-color m-0">
+          {{ activeGallery?.title }}
+          <span class="content-color">· {{ activeIndex + 1 }} / {{ activeGallery?.images?.length || 0 }}</span>
+        </h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="closeLightbox()"></button>
+      </div>
+  
+      <div class="lightbox-body" (click)="$event.stopPropagation()">
+        <button class="nav-btn prev" (click)="prevImage()" aria-label="Anterior">
+          <svg width="22" height="22" viewBox="0 0 24 24"><path fill="currentColor" d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+        </button>
+  
+        <img
+          class="lightbox-image"
+          [src]="activeGallery?.images?.[activeIndex]?.url || 'assets/images/placeholder.jpg'"
+          alt="imagen" />
+  
+        <button class="nav-btn next" (click)="nextImage()" aria-label="Siguiente">
+          <svg width="22" height="22" viewBox="0 0 24 24"><path fill="currentColor" d="M8.59 16.59 10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg>
+        </button>
+      </div>
+  
+      <div class="lightbox-thumbs" *ngIf="activeGallery?.images?.length" (click)="$event.stopPropagation()">
+        <img
+          *ngFor="let img of activeGallery?.images; let i = index"
+          [src]="img.url"
+          [class.active]="i === activeIndex"
+          (click)="selectThumb(i)"
+          alt="thumb" />
+      </div>
+    </div>
+  </section>
+  

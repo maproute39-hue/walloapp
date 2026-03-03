@@ -1,0 +1,119 @@
+<header class="main-header">
+    <div class="custom-container">
+        <div class="header-panel">
+            <a (click)="router.navigate(['/profile'])" class="back-link" style="color: #f9680f;">
+              <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+              </svg>       </a>
+            <h3>Servicios</h3>
+        </div>
+    </div>
+</header>
+<section class="section-lg-b-space">
+    <div class="custom-container">
+      <form class=" mt-0">
+        <div class="row g-0">
+  
+          <!-- Lista de categorías (igual al original visualmente) -->
+          <div class="col-12">
+            <div class="form-group">
+                <div class="d-flex align-items-center justify-content-between">
+                    <label class="form-label mb-2" for="Inputnotes">Descripción</label>
+                    <a 
+                      class="theme-color fw-medium edit-service"
+                      href="#"
+                      (click)="toggleExpandAll($event)">
+                      {{ allExpanded ? 'Contraer todo' : 'Expandir todo' }}
+                    </a>
+                  </div>
+                  
+  
+            <!-- Categorías como título + subs como tags -->
+            <div class="categories-list">
+                <div *ngFor="let cat of categories" class="category-block">
+                  <div class="category-header" (click)="expandCategory(cat, $event)" [class.open]="isExpanded(cat)">
+                    <div class="left">
+                      <img class="categories-icon" [src]="iconUrlFn(cat)" [alt]="cat.name || 'category'">
+                      <h5 class="category-title">{{ cat.name }}</h5>
+                    </div>
+                    <div class="right">
+                      <span class="caret" [attr.aria-hidden]="true">{{ isExpanded(cat) ? '▾' : '▸' }}</span>
+                    </div>
+                  </div>
+              
+                  <!-- tags (visible si está expandida) -->
+                  <div *ngIf="isExpanded(cat)" class="tags-row">
+                    <ng-container *ngIf="(cat.subs || []).length > 0; else noTags">
+                      <button
+                        *ngFor="let sub of cat.subs"
+                        type="button"
+                        class="tag"
+                        [class.selected]="isSubSelected(cat.id, subId(sub))"
+                        (click)="toggleTag(cat.id, subId(sub), $event)"
+                        [attr.aria-pressed]="isSubSelected(cat.id, subId(sub))"
+                        [attr.title]="subLabel(sub)">
+                        
+                        <span class="tag-content">
+                          <span class="check-icon" *ngIf="isSubSelected(cat.id, subId(sub))">✔</span>
+                          {{ subLabel(sub) }}
+                        </span>
+                      </button>
+                    </ng-container>
+              
+                    <ng-template #noTags>
+                      <p class="muted">Sin subcategorías</p>
+                    </ng-template>
+                  </div>
+                </div>
+              </div>
+              
+  
+           
+  
+            </div>
+          </div>
+  
+          <!-- Active status / otros campos -->
+       <!-- --- LISTADO DE SUBCATEGORÍAS SELECCIONADAS (chips) --- -->
+       <div *ngIf="selected && selected.length" class="selected-chips mt-3">
+        <h6 class="mb-2 ti" style="font-size: 16px; font-weight: 600;">Servicios aplicados</h6>
+        <div class="chips-wrap mb-3">
+          <ng-container *ngFor="let rel of selected">
+            <ng-container *ngIf="rel.selectedByUser?.length">
+              <div *ngFor="let subId of rel.selectedByUser" class="chip">
+                <span class="chip-label">{{ getSubLabelById(rel.categoryId, subId) }}</span>
+                <button type="button" class="chip-remove" (click)="removeSub(rel.categoryId, subId)" aria-label="Eliminar">×</button>
+              </div>
+
+            </ng-container>
+          </ng-container>
+        </div>
+      </div>
+      <!-- fin chips -->
+  
+        </div>
+      </form>
+    </div>
+  
+    <!-- Botón fijo -->
+    <div class="fixed-btn">
+      <div class="custom-container " >
+          
+        <button
+          type="button"
+          class="btn theme-btn w-100 auth-btn mt-0"
+          (click)="saveSelections()"
+          [disabled]="saving"
+          aria-live="polite"
+          [attr.aria-busy]="saving">
+          <ng-container *ngIf="!saving">Guardar</ng-container>
+          <ng-container *ngIf="saving">
+            <span class="local-spinner" aria-hidden="true"></span> Guardando...
+          </ng-container>
+        </button>
+  
+        <div *ngIf="saveMessage" class="save-message" role="status">{{ saveMessage }}</div>
+      </div>
+    </div>
+  </section>
+  

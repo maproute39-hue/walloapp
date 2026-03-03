@@ -1,0 +1,60 @@
+<header class="main-header">
+        <div class="custom-container">
+            <div class="header-panel">
+                <div class="d-flex align-items-center gap-2">
+                   <a (click)="router.navigate(['/home'])" class="back-link" style="color: #f9680f;">
+                    <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                    </svg>       
+                    </a>
+                    <h3>Perfil de experto</h3>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- header end -->
+
+    <!-- servicemen details starts -->
+<section class="section-b-space section-lg-t-space" *ngIf="expert$ | async as expert">
+        <div class="custom-container">
+            <div class="provider-details-wrapper servicemen-details-wrapper">
+                <div class="profile-img">
+        <img class="img-fluid profile-pic" [src]="expert.avatarUrl || 'assets/images/profile/profile2.png'" alt="">
+                </div>
+                <div class="d-flex align-items-center justify-content-center gap-2 mt-4">
+        <h5 class="fw-medium title-color">{{ expert.displayName }}</h5>
+                    <h5 class="title-color d-flex align-items-center gap-1"><img class="img-fluid star"
+                            src="../../assets/images/svg/star-fill.svg" alt="star"> 3.5</h5>
+                </div>
+
+                <ul class="provider-review">
+                    <li class="fw-medium title-color">
+                        <i class="iconsax location-icon" data-icon="location">
+                        </i> {{ expert.address }}
+                    </li>
+                    <li class="fw-medium title-color">
+                        {{ expert.rolw }}
+                    </li>
+                </ul>
+
+                <div class="service-count-box">
+                    <h6>Servicios realizados :</h6>
+                    <h5><span></span> servicios</h5>
+                </div>
+
+                
+
+
+                <h5 class="inner-sub-title mt-3">Experto en</h5>
+
+                <ul class="expertise-list">
+                    <li>{{ expert.rolw }}</li>
+                </ul>
+
+                <div class="provider-description">
+                    <h5 class="inner-sub-title">Biografía</h5>
+                    <p class="content-color">{{ expert['bio'] }}</p>
+                </div>
+            </div>
+        </div>
+    </section>

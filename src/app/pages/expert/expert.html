@@ -1,0 +1,55 @@
+ <header class="main-header">
+        <div class="custom-container">
+            <div class="header-panel">
+               
+                <a (click)="router.navigate(['/home'])" class="back-link" style="color: #f9680f;">
+                <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                </svg>       
+                </a>
+                <h3>Expertos Calificados</h3>
+            </div>
+        </div>
+    </header>
+    <!-- header end -->
+
+    <!-- expert-servicer section starts -->
+    <section class="section-lg-t-space section-b-space">
+        <div class="custom-container">
+            <form class="auth-form mt-0 p-0 bg-transparent">
+                <div class="form-group">
+                    <div class="form-input">
+                        <input type="search" class="form-control search wo-filter" id="inputusername"
+                            placeholder="Buscar">
+                        <i class="iconsax search-icon" data-icon="search-normal-2"></i>
+                    </div>
+                </div>
+            </form>
+
+            <ul class="servicer-list mt-4" *ngIf="experts$ | async as experts; else empty">
+                <li class="servicer-box" *ngFor="let expert of experts">
+                    <div class="servicer-profile">
+                    <img class="profile-img" [src]="expert.avatarUrl || 'assets/images/profile/profile2.png'" alt="avatar">
+                    </div>
+                    <div class="servicer-details">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <h4 class="fw-medium title-color">{{ expert.displayName }}</h4>
+                            <h6 class="rating"> <img class="img-fluid star" src="../../assets/images/svg/star-fill.svg"
+                                    alt="star">
+                                4.2</h6>
+                        </div>
+                        <h6 class="fw-normal">Painting Service</h6>
+                            <a (click)="goToExpertDetail(expert.id)">Ver perfil</a>
+                        <div class="location">
+                            <i class="iconsax icon" data-icon="location"></i>
+                            <h6> {{ expert.address }}</h6>
+                        </div>
+                    </div>
+                </li>
+               
+            </ul>
+             <ng-template #empty>
+            <p class="muted mt-4">No hay expertos aprobados por ahora.</p>
+            </ng-template>
+        </div>
+    </section>
