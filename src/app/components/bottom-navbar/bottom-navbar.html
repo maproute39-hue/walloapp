@@ -1,6 +1,9 @@
 <!-- bottom navbar start -->
 <div class="navbar-menu"[hidden]="hideHeader 
+|| router.url === '/new'
+
 || router.url === '/login'
+|| router.url === '/'
 || router.url.includes('/profile/(panel:services)')
 || router.url.includes('/profile/(panel:biografy)')
 || router.url.includes('/profile/(panel:gallery')
@@ -21,21 +24,21 @@
                     <img class="unactive" src="assets/images/svg/home.svg" alt="home">
                     <img class="active" src="assets/images/svg/home-fill.svg" alt="home">
                 </div>
-                <h5 class="active">Inicio</h5>
+                <h5 class="active">home</h5>
             </a>
         </li>
   
         <li>
-            <a routerLink="/booking">
+            <a routerLink="/requests">
                 <div class="icon">
                     <img class="unactive" src="assets/images/svg/booking.svg" alt="booking">
                     <img class="active" src="assets/images/svg/booking-fill.svg" alt="booking">
                 </div>
-                <h5>Solicitudes</h5>
+                <h5>Requests</h5>
             </a>
         </li>
   
-<li>
+<!-- <li>
                 <a href="#filter" class="scanner-btn" data-bs-toggle="modal"  data-bs-toggle="offcanvas">
                     <i class="iconsax icon-btn" data-icon="add"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M6 12H18" stroke="#292D32" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -43,7 +46,7 @@
 </svg>
 </i>
                 </a>
-            </li>
+            </li> -->
 
 
         <!-- <li [class.active]="isActive('/scanner')">
@@ -69,7 +72,7 @@
                       </svg>
                       </i>     
               </div>
-                <h5>Notificaciones</h5>
+                <h5>Notifications</h5>
             </a>
         </li>
   
@@ -79,7 +82,7 @@
                     <img class="unactive" src="assets/images/svg/profile.svg" alt="profile">
                     <img class="active" src="assets/images/svg/profile-fill.svg" alt="profile">
                 </div>
-                <h5>Perfil</h5>
+                <h5>Profile</h5>
             </a>
         </li>
     </ul>

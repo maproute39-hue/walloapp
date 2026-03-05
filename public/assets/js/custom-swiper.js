@@ -136,3 +136,17 @@ var sliderSeven = new Swiper(".plan-slider", {
     },
   },
 });
+
+var testimonialsSwiper = new Swiper(".testimonials", {
+  slidesPerView: 1,
+  spaceBetween: 20,
+  loop: true,
+  autoplay: {
+    delay: 4000,
+    disableOnInteraction: false,
+  },
+  pagination: {
+    el: ".swiper-pagination",
+    clickable: true,
+  },
+});

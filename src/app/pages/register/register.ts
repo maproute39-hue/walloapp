@@ -25,7 +25,7 @@ function matchPasswordsValidator(a: string, b: string): ValidatorFn {
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './register.html',
   styleUrls: ['./register.scss'],
 })

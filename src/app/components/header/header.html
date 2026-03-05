@@ -1,9 +1,12 @@
 <!-- header start -->
 <header class="header" [hidden]="
 hideHeader || 
+router.url === '/new' ||
 router.url === '/login' || 
 router.url === '/register' || 
 router.url === '/scanner' || 
+router.url === '/' ||
+
 router.url.includes('/profile/(panel:services') ||
 router.url.includes('/profile/(panel:wallet') ||
 router.url.includes('/profile/(panel:suscription-plan') ||
@@ -90,7 +93,8 @@ router.url === '/profile'" >
         </div>
     </div>
   </header>
-  <header class="auth-header" [hidden]="router.url !== '/login' && router.url !== '/register'">
+  <header class="auth-header" [hidden]="router.url ==='/new' ||
+  router.url !== '/login' && router.url !== '/register'">
       <div class="custom-container">
           <div class="header-panel pb-3">
               <a [routerLink]="['/home']" >

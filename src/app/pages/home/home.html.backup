@@ -1,0 +1,253 @@
+ <!-- <header class="main-header">
+    
+        <div class="custom-container">
+            
+            <div class="header-panel d-flex justify-content-center">
+                 <img class="img-fluid logo" style="height: 35px !important;" src="assets/images/logo/logo.png" alt="logo" >
+            </div>
+        </div>
+    </header> -->
+     <header class="main-header">
+ <div class="custom-container">
+  <div class="head-content header-panel d-flex">
+            <a href="home.html#sidebar" class="sidebar-btn" data-bs-toggle="offcanvas">
+                <i class="iconsax" data-icon="text-align-left"></i>
+            </a>
+         
+                           <img class="img-fluid logo" style="height: 35px !important;" src="assets/images/logo/logo.png" alt="logo" >
+
+              
+            <div class="d-flex align-items-center gap-2">
+                <!-- <a href="search.html">
+                    <i class="iconsax icon-btn" data-icon="search-normal-2"></i>
+                </a>
+                <a href="notification.html">
+                    <i class="iconsax icon-btn notification-icon" data-icon="bell-2"></i>
+                </a> -->
+            </div>
+        </div>
+        </div>
+</header>
+<section class="section-lg-t-space section-b-space">
+    <div class="custom-container">
+        <div class="packages-details-wrapper">
+            <!-- 4.1 Página Inicial: Banner Explicativo -->
+            <img class="packages-banner w-100 img-fluid" src="../../assets/images/service/wallpaper-install.jpg" alt="Instalación Wallpaper">
+
+            <!-- Título Principal y Propuesta de Valor -->
+            <div class="d-flex align-items-center justify-content-between mt-3">
+                <h4 class="theme-color fw-medium">WALLO PWA</h4>
+                <a href="#como-funciona" class="status theme-color fw-medium">Cómo funciona <i
+                        class="iconsax arrow-icon" data-icon="arrow-right"> </i>
+                </a>
+            </div>
+
+            <!-- Headline Claro (Objetivo MVP) -->
+            <div class="d-flex align-items-center justify-content-between mt-3">
+                <h4 class="title-color fw-medium">Instalación de Wallpaper Profesional</h4>
+                <h6 class="title-color fw-medium d-flex align-items-center gap-1">
+                    <img class="img-fluid" src="../../assets/images/svg/star-fill.svg" alt="star"> Calidad Verificada
+                </h6>
+            </div>
+
+            <!-- 4.4 & 5.4 Flujo Visual (Adaptación de Listing Box) -->
+            <!-- En lugar de Fecha/Hora, mostramos los 3 pasos clave del MVP -->
+            <div class="package-booking-details">
+                <ul class="listing">
+                    <li>
+                        <div class="listing-box">
+                            <i class="iconsax icon" data-icon="document-text"> </i>
+                            <div>
+                                <h6 class="title-color listing-title ps-2">1. Solicitud</h6>
+                                <h5 class="content-color white-nowrap ps-2 mt-1">Cliente envía detalles</h5>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="listing-box">
+                            <i class="iconsax icon" data-icon="shield-tick"> </i>
+                            <div>
+                                <h6 class="title-color listing-title ps-2">2. Validación</h6>
+                                <h5 class="content-color ps-2 mt-1">Perfil completo requerido</h5>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+
+                <ul class="listing border-0">
+                    <li>
+                        <div class="listing-box">
+                            <i class="iconsax icon" data-icon="unlock"> </i>
+                            <div>
+                                <h6 class="title-color listing-title ps-2">3. Contacto</h6>
+                                <h5 class="content-color ps-2 mt-1">Desbloqueo tras pago (Lead)</h5>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 6) Modelo de Negocio (Adaptación de Description) -->
+            <div class="description mt-3">
+                <h6 class="inner-sub-title">Modelo Justo y Controlado</h6>
+                <p class="content-color fw-normal mt-1">
+                    No somos un marketplace abierto. Conectamos demanda real con oferta profesional. 
+                    Máximo 3 profesionales por solicitud. El profesional paga solo si quiere el contacto.
+                </p>
+            </div>
+
+            <!-- 7) Control de Calidad (Adaptación de Customer Details - Cliente) -->
+            <div class="customer-details mt-3">
+                <div class="customer-head">
+                    <h6 class="title-color fw-medium">Para Clientes</h6>
+                </div>
+
+                <div class="customer-profile">
+                    <!-- Icono representativo en lugar de foto genérica -->
+                    <img class="img-fluid profile-img" src="../../assets/images/profile/client-icon.png" alt="Cliente">
+
+                    <div class="profile-content">
+                        <h5 class="title-color">Solicitudes Reales</h5>
+                        <div class="d-flex align-items-center gap-2 mt-2">
+                            <span class="content-color fw-normal" style="font-size: 12px;">
+                                <i class="iconsax icon" data-icon="security-card"> </i> Sin Spam
+                            </span>
+                            <span class="content-color fw-normal" style="font-size: 12px;">
+                                <i class="iconsax icon" data-icon="status"> </i> Tracking Visible
+                            </span>
+                        </div>
+                        <!-- No hay chat interno en MVP, solo contacto directo tras match -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5) Flujo Profesional (Adaptación de Customer Details - Pro) -->
+            <div class="customer-details mt-3">
+                <div class="customer-head">
+                    <h6 class="title-color fw-medium">Para Profesionales</h6>
+                </div>
+
+                <div class="customer-profile">
+                    <img class="img-fluid profile-img" src="../../assets/images/profile/pro-icon.png" alt="Pro">
+
+                    <div class="profile-content">
+                        <div>
+                            <h5 class="title-color">Leads de Calidad</h5>
+                            <h6 class="d-flex align-items-center gap-2 mt-1 content-color">
+                                <img src="../../assets/images/svg/star-fill.svg" alt="star"> Perfil Completo Obligatorio
+                            </h6>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 mt-2">
+                            <span class="content-color fw-normal" style="font-size: 12px;">
+                                <i class="iconsax icon" data-icon="wallet"> </i> Pago por Contacto
+                            </span>
+                            <span class="content-color fw-normal" style="font-size: 12px;">
+                                <i class="iconsax icon" data-icon="user-tick"> </i> Máx 3 Competidores
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6) Modelo de Negocio (Adaptación de Receivable Amount) -->
+        <div class="receivable-amount-box">
+            <h5 class="fw-medium title-color mb-2">Costo por Lead</h5>
+            <div class="receivable-amount">
+                <h5 class="amount success-color fw-bold">$4.99 USD</h5>
+                <h6 class="content-color fw-normal">/contacto desbloqueado</h6>
+            </div>
+        </div>
+
+        <!-- Principios No Negociables (Adaptación de Bill Summary) -->
+        <div class="title mt-3">
+            <h2>Reglas del Sistema</h2>
+        </div>
+        <div class="bill-box">
+            <div class="bill-box-content p-3 pb-2">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="fw-medium content-color">Diseño Mobile-First</h5>
+                    <h5 class="fw-medium title-color"><i class="iconsax" data-icon="mobile"></i></h5>
+                </div>
+                <div class="d-flex align-items-center justify-content-between pt-2">
+                    <h5 class="fw-medium content-color">Sin Chat Interno (MVP)</h5>
+                    <h5 class="fw-medium title-color"><i class="iconsax" data-icon="slash"></i></h5>
+                </div>
+                <div class="d-flex align-items-center justify-content-between pt-2">
+                    <h5 class="fw-medium content-color">Sin Pagos del Trabajo</h5>
+                    <h5 class="fw-medium success-color"><i class="iconsax" data-icon="bank"></i></h5>
+                </div>
+                <div class="d-flex align-items-center justify-content-between pt-2">
+                    <h5 class="fw-medium content-color">Validación de Identidad</h5>
+                    <h5 class="fw-medium success-color"><i class="iconsax" data-icon="security-user"></i></h5>
+                </div>
+                <div class="total-amount pb-0">
+                    <h5 class="fw-medium title-color">Enfoque</h5>
+                    <h4 class="fw-semibold title-color">Calidad > Volumen</h4>
+                </div>
+            </div>
+            <img class="img-fluid bottom-design" src="../../assets/images/svg/dots-design.svg" alt="dots-design">
+        </div>
+
+        <!-- 10) Objetivo Final (Adaptación de Reviews -> Validación) -->
+        <div class="title mt-3">
+            <h2>Objetivo MVP</h2>
+        </div>
+
+        <ul class="review-list p-0">
+            <li class="review-box">
+                <div class="review-profile">
+                    <div class="profile-content">
+                        <div>
+                            <h5 class="fw-medium title-color">Flujo Claro</h5>
+                            <h6 class="content-color mt-1">Tipo Domino's/DoorDash</h6>
+                        </div>
+                    </div>
+                    <p class="review-content">"Estado visible en todo momento para el cliente."</p>
+               </div>
+                </li>
+                <li class="review-box">
+                    <div class="review-profile">
+                        <div class="profile-content">
+                            <div>
+                                <h5 class="fw-medium title-color">Uso Real</h5>
+                                <h6 class="content-color mt-1">Validación de Mercado</h6>
+                            </div>
+                        </div>
+                        <p class="review-content">"Clientes reales envían solicitudes verificadas."</p>
+                    </div>
+                </li>
+                <li class="review-box">
+                    <div class="review-profile">
+                        <div class="profile-content">
+                            <div>
+                                <h5 class="fw-medium title-color">Disposición de Pago</h5>
+                                <h6 class="content-color mt-1">Profesionales Invertidos</h6>
+                            </div>
+                        </div>
+                        <p class="review-content">"El profesional paga solo si quiere el contacto."</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- 4.1 & 5.1 CTAs Claros (Fixed Button) -->
+        <div class="grid-btn fixed-button">
+            <div class="custom-container">
+                <div class="d-flex align-items-center gap-3">
+                    <!-- 5.1 CTA Profesionales -->
+                    <a href="pro-register.html" class="btn theme-outline-btn w-50" style="background-color: transparent;
+      color: rgba(var(--theme-color), 1);
+      border-color: rgba(var(--theme-color), 1);
+      font-weight: 500;
+      font-size: 14px;
+      border-radius: 8px;">Soy Profesional</a>
+                    <!-- 4.1 CTA Clientes -->
+                    <a href="client-request.html" class="btn theme-btn w-50">Solicitar Instalación</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    

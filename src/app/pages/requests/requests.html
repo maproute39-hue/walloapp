@@ -1,0 +1,136 @@
+<!-- Header Section -->
+<div class="section-b-space box-background">
+  <div class="custom-container">
+    <div class="title">
+      <h2>Mis Solicitudes</h2>
+      <button class="btn btn-primary btn-sm" (click)="openNewRequest()">
+        <i class="bi bi-plus-lg me-1"></i>Nueva
+      </button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-box mb-4">
+      <div class="position-relative">
+        <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+        <input 
+          type="text" 
+          class="form-control ps-5 py-2" 
+          placeholder="Buscar por ID, dirección o profesional..." 
+          [(ngModel)]="searchTerm"
+          (input)="filterRequests()">
+      </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs mb-4">
+      <div class="d-flex gap-2 overflow-auto">
+        <button 
+          *ngFor="let filter of filters" 
+          class="btn filter-tab" 
+          [class.active]="currentFilter === filter.value"
+          (click)="setFilter(filter.value)">
+          {{ filter.label }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Sort Options -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <span class="text-muted small">{{ filteredRequests.length }} solicitud{{ filteredRequests.length !== 1 ? 'es' : '' }}</span>
+      <select class="form-select form-select-sm w-auto" [(ngModel)]="sortValue" (change)="filterRequests()">
+        <option value="newest">Más recientes</option>
+        <option value="oldest">Más antiguas</option>
+        <option value="price-high">Precio: Mayor a menor</option>
+        <option value="price-low">Precio: Menor a mayor</option>
+      </select>
+    </div>
+
+    <!-- Loading State -->
+    <div class="text-center py-5" *ngIf="loading">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p class="mt-2 text-muted">Cargando solicitudes...</p>
+    </div>
+
+    <!-- Requests List -->
+    <ul class="servicer-list" *ngIf="!loading">
+      <li class="servicer-box" *ngFor="let request of filteredRequests">
+        <div class="servicer-profile">
+          <img 
+            *ngIf="request.professional?.avatar" 
+            class="profile-img" 
+            [src]="request.professional?.avatar" 
+            [alt]="request.professional?.name">
+          <div *ngIf="!request.professional?.avatar" class="profile-img bg-light d-flex align-items-center justify-content-center">
+            <i class="bi bi-person text-muted fs-3"></i>
+          </div>
+          <span class="status-badge" [ngClass]="getStatusBadgeClass(request.status)">
+            <i class="bi {{ getStatusIcon(request.status) }}"></i>
+          </span>
+        </div>
+        <div class="servicer-details">
+          <div class="d-flex align-items-center justify-content-between">
+            <a [routerLink]="['/requests', request.id]">
+              <h4 class="fw-medium title-color">{{ request.serviceType }}</h4>
+            </a>
+            <h6 class="rating"> 
+              <span class="price-tag">{{ request.price | currency:'USD':'symbol':'1.2-2' }}</span>
+            </h6>
+          </div>
+          <h6 class="fw-normal title-color">{{ request.id }}</h6>
+
+          <div class="location">
+            <i class="iconsax icon" data-icon="location"></i>
+            <h6>{{ request.address }}</h6>
+          </div>
+
+          <div class="professional-info mt-2">
+            <span class="text-muted small">
+              <i class="bi bi-person me-1"></i>{{ request.professional?.name || 'Sin asignar' }}
+            </span>
+            <span *ngIf="request.professional?.rating" class="rating-small ms-2">
+              <i class="bi bi-star-fill text-warning"></i>{{ request.professional?.rating }}
+            </span>
+          </div>
+
+          <div class="request-actions mt-3 d-flex gap-2">
+            <a 
+              [routerLink]="['/requests', request.id]" 
+              class="btn btn-sm btn-theme">
+              Ver detalle
+            </a>
+            <button 
+              *ngIf="request.status === 'completed'" 
+              class="btn btn-sm btn-outline-secondary"
+              (click)="openRatingModal(request)">
+              <i class="bi bi-star me-1"></i>Calificar
+            </button>
+            <button 
+              *ngIf="request.status === 'pending'" 
+              class="btn btn-sm btn-outline-danger"
+              (click)="cancelRequest(request)">
+              <i class="bi bi-trash me-1"></i>
+            </button>
+          </div>
+
+          <div class="request-date mt-2">
+            <span class="text-muted small">{{ getStatusDateText(request) }}</span>
+          </div>
+        </div>
+      </li>
+    </ul>
+
+    <!-- Empty State -->
+    <div class="text-center py-5" *ngIf="!loading && filteredRequests.length === 0">
+      <div class="mb-3">
+        <i class="bi bi-clipboard-x fs-1 text-muted"></i>
+      </div>
+      <h5 class="text-muted">No se encontraron solicitudes</h5>
+      <p class="text-muted small">Intenta ajustar los filtros de búsqueda</p>
+      <button class="btn btn-theme mt-3" (click)="openNewRequest()">
+        <i class="bi bi-plus-lg me-1"></i>Crear nueva solicitud
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,32 +1,20 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { BannerCarousel } from '../../pages/home/sections/banner-carousel/banner-carousel.component';
-import { TopCategories } from '../../pages/home/sections/top-categories/top-categories';
-import { TopProviders } from '../../pages/home/sections/top-providers/top-providers';
-
 import { BannerItem } from '../../interfaces/banner.interface';
-import { Category } from '../../interfaces/category.interface';
 import { Provider } from '../../interfaces/provider.interface';
 import { SeoService } from '../../services/seo.service';
-import { FeaturedServices } from './sections/featured-services/featured-services';
-import { Packages } from './sections/packages/packages';
-import { FeatureFlagDirective } from '@app/core/feature-flag.directive';
+
 import { ConfigMobileService } from '@app/core/config-mobile.service';
-import { FeaturesExperts } from "./sections/features-experts/features-experts";
+import { RouterLink } from "@angular/router";
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule,
-    BannerCarousel,
-    TopCategories,
-    FeaturedServices,
-    Packages,
-    FeatureFlagDirective, 
-    FeaturesExperts],
+  imports: [CommonModule, RouterLink],
   templateUrl:   './home.html',
-  // styleUrls: ['./home.component.scss'] 
+  styleUrl: './home.scss'
+
 })    
 export class HomeComponent implements OnInit {
   constructor(public cfg: ConfigMobileService){

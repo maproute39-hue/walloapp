@@ -1,10 +1,154 @@
 
 
-<section class=" section-b-space">
+   <header class="auth-header" >
+      <div class="custom-container">
+          <div class="header-panel pb-3">
+              <a [hidden]="step===1">
+                  <i class="iconsax icon-btn" (click)="step=1" data-icon="chevron-left"> <</i>
+              </a>
+                <a  routerLink="/" [hidden]="step===2">
+                  <i class="icon iconsax icon-btn"  data-icon="chevron-left"> <</i>
+              </a>
+  
+              <img class="img-fluid logo" src="assets/images/logo/logo.png" alt="logo">
+              <img class="img-fluid logo-dark" src="assets/images/logo/logo-white.png" alt="logo">
+          </div>
+      </div>
+  </header>
+
+    <!-- auth section starts -->
+    <section class="section-lg-t-space section-b-space" [hidden]="step === 2">
+        <div class="custom-container">
+            <!-- <div class="auth-prograssbar">
+                <div class="progress" role="progressbar">
+                    <div class="progress-bar progress-bar-wrapper overflow-visible" style="width: 33%">Few
+                        more steps to earn more
+                    </div>
+                    <img class="img-fluid coin" src="../../assets/images/gif/coin.gif" alt="coin">
+                </div>
+            </div> -->
+
+          <form class="auth-form pt-0">
+    <div class="auth-head">
+        <!-- Cambiado el título para reflejar el contenido -->
+        <h4 class="fw-medium title-color text-center text-uppercase">Detalles del Proyecto</h4>
+    </div>
+
+    <!-- Ciudad y Código Postal -->
+    <div class="form-group">
+        <label class="form-label mb-2" for="cityZip">Ciudad y Código Postal</label>
+        <div class="d-flex gap-2">
+            <div class="form-input w-100">
+                <input type="text" class="form-control" id="cityInput" placeholder="Ciudad" required>
+                <i class="iconsax" data-icon="location"></i>
+            </div>
+            <div class="form-input w-100">
+                <input type="text" class="form-control" id="zipInput" placeholder="Código Postal" required>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tipo de Espacio -->
+    <div class="form-group">
+        <label class="form-label mb-2" for="spaceType">Tipo de espacio</label>
+        <div class="form-input">
+            <select class="form-select" id="spaceType">
+                <option selected disabled>Seleccionar tipo</option>
+                <option value="1">Oficina</option>
+                <option value="2">Residencial</option>
+                <option value="3">Comercial / Retail</option>
+                <option value="4">Restaurante</option>
+            </select>
+            <i class="iconsax" data-icon="building"></i>
+        </div>
+    </div>
+
+    <!-- Tamaño y Altura -->
+    <div class="form-group">
+        <label class="form-label mb-2" for="sizeHeight">Tamaño aprox. y Altura</label>
+        <div class="d-flex gap-2">
+            <div class="form-input w-100">
+                <input type="number" class="form-control" id="sizeInput" placeholder="m² (Tamaño)" required>
+                <i class="iconsax" data-icon="ruler"></i>
+            </div>
+            <div class="form-input w-100">
+                <input type="number" class="form-control" id="heightInput" placeholder="m (Altura)" required>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tipo de Wallpaper -->
+    <div class="form-group">
+        <label class="form-label mb-2" for="wallpaperType">Tipo de wallpaper</label>
+        <div class="form-input">
+            <select class="form-select" id="wallpaperType">
+                <option selected disabled>Seleccionar estilo</option>
+                <option value="1">Vinilo Adhesivo</option>
+                <option value="2">Papel Pintado (Paste)</option>
+                <option value="3">Mural Fotográfico</option>
+                <option value="4">Texturizado</option>
+            </select>
+            <i class="iconsax" data-icon="color-swatch"></i>
+        </div>
+    </div>
+
+    <!-- Fecha Deseada -->
+    <div class="form-group">
+        <label class="form-label mb-2" for="desiredDate">Fecha deseada</label>
+        <div class="form-input">
+            <input type="date" class="form-control" id="desiredDate" placeholder="DD/MM/AAAA" required>
+            <i class="iconsax" data-icon="calendar"></i>
+        </div>
+    </div>
+
+    <!-- Presupuesto -->
+    <div class="form-group">
+        <label class="form-label mb-2" for="budgetRange">Presupuesto (rango)</label>
+        <div class="form-input">
+            <input type="text" class="form-control" id="budgetRange" placeholder="Ej: $500 - $1000 USD">
+            <i class="iconsax" data-icon="dollar-circle"></i>
+        </div>
+    </div>
+
+    <!-- Nivel de Intención -->
+    <div class="form-group">
+        <label class="form-label mb-2" for="intentLevel">Nivel de intención</label>
+        <div class="form-input">
+            <select class="form-select" id="intentLevel">
+                <option selected disabled>Seleccione nivel</option>
+                <option value="1">Alta (Listo para comprar)</option>
+                <option value="2">Media (Cotizando opciones)</option>
+                <option value="3">Baja (Solo explorando)</option>
+            </select>
+            <i class="iconsax" data-icon="chart"></i>
+        </div>
+    </div>
+
+    <!-- Fotos (Opcional) -->
+    <div class="form-group">
+        <label class="form-label mb-2" for="formPhotos">Fotos (opcional)</label>
+        <div class="upload-image">
+            <input class="form-control upload-file" type="file" id="formPhotos" multiple>
+            <i class="iconsax upload-icon" data-icon="camera"></i>
+            <h5 class="content-color mb-0">Subir fotos del espacio</h5>
+        </div>
+    </div>
+</form>
+            <!-- <a href="company-location.html" class="btn theme-btn w-100 auth-btn">Next</a> -->
+        </div>
+             <div class="fixed-btn">
+        <div class="custom-container">
+            <a (click)="step=2" class="btn theme-btn w-100">Next</a>
+        </div>
+    </div>
+    </section>
+    <!-- auth section end -->
+
+<section class="section-lg-t-space section-b-space" [hidden]="step === 1">
     <div class="custom-container">
         <div class="auth-title text-center pt-0 mt-5">
-            <h2 class="title-color">Sign Up</h2>
-            <h5 class="mt-1 content-color">in under 1 minute</h5>
+            <h2 class="title-color">Para recibir respuestas y ver instaladores disponibles</h2>
+            <h5 class="mt-1 content-color">confirma tu contacto</h5>
         </div>
         <form class="auth-form">
             <div class="form-group mt-0">
@@ -30,7 +174,7 @@
                     </div>
                 </div>
             </div>
-            <a href="home.html" class="btn theme-btn w-100 auth-btn">Login</a>
+            <a href="home.html" class="btn theme-btn w-100 auth-btn">Continue</a>
         </form>
         <div class="division" style="margin-top: 0px !important;">
             <span>OR Continue With</span>
@@ -48,9 +192,10 @@
             </li>
         </ul>
     </div>
+ 
 </section>
 
-<section class=" section-b-space">
+<section class=" section-b-space" [hidden]="step === 1">
     <div class="custom-container">
         <div class="title">
             <h2>Instaladores disponibles cerca de ti</h2>
@@ -212,9 +357,5 @@
             </li> -->
         </ul>
     </div>
-    <!-- <div class="fixed-btn">
-        <div class="custom-container">
-            <a href="service-bill-details.html" class="btn theme-btn w-100">Next</a>
-        </div>
-    </div> -->
+  
 </section>

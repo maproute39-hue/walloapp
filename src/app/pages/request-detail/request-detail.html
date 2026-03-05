@@ -1,0 +1,369 @@
+<main class="container-fluid mt-3">
+
+  <!-- Service Request Tracker -->
+  <div class="service-tracker mb-3 pt-1">
+    <div class="step completed">
+      <div class="step-icon"><i class="bi bi-clipboard-check"></i></div>
+      <div class="step-label">Solicitado</div>
+    </div>
+    <div class="step-line"></div>
+    <div class="step completed">
+      <div class="step-icon"><i class="bi bi-person-check"></i></div>
+      <div class="step-label">Confirmado</div>
+    </div>
+    <div class="step-line"></div>
+    <div class="step active">
+      <div class="step-icon"><i class="bi bi-tools"></i></div>
+      <div class="step-label">En Progreso</div>
+    </div>
+    <div class="step-line"></div>
+    <div class="step">
+      <div class="step-icon"><i class="bi bi-check-circle"></i></div>
+      <div class="step-label">Completado</div>
+    </div>
+  </div>
+
+  <!-- Service Details Card -->
+  <div class="service-details-card mb-3">
+    <h6 class="card-title-section">Detalles del Servicio</h6>
+    <div class="info-row">
+      <span class="info-label">Solicitado el</span>
+      <span class="info-value">Oct 21, 2023</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Fecha Programada</span>
+      <span class="info-value">Oct 25, 2023 - 10:00 AM</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Dirección</span>
+      <span class="info-value">123 Main Street, New York</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Tipo de Servicio</span>
+      <span class="info-value">Instalación de Wallpaper</span>
+    </div>
+  </div>
+
+  <!-- Professional Details Card -->
+  <div class="service-details-card mb-3">
+    <h6 class="card-title-section">Profesional Asignado</h6>
+    <div class="professional-info d-flex align-items-center p-2">
+      <img src="img/professional.jpg" alt="Professional" class="professional-avatar rounded-circle me-3">
+      <div class="professional-details flex-grow-1">
+        <p class="professional-name mb-1 fw-bold">Carlos Rodríguez</p>
+        <div class="professional-rating text-warning">
+          <i class="bi bi-star-fill"></i>
+          <i class="bi bi-star-fill"></i>
+          <i class="bi bi-star-fill"></i>
+          <i class="bi bi-star-fill"></i>
+          <i class="bi bi-star-fill"></i>
+          <span class="text-muted ms-2">(4.9 - 127 trabajos)</span>
+        </div>
+      </div>
+      <div class="professional-contact">
+        <a href="tel:+1234567890" class="btn btn-sm btn-outline-primary me-2"><i class="bi bi-telephone"></i></a>
+        <a href="sms:+1234567890" class="btn btn-sm btn-outline-primary"><i class="bi bi-chat-dots"></i></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Service Items Card -->
+  <div class="service-details-card mb-3">
+    <h6 class="card-title-section">Detalles del Trabajo (2)</h6>
+    <ul class="item-list">
+      <!-- Item 1 -->
+      <li class="item-entry">
+        <img src="img/wallpaper1.jpg" alt="Wallpaper">
+        <div class="item-info">
+          <p class="item-name">Instalación - Sala Principal</p>
+          <p class="item-price">15 m² - $299.00</p>
+        </div>
+      </li>
+      <!-- Item 2 -->
+      <li class="item-entry">
+        <img src="img/wallpaper2.jpg" alt="Wallpaper">
+        <div class="item-info">
+          <p class="item-name">Instalación - Recámara</p>
+          <p class="item-price">12 m² - $238.00</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Payment Summary Card -->
+  <div class="service-details-card mb-3">
+    <h6 class="card-title-section">Resumen de Pago</h6>
+    <div class="info-row">
+      <span class="info-label">Subtotal</span>
+      <span class="info-value">$537.00</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Tarifa de Servicio</span>
+      <span class="info-value">$50.00</span>
+    </div>
+    <div class="info-row text-success">
+      <span class="info-label">Descuento Primera vez</span>
+      <span class="info-value">-$50.00</span>
+    </div>
+    <hr>
+    <div class="info-row total-row">
+      <span class="info-label">Total (Visa •••• 1234)</span>
+      <span class="info-value">$537.00</span>
+    </div>
+  </div>
+
+  <!-- Additional Info Card -->
+  <div class="service-details-card mb-3">
+    <h6 class="card-title-section">Información Adicional</h6>
+    <div class="info-row">
+      <span class="info-label">Materiales Incluidos</span>
+      <span class="info-value">Pegamento, imprimación</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Garantía</span>
+      <span class="info-value">6 meses en instalación</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Notas del Cliente</span>
+      <span class="info-value">Preferir contacto antes de llegar</span>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="d-grid gap-2 my-4">
+    <a href="support.html" class="btn btn-outline-secondary">
+      <i class="bi bi-headset me-2"></i>Obtener Ayuda
+    </a>
+    <a href="reschedule.html" class="btn btn-outline-primary">
+      <i class="bi bi-calendar-event me-2"></i>Reprogramar Cita
+    </a>
+    <a href="cancel.html" class="btn btn-outline-danger">
+      <i class="bi bi-x-circle me-2"></i>Cancelar Servicio
+    </a>
+  </div>
+
+</main>
+
+<style>
+  /* Service Tracker Styles */
+  .service-tracker {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 10px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .step-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    background: #e9ecef;
+    color: #6c757d;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+  }
+
+  .step.completed .step-icon {
+    background: #6f42c1;
+    color: #fff;
+  }
+
+  .step.active .step-icon {
+    background: #8b5cf6;
+    color: #fff;
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2); }
+    50% { box-shadow: 0 0 0 8px rgba(139, 92, 246, 0.1); }
+  }
+
+  .step-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6c757d;
+    text-align: center;
+  }
+
+  .step.completed .step-label,
+  .step.active .step-label {
+    color: #6f42c1;
+  }
+
+  .step-line {
+    flex: 1;
+    height: 3px;
+    background: #e9ecef;
+    margin: 0 5px;
+    position: relative;
+    top: -15px;
+  }
+
+  .step.completed + .step-line {
+    background: #6f42c1;
+  }
+
+  /* Card Styles */
+  .service-details-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  .card-title-section {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #f0f0f0;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 12px 0;
+    border-bottom: 1px solid #f7f7f7;
+  }
+
+  .info-row:last-child {
+    border-bottom: none;
+  }
+
+  .info-label {
+    color: #718096;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .info-value {
+    color: #2d3748;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: right;
+    max-width: 60%;
+  }
+
+  /* Professional Info */
+  .professional-avatar {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border: 3px solid #6f42c1;
+  }
+
+  .professional-name {
+    font-size: 16px;
+    color: #2d3748;
+  }
+
+  .professional-rating {
+    font-size: 14px;
+  }
+
+  /* Item List */
+  .item-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .item-entry {
+    display: flex;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid #f7f7f7;
+  }
+
+  .item-entry:last-child {
+    border-bottom: none;
+  }
+
+  .item-entry img {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-right: 16px;
+  }
+
+  .item-info {
+    flex: 1;
+  }
+
+  .item-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0 0 4px 0;
+  }
+
+  .item-price {
+    font-size: 14px;
+    color: #718096;
+    margin: 0;
+  }
+
+  /* Total Row */
+  .total-row {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2d3748;
+    padding-top: 16px;
+    border-top: 2px solid #e2e8f0;
+  }
+
+  .total-row .info-value {
+    color: #6f42c1;
+    font-size: 20px;
+  }
+
+  /* Responsive */
+  @media (max-width: 576px) {
+    .step-label {
+      font-size: 10px;
+    }
+    
+    .step-icon {
+      width: 40px;
+      height: 40px;
+      font-size: 18px;
+    }
+    
+    .step-line {
+      top: -12px;
+    }
+    
+    .professional-info {
+      flex-direction: column;
+      text-align: center;
+    }
+    
+    .professional-avatar {
+      margin: 0 auto 12px;
+    }
+    
+    .professional-contact {
+      margin-top: 12px;
+    }
+  }
+</style>
