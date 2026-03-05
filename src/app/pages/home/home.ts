@@ -35,7 +35,7 @@ export class HomeComponent implements OnInit {
 
   ngOnInit() {
     this.seo.updateTags({
-      title: 'Don Reparador | Reparaciones y servicios a domicilio',
+      title: 'Wallo | Reparaciones y servicios a domicilio',
       description: 'Encuentra profesionales verificados de plomería, electricidad, pintura y más.',
       canonicalPath: '/'
     });

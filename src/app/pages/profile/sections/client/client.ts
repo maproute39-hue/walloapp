@@ -19,7 +19,7 @@ export class Client {
   async logout() {
     const res = await Swal.fire({
       title: '¿Cerrar sesión?',
-      text: 'Vas a salir de Don Reparador.',
+      text: 'Vas a salir de Wallo.',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Sí, salir',
