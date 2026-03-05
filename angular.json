@@ -4,7 +4,7 @@
   "newProjectRoot": "projects",
 
   "projects": {
-    "don-reparador": {
+    "wallo": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -45,7 +45,7 @@
                 {
                   "type": "anyComponentStyle",
                   "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumError": "10kB"
                 }
               ],
               "outputHashing": "all"
@@ -62,10 +62,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "don-reparador:build:production"
+              "buildTarget": "wallo:build:production"
             },
             "development": {
-              "buildTarget": "don-reparador:build:development"
+              "buildTarget": "wallo:build:development"
             }
           },
           "defaultConfiguration": "development"

@@ -47,7 +47,7 @@ export class EmailService {
     phone?: string;
   }) {
     const body = {
-      toEmail: 'donreparador.com@gmail.com',
+      toEmail: 'Wallo.com@gmail.com',
       toName: 'Equipo',
       templateId: this.TEMPLATE_ADMIN,
       params

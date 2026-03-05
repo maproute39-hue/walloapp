@@ -79,7 +79,7 @@
         <h6 class="mb-2 ti" style="font-size: 16px; font-weight: 600;">Servicios aplicados</h6>
         <div class="chips-wrap mb-3">
           <ng-container *ngFor="let rel of selected">
-            <ng-container *ngIf="rel.selectedByUser?.length">
+            <ng-container *ngIf="rel.selectedByUser">
               <div *ngFor="let subId of rel.selectedByUser" class="chip">
                 <span class="chip-label">{{ getSubLabelById(rel.categoryId, subId) }}</span>
                 <button type="button" class="chip-remove" (click)="removeSub(rel.categoryId, subId)" aria-label="Eliminar">×</button>
