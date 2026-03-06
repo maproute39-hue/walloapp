@@ -1,0 +1,13 @@
+// pb_hooks/otp_sms_logger.pb.js
+// Solo para loguear el OTP (en producción integrarías SMS real)
+
+onRecordAuthRequest((e) => {
+    // Este hook se dispara durante autenticación
+    // Útil para logging y auditoría
+    const record = e.record;
+    if (record) {
+        console.log("🔐 Autenticación para:", record.get("email"));
+    }
+});
+
+console.log("🚀 Hook otp_sms_logger.pb.js cargado");

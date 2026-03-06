@@ -1,7 +1,7 @@
 // app.routes.ts
 import { Routes } from '@angular/router';
 import { HomeComponent } from '@app/pages/home/home';
-import { newRequest } from '@app/pages/new/new';
+import { NewRequestComponent } from '@app/pages/new/new';
 
 import { Landing } from '@app/pages/landing/landing';
 export const routes: Routes = [
@@ -15,7 +15,7 @@ export const routes: Routes = [
   { path: 'requests', loadComponent: () => import('./pages/requests/requests').then(c => c.Requests) },
   { path: 'request-detail/:id', loadComponent: () => import('./pages/request-detail/request-detail').then(c => c.RequestDetail) },
   { path: 'register', loadComponent: () => import('./pages/register/register').then(c => c.Register) },
-  { path: 'new', loadComponent: () => import('./pages/new/new').then(c => c.newRequest) },
+  { path: 'new', loadComponent: () => import('./pages/new/new').then(c => c.NewRequestComponent) },
   { path: 'login', loadComponent: () => import('./pages/login/login').then(c => c.Login) },
 
   {

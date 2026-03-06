@@ -1,0 +1,74 @@
+// pb_hooks/otp_simple.pb.js
+
+routerAdd("POST", "/api/otp-generate", (c) => {
+    try {
+        const body = c.requestInfo().body;
+        const email = body.email;
+        const phone = body.phone;
+        
+        if (!email) {
+            return c.json(400, { error: "Email requerido" });
+        }
+        
+        // Generar OTP de 6 dígitos
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 min
+        
+        // Log para que lo veas en terminal
+        console.log("======================================");
+        console.log("🔑 OTP GENERADO (DESARROLLO):", otp);
+        console.log("📧 Email:", email);
+        console.log("📱 Teléfono:", phone);
+        console.log("⏰ Expira:", expiresAt.toISOString());
+        console.log("======================================");
+        
+        // Guardar en colección custom (opcional)
+        // O usar para validar manualmente después
+        
+        return c.json(200, {
+            success: true,
+            otp: otp,  // ← Lo ves en respuesta Y en logs
+            email: email,
+            message: "OTP generado - revisa terminal o esta respuesta"
+        });
+        
+    } catch (error) {
+        console.error("❌ Error:", error);
+        return c.json(500, { error: error.message });
+    }
+});
+
+// Endpoint para verificar OTP manualmente
+routerAdd("POST", "/api/otp-verify", (c) => {
+    try {
+        const body = c.requestInfo().body;
+        const email = body.email;
+        const otp = body.otp;
+        
+        // Validación simple (en producción usarías DB real)
+        // Por ahora, aceptamos cualquier OTP de 6 dígitos para testing
+        if (!otp || otp.length !== 6) {
+            return c.json(400, { error: "OTP inválido" });
+        }
+        
+        // Buscar usuario
+        const user = $app.findRecordByFilter("users", `email = "${email}"`);
+        if (!user) {
+            return c.json(404, { error: "Usuario no encontrado" });
+        }
+        
+        // Autenticar manualmente (simulado)
+        // En producción, integrarías con el sistema real de PocketBase
+        
+        return c.json(200, {
+            success: true,
+            message: "OTP verificado (simulado)",
+            user_id: user.id
+        });
+        
+    } catch (error) {
+        return c.json(500, { error: error.message });
+    }
+});
+
+console.log("🚀 Hook otp_simple.pb.js cargado - OTP visible en logs y respuesta");

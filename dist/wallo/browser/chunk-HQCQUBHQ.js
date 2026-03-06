@@ -1,1 +1,0 @@
-import{Mb as n,Ya as i,tb as a,ub as s}from"./chunk-XZPLZU43.js";var c=class t{static \u0275fac=function(e){return new(e||t)};static \u0275cmp=i({type:t,selectors:[["app-service-detail"]],decls:2,vars:0,template:function(e,r){e&1&&(a(0,"p"),n(1,"service-detail works!"),s())},encapsulation:2})};export{c as ServiceDetail};

@@ -1,0 +1,151 @@
+// pb_hooks/otp_create_user.pb.js
+// Hook para crear usuarios automáticamente y capturar OTP para envío por SMS
+
+// ============================================================================
+// 1. CREAR USUARIO ANTES DE SOLICITAR OTP (si no existe)
+// ============================================================================
+
+onModelBeforeRequestOTP((e) => {
+    const email = e.model?.email || e.requestInfo?.body?.email;
+    
+    if (!email) {
+        console.log("⚠️ No se encontró email en la solicitud OTP");
+        return;
+    }
+
+    console.log("🔍 Verificando existencia de usuario:", email);
+
+    try {
+        // Verificar si el usuario ya existe
+        const existingUser = $app.findRecordByFilter("users", `email = "${email}"`);
+        
+        if (existingUser) {
+            console.log("✅ Usuario ya existe:", existingUser.getId());
+            return; // No hacer nada, el usuario ya existe
+        }
+
+        // Usuario no existe - crearlo automáticamente
+        console.log("📝 Creando usuario automático para:", email);
+        
+        // Extraer teléfono del email sintético (ej: 581451111478@wallo.usuario)
+        let phone = "";
+        if (email.includes('@wallo.usuario') || email.includes('@wallo.app')) {
+            phone = email.split('@')[0];
+        }
+
+        const collection = $app.findCollectionByNameOrId("users");
+        const record = new Record(collection);
+        
+        record.setEmail(email);
+        record.set("phone", phone);
+        record.set("name", `Usuario ${phone.slice(-4) || 'Nuevo'}`);
+        record.set("role", "client");
+        record.set("verified", false);
+        record.setPassword($security.randomString(30));
+        
+        $app.save(record);
+        
+        console.log("✅ Usuario creado exitosamente con ID:", record.getId());
+        
+    } catch (error) {
+        console.error("❌ Error al crear usuario:", error.message);
+        // No lanzar error - permitir que PocketBase continúe
+    }
+});
+
+// ============================================================================
+// 2. CAPTURAR OTP DESPUÉS DE GENERARLO (para enviar por SMS)
+// ============================================================================
+
+onModelAfterRequestOTP((e) => {
+    const email = e.model?.email;
+    const otp = e.otp; // PocketBase expone el OTP aquí después de generarlo
+    
+    if (!otp || !email) {
+        console.log("⚠️ No se pudo capturar OTP o email");
+        return;
+    }
+
+    console.log("======================================");
+    console.log("🔑 CÓDIGO OTP GENERADO:", otp);
+    console.log("📧 Para email:", email);
+    console.log("📱 Para teléfono:", e.model?.get("phone") || "N/A");
+    console.log("⏰ Expira en: 5 minutos (configuración por defecto)");
+    console.log("======================================");
+
+    // Extraer teléfono para enviar SMS
+    const phone = e.model?.get("phone") || email.split('@')[0];
+
+    // ========================================================================
+    // AQUÍ DEBES INTEGRAR TU PROVEEDOR DE SMS REAL
+    // ========================================================================
+    
+    try {
+        // OPCIÓN 1: Mock para desarrollo (ACTUAL)
+        console.log(`📱 [SMS MOCK] Enviando código ${otp} al teléfono ${phone}`);
+        
+        // OPCIÓN 2: Twilio (descomentar y configurar)
+        // await sendSMSTwilio(phone, otp);
+        
+        // OPCIÓN 3: AWS SNS (descomentar y configurar)
+        // await sendSMSAWS(phone, otp);
+        
+        // OPCIÓN 4: MessageBird, Vonage, etc.
+        // await sendSMSProvider(phone, otp);
+        
+        console.log("✅ SMS enviado (o simulado) correctamente");
+        
+    } catch (error) {
+        console.error("❌ Error al enviar SMS:", error.message);
+        // No lanzar error - el OTP ya fue generado y el usuario puede verificar
+    }
+});
+
+// ============================================================================
+// FUNCIÓN DE EJEMPLO PARA TWILIO (descomentar y configurar)
+// ============================================================================
+
+/*
+async function sendSMSTwilio(phone, code) {
+    const accountSid = $app.settings().meta.appName; // O usar variables de entorno
+    const authToken = "TU_TWILIO_AUTH_TOKEN";
+    const twilioPhone = "TU_TWILIO_PHONE_NUMBER";
+    
+    // Importar twilio (debes instalarlo: npm install twilio)
+    const twilio = require('twilio');
+    const client = twilio(accountSid, authToken);
+    
+    const message = await client.messages.create({
+        body: `Tu código de verificación WALLO es: ${code}. Válido por 5 minutos.`,
+        from: twilioPhone,
+        to: phone
+    });
+    
+    console.log("📱 SMS Twilio enviado:", message.sid);
+}
+*/
+
+// ============================================================================
+// FUNCIÓN DE EJEMPLO PARA AWS SNS (descomentar y configurar)
+// ============================================================================
+
+/*
+async function sendSMSAWS(phone, code) {
+    const SNS = require('aws-sdk/clients/sns');
+    const sns = new SNS({
+        region: 'us-east-1',
+        accessKeyId: process.env.AWS_ACCESS_KEY,
+        secretAccessKey: process.env.AWS_SECRET_KEY
+    });
+    
+    const params = {
+        Message: `Tu código WALLO es: ${code}. Válido por 5 minutos.`,
+        PhoneNumber: phone
+    };
+    
+    const result = await sns.publish(params).promise();
+    console.log("📱 SMS AWS enviado:", result.MessageId);
+}
+*/
+
+console.log("🚀 Hook otp_create_user.pb.js cargado correctamente");

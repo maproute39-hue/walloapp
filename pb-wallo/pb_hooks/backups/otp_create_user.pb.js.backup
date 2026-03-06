@@ -1,0 +1,80 @@
+// otp_create_user.pb.js - Versión de depuración
+
+onRecordRequestOTPRequest((e) => {
+    // Verificar si el usuario NO existe
+    if (!e.record) {
+        try {
+            const body = e.requestInfo().body;
+            const email = body["email"];
+            const phone = body["phone"] || "";
+            const name = body["name"] || "Usuario automático";
+            
+            console.log("📝 Creando usuario automático para:", email);
+            
+            const record = new Record(e.collection);
+            record.setEmail(email);
+            record.set("phone", phone);
+            record.set("name", name);
+            record.set("role", "client");
+            record.set("verified", false);
+            record.setPassword($security.randomString(30));
+            
+            e.app.save(record);
+            e.record = record;
+            
+            console.log("✅ Usuario creado exitosamente con ID:", record.getId());
+            
+        } catch (error) {
+            console.error("❌ Error al crear usuario:", error.message);
+        }
+    }
+    
+    // 🔥 DEPURACIÓN: Ver qué contiene e
+    console.log("=========================================");
+    console.log("🔍 DEPURACIÓN: Contenido de 'e'");
+    console.log("=========================================");
+    
+    // Mostrar todas las propiedades de e
+    for (let prop in e) {
+        try {
+            console.log(`- e.${prop}:`, typeof e[prop]);
+        } catch (err) {
+            console.log(`- e.${prop}: [Error al acceder]`);
+        }
+    }
+    
+    // Intentar acceder a posibles ubicaciones del código
+    if (e.otp) {
+        console.log("✅ e.otp existe");
+        for (let prop in e.otp) {
+            console.log(`  - e.otp.${prop}:`, e.otp[prop]);
+        }
+    } else {
+        console.log("❌ e.otp NO existe");
+    }
+    
+    // Buscar en otras propiedades comunes
+    if (e.data) {
+        console.log("✅ e.data existe:", e.data);
+    }
+    
+    if (e.request) {
+        console.log("✅ e.request existe");
+    }
+    
+    if (e.password) {
+        console.log("✅ e.password existe:", e.password);
+    }
+    
+    // Este es el candidato más probable según algunos forks de PocketBase
+    if (e.otpData) {
+        console.log("✅ e.otpData existe:", e.otpData);
+    }
+    
+    console.log("=========================================");
+    
+    // Continuar con el flujo normal de OTP
+    return e.next();
+}, "users");
+
+console.log("🚀 Hook de creación automática de usuarios cargado correctamente");

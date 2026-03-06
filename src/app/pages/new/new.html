@@ -1,361 +1,215 @@
+<header class="auth-header">
+  <div class="custom-container">
+    <div class="header-panel pb-3">
+      <a *ngIf="step > 1">
+        <i class="iconsax icon-btn" (click)="prevStep()" data-icon="chevron-left"> <</i>
+      </a>
+      <a routerLink="/" *ngIf="step === 1">
+        <i class="icon iconsax icon-btn" data-icon="chevron-left"> <</i>
+      </a>
+      <img class="img-fluid logo" src="assets/images/logo/logo.png" alt="logo">
+      <img class="img-fluid logo-dark" src="assets/images/logo/logo-white.png" alt="logo">
+    </div>
+  </div>
+</header>
 
+<!-- Mensajes de estado -->
+<div class="custom-container" *ngIf="errorMessage || successMessage">
+  <div class="alert" [class.alert-danger]="errorMessage" [class.alert-success]="successMessage" role="alert">
+    {{ errorMessage || successMessage }}
+  </div>
+</div>
 
-   <header class="auth-header" >
-      <div class="custom-container">
-          <div class="header-panel pb-3">
-              <a [hidden]="step===1">
-                  <i class="iconsax icon-btn" (click)="step=1" data-icon="chevron-left"> <</i>
-              </a>
-                <a  routerLink="/" [hidden]="step===2">
-                  <i class="icon iconsax icon-btn"  data-icon="chevron-left"> <</i>
-              </a>
-  
-              <img class="img-fluid logo" src="assets/images/logo/logo.png" alt="logo">
-              <img class="img-fluid logo-dark" src="assets/images/logo/logo-white.png" alt="logo">
-          </div>
-      </div>
-  </header>
-
-    <!-- auth section starts -->
-    <section class="section-lg-t-space section-b-space" [hidden]="step === 2">
-        <div class="custom-container">
-            <!-- <div class="auth-prograssbar">
-                <div class="progress" role="progressbar">
-                    <div class="progress-bar progress-bar-wrapper overflow-visible" style="width: 33%">Few
-                        more steps to earn more
-                    </div>
-                    <img class="img-fluid coin" src="../../assets/images/gif/coin.gif" alt="coin">
-                </div>
-            </div> -->
-
-          <form class="auth-form pt-0">
-    <div class="auth-head">
-        <!-- Cambiado el título para reflejar el contenido -->
+<!-- STEP 1: Formulario de Proyecto -->
+<section class="section-lg-t-space section-b-space" *ngIf="isStep1">
+  <div class="custom-container">
+    <form class="auth-form pt-0" [formGroup]="projectForm" (ngSubmit)="nextStep()">
+      <div class="auth-head">
         <h4 class="fw-medium title-color text-center text-uppercase">Detalles del Proyecto</h4>
-    </div>
+      </div>
 
-    <!-- Ciudad y Código Postal -->
-    <div class="form-group">
-        <label class="form-label mb-2" for="cityZip">Ciudad y Código Postal</label>
+      <!-- Ciudad y Código Postal -->
+      <div class="form-group">
+        <label class="form-label mb-2">Ciudad y Código Postal</label>
         <div class="d-flex gap-2">
-            <div class="form-input w-100">
-                <input type="text" class="form-control" id="cityInput" placeholder="Ciudad" required>
-                <i class="iconsax" data-icon="location"></i>
-            </div>
-            <div class="form-input w-100">
-                <input type="text" class="form-control" id="zipInput" placeholder="Código Postal" required>
-            </div>
+          <div class="form-input w-100">
+            <input type="text" class="form-control" placeholder="Ciudad" 
+                   formControlName="city">
+            <i class="iconsax" data-icon="location"></i>
+          </div>
+          <div class="form-input w-100">
+            <input type="text" class="form-control" placeholder="Código Postal" 
+                   formControlName="zip_code">
+          </div>
         </div>
-    </div>
+      </div>
 
-    <!-- Tipo de Espacio -->
-    <div class="form-group">
-        <label class="form-label mb-2" for="spaceType">Tipo de espacio</label>
+      <!-- Tipo de Espacio -->
+      <div class="form-group">
+        <label class="form-label mb-2">Tipo de Espacio</label>
         <div class="form-input">
-            <select class="form-select" id="spaceType">
-                <option selected disabled>Seleccionar tipo</option>
-                <option value="1">Oficina</option>
-                <option value="2">Residencial</option>
-                <option value="3">Comercial / Retail</option>
-                <option value="4">Restaurante</option>
-            </select>
-            <i class="iconsax" data-icon="building"></i>
+          <input type="text" class="form-control" placeholder="Tipo de espacio" formControlName="space_type">
         </div>
-    </div>
+      </div>
 
-    <!-- Tamaño y Altura -->
-    <div class="form-group">
-        <label class="form-label mb-2" for="sizeHeight">Tamaño aprox. y Altura</label>
-        <div class="d-flex gap-2">
-            <div class="form-input w-100">
-                <input type="number" class="form-control" id="sizeInput" placeholder="m² (Tamaño)" required>
-                <i class="iconsax" data-icon="ruler"></i>
-            </div>
-            <div class="form-input w-100">
-                <input type="number" class="form-control" id="heightInput" placeholder="m (Altura)" required>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tipo de Wallpaper -->
-    <div class="form-group">
-        <label class="form-label mb-2" for="wallpaperType">Tipo de wallpaper</label>
+      <!-- Tamaño en m² -->
+      <div class="form-group">
+        <label class="form-label mb-2">Tamaño en m²</label>
         <div class="form-input">
-            <select class="form-select" id="wallpaperType">
-                <option selected disabled>Seleccionar estilo</option>
-                <option value="1">Vinilo Adhesivo</option>
-                <option value="2">Papel Pintado (Paste)</option>
-                <option value="3">Mural Fotográfico</option>
-                <option value="4">Texturizado</option>
-            </select>
-            <i class="iconsax" data-icon="color-swatch"></i>
+          <input type="number" class="form-control" placeholder="Tamaño" formControlName="size_sqm">
         </div>
-    </div>
+      </div>
 
-    <!-- Fecha Deseada -->
-    <div class="form-group">
-        <label class="form-label mb-2" for="desiredDate">Fecha deseada</label>
+      <!-- Altura en m -->
+      <div class="form-group">
+        <label class="form-label mb-2">Altura en m (opcional)</label>
         <div class="form-input">
-            <input type="date" class="form-control" id="desiredDate" placeholder="DD/MM/AAAA" required>
-            <i class="iconsax" data-icon="calendar"></i>
+          <input type="number" class="form-control" placeholder="Altura" formControlName="height_m">
         </div>
-    </div>
+      </div>
 
-    <!-- Presupuesto -->
-    <div class="form-group">
-        <label class="form-label mb-2" for="budgetRange">Presupuesto (rango)</label>
+      <!-- Tipo de Papel Tapiz -->
+      <div class="form-group">
+        <label class="form-label mb-2">Tipo de Papel Tapiz</label>
         <div class="form-input">
-            <input type="text" class="form-control" id="budgetRange" placeholder="Ej: $500 - $1000 USD">
-            <i class="iconsax" data-icon="dollar-circle"></i>
+          <input type="text" class="form-control" placeholder="Tipo" formControlName="wallpaper_type">
         </div>
-    </div>
+      </div>
 
-    <!-- Nivel de Intención -->
-    <div class="form-group">
-        <label class="form-label mb-2" for="intentLevel">Nivel de intención</label>
+      <!-- Fecha Deseada -->
+      <div class="form-group">
+        <label class="form-label mb-2">Fecha Deseada (opcional)</label>
         <div class="form-input">
-            <select class="form-select" id="intentLevel">
-                <option selected disabled>Seleccione nivel</option>
-                <option value="1">Alta (Listo para comprar)</option>
-                <option value="2">Media (Cotizando opciones)</option>
-                <option value="3">Baja (Solo explorando)</option>
-            </select>
-            <i class="iconsax" data-icon="chart"></i>
+          <input type="date" class="form-control" formControlName="desired_date">
         </div>
-    </div>
+      </div>
 
-    <!-- Fotos (Opcional) -->
-    <div class="form-group">
-        <label class="form-label mb-2" for="formPhotos">Fotos (opcional)</label>
+      <!-- Rango de Presupuesto -->
+      <div class="form-group">
+        <label class="form-label mb-2">Rango de Presupuesto (opcional)</label>
+        <div class="form-input">
+          <input type="text" class="form-control" placeholder="Rango" formControlName="budget_range">
+        </div>
+      </div>
+
+      <!-- Nivel de Intención -->
+      <div class="form-group">
+        <label class="form-label mb-2">Nivel de Intención</label>
+        <div class="form-input">
+          <select class="form-control" formControlName="intention_level">
+            <option value="low">Bajo</option>
+            <option value="medium">Medio</option>
+            <option value="high">Alto</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Fotos -->
+      <div class="form-group">
+        <label class="form-label mb-2">Fotos (opcional)</label>
         <div class="upload-image">
-            <input class="form-control upload-file" type="file" id="formPhotos" multiple>
-            <i class="iconsax upload-icon" data-icon="camera"></i>
-            <h5 class="content-color mb-0">Subir fotos del espacio</h5>
+          <input class="form-control upload-file" type="file" 
+                 (change)="onFileSelected($event)" multiple accept="image/*">
+          <i class="iconsax upload-icon" data-icon="camera"></i>
+          <h5 class="content-color mb-0">
+            {{ photos.length ? photos.length + ' fotos seleccionadas' : 'Subir fotos del espacio' }}
+          </h5>
         </div>
-    </div>
-</form>
-            <!-- <a href="company-location.html" class="btn theme-btn w-100 auth-btn">Next</a> -->
-        </div>
-             <div class="fixed-btn">
-        <div class="custom-container">
-            <a (click)="step=2" class="btn theme-btn w-100">Next</a>
-        </div>
-    </div>
-    </section>
-    <!-- auth section end -->
+      </div>
+    </form>
 
-<section class="section-lg-t-space section-b-space" [hidden]="step === 1">
-    <div class="custom-container">
-        <div class="auth-title text-center pt-0 mt-5">
-            <h2 class="title-color">Para recibir respuestas y ver instaladores disponibles</h2>
-            <h5 class="mt-1 content-color">confirma tu contacto</h5>
-        </div>
-        <form class="auth-form">
-            <div class="form-group mt-0">
-                <label class="form-label" for="validationDefault01">Mobile Number</label>
-                <div class="d-flex gap-2">
-                    <div class="dropdown">
-                        <a class="btn dropdown-toggle mt-0" href="login-number.html#" role="button"
-                            data-bs-toggle="dropdown">
-                            +1-212
-                            <i class="iconsax dropdown-icon" data-icon="chevron-down"> </i>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a href="login-number.html#" class="dropdown-item">+1-212</a></li>
-                            <li><a href="login-number.html#" class="dropdown-item">+1-213</a></li>
-                            <li><a href="login-number.html#" class="dropdown-item">+1-702</a></li>
-                            <li><a href="login-number.html#" class="dropdown-item">+1-312</a></li>
-                            <li><a href="login-number.html#" class="dropdown-item">+1-617</a></li>
-                        </ul>
-                    </div>
-                    <div class="form-input w-100">
-                        <input type="number" class="form-control without-icon" id="validationDefault01"
-                            placeholder="Enter your number" required>
-                    </div>
-                </div>
-            </div>
-            <a href="home.html" class="btn theme-btn w-100 auth-btn">Continue</a>
-        </form>
-        <div class="division" style="margin-top: 0px !important;">
-            <span>OR Continue With</span>
-        </div>
-        <ul class="login-list">
-            <li class="login-box">
-                <a href="https://www.google.com/" target="_blank">
-                    <img class="img-fluid login-icon" src="./assets/images/icon/svg/google.svg" alt="google">
-                </a>
-            </li>
-            <li class="login-box">
-                <a href="https://www.apple.com/" target="_blank">
-                    <img class="img-fluid login-icon apple-img" src="./assets/images/icon/svg/apple.svg" alt="apple">
-                </a>
-            </li>
-        </ul>
+    <div class="fixed-btn">
+      <div class="custom-container">
+        <button class="btn theme-btn w-100" (click)="nextStep()" [disabled]="isLoading">
+          {{ isLoading ? 'Procesando...' : 'Siguiente' }}
+        </button>
+      </div>
     </div>
- 
+  </div>
 </section>
 
-<section class=" section-b-space" [hidden]="step === 1">
-    <div class="custom-container">
-        <div class="title">
-            <h2>Instaladores disponibles cerca de ti</h2>
-        </div>
-        <ul class="servicemen-listing mt-4">
-            <li class="servicemen-box select-servicemen-box white-background mb-3">
-                <div class="form-check form-check-reverse text-start">
-                    <label class="form-check-label d-flex align-items-center" for="profile1">
-                        <span class="profile-image">
-                            <img class="img-fluid img" src="../../assets/images/profile/p4.png" alt="p12">
-                        </span>
-
-                        <span class="profile-content">
-                            <span>
-                                <span class="d-flex align-items-center">
-                                    <a href="servicemen-details.html">
-                                        <span class="name fw-medium title-color">Templeton Peck</span>
-                                    </a>
-                                    <span class="fw-normal title-color ps-2"><img
-                                            src="../../assets/images/svg/star-fill.svg" alt="star"> 3.6</span>
-                                </span>
-                                <span class="content-color fw-normal mt-1">2 years of experience</span>
-                            </span>
-                        </span>
-                    </label>
-                </div>
-            </li>
-            <li class="servicemen-box select-servicemen-box white-background mb-3">
-                <div class="form-check form-check-reverse text-start">
-                    <label class="form-check-label d-flex align-items-center" for="profile2">
-                        <span class="profile-image">
-                            <img class="img-fluid img" src="../../assets/images/profile/p10.png" alt="p12">
-                        </span>
-
-                        <span class="profile-content">
-                            <span>
-                                <span class="d-flex align-items-center">
-                                    <a href="servicemen-details.html">
-                                        <span class="name fw-medium title-color">Lynn Tanner</span>
-                                    </a>
-                                    <span class="fw-normal title-color ps-2"><img
-                                            src="../../assets/images/svg/star-fill.svg" alt="star"> 3.6</span>
-                                </span>
-                                <span class="content-color fw-normal mt-1">5 years of experience</span>
-                            </span>
-                        </span>
-                    </label>
-                </div>
-            </li>
-            <!-- <li class="servicemen-box select-servicemen-box white-background mb-3">
-                <div class="form-check form-check-reverse text-start">
-                    <label class="form-check-label d-flex align-items-center" for="profile3">
-                        <span class="profile-image">
-                            <img class="img-fluid img" src="../../assets/images/profile/p8.png" alt="p12">
-                        </span>
-
-                        <span class="profile-content">
-                            <span>
-                                <span class="d-flex align-items-center">
-                                    <a href="servicemen-details.html">
-                                        <span class="name fw-medium title-color">Kate Tanner</span>
-                                    </a>
-                                    <span class="fw-normal title-color ps-2"><img
-                                            src="../../assets/images/svg/star-fill.svg" alt="star"> 3.6</span>
-                                </span>
-                                <span class="content-color fw-normal mt-1">6 years of experience</span>
-                            </span>
-                        </span>
-                    </label>
-                </div>
-            </li>
-            <li class="servicemen-box select-servicemen-box white-background mb-3">
-                <div class="form-check form-check-reverse text-start">
-                    <label class="form-check-label d-flex align-items-center" for="profile4">
-                        <span class="profile-image">
-                            <img class="img-fluid img" src="../../assets/images/profile/p9.png" alt="p9">
-                        </span>
-
-                        <span class="profile-content">
-                            <span>
-                                <span class="d-flex align-items-center">
-                                    <a href="servicemen-details.html">
-                                        <span class="name fw-medium title-color">Murdock</span>
-                                    </a>
-                                    <span class="fw-normal title-color ps-2"><img
-                                            src="../../assets/images/svg/star-fill.svg" alt="star"> 3.6</span>
-                                </span>
-                                <span class="content-color fw-normal mt-1">1.5 years of experience</span>
-                            </span>
-                        </span>
-                    </label>
-                </div>
-            </li>
-            <li class="servicemen-box select-servicemen-box white-background mb-3">
-                <div class="form-check form-check-reverse text-start">
-                    <label class="form-check-label d-flex align-items-center" for="profile5">
-                        <span class="profile-image">
-                            <img class="img-fluid img" src="../../assets/images/profile/p11.png" alt="p11">
-                        </span>
-
-                        <span class="profile-content">
-                            <span>
-                                <span class="d-flex align-items-center">
-                                    <a href="servicemen-details.html">
-                                        <span class="name fw-medium title-color">Willie Tanner</span>
-                                    </a>
-                                    <span class="fw-normal title-color ps-2"><img
-                                            src="../../assets/images/svg/star-fill.svg" alt="star"> 3.6</span>
-                                </span>
-                                <span class="content-color fw-normal mt-1">2 years of experience</span>
-                            </span>
-                        </span>
-                    </label>
-                </div>
-            </li>
-            <li class="servicemen-box select-servicemen-box white-background mb-3">
-                <div class="form-check form-check-reverse text-start">
-                    <label class="form-check-label d-flex align-items-center" for="profile6">
-                        <span class="profile-image">
-                            <img class="img-fluid img" src="../../assets/images/profile/p14.png" alt="p14">
-                        </span>
-
-                        <span class="profile-content">
-                            <span>
-                                <span class="d-flex align-items-center">
-                                    <a href="servicemen-details.html">
-                                        <span class="name fw-medium title-color">Theodore Calvin</span>
-                                    </a>
-                                    <span class="fw-normal title-color ps-2"><img
-                                            src="../../assets/images/svg/star-fill.svg" alt="star"> 3.6</span>
-                                </span>
-                                <span class="content-color fw-normal mt-1">2.5 years of experience</span>
-                            </span>
-                        </span>
-                    </label>
-                </div>
-            </li>
-            <li class="servicemen-box select-servicemen-box white-background mb-3">
-                <div class="form-check form-check-reverse text-start">
-                    <label class="form-check-label d-flex align-items-center" for="profile7">
-                        <span class="profile-image">
-                            <img class="img-fluid img" src="../../assets/images/profile/p15.png" alt="p15">
-                        </span>
-
-                        <span class="profile-content">
-                            <span>
-                                <span class="d-flex align-items-center">
-                                    <a href="servicemen-details.html">
-                                        <span class="name fw-medium title-color">Michael Knight</span>
-                                    </a>
-                                    <span class="fw-normal title-color ps-2"><img
-                                            src="../../assets/images/svg/star-fill.svg" alt="star"> 3.6</span>
-                                </span>
-                                <span class="content-color fw-normal mt-1">10 years of experience</span>
-                            </span>
-                        </span>
-                    </label>
-                </div>
-            </li> -->
-        </ul>
+<!-- STEP 2: Registro con Teléfono -->
+<section class="section-lg-t-space section-b-space" *ngIf="isStep2">
+  <div class="custom-container">
+    <div class="auth-title text-center pt-0 mt-5">
+      <h2 class="title-color">Para recibir respuestas</h2>
+      <h5 class="mt-1 content-color">Confirma tu contacto</h5>
     </div>
-  
+
+    <form class="auth-form" (ngSubmit)="onRegisterPhone()">
+      <div class="form-group mt-0">
+        <label class="form-label">Número de teléfono</label>
+        <div class="d-flex gap-2">
+          <div class="dropdown">
+            <button type="button" class="btn dropdown-toggle mt-0" 
+                    data-bs-toggle="dropdown">
+              {{ authForm.countryCode }}
+              <i class="iconsax dropdown-icon" data-icon="chevron-down"></i>
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" (click)="authForm.countryCode = '+58'">+58 🇻🇪</a></li>
+              <li><a class="dropdown-item" (click)="authForm.countryCode = '+57'">+57 🇨🇴</a></li>
+              <li><a class="dropdown-item" (click)="authForm.countryCode = '+1'">+1 🇺🇸</a></li>
+            </ul>
+          </div>
+          <div class="form-input w-100">
+            <input type="tel" class="form-control without-icon" 
+                   placeholder="412-1234567" 
+                   [(ngModel)]="authForm.phone" name="phone" required>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn theme-btn w-100 auth-btn" [disabled]="isLoading">
+        {{ isLoading ? 'Enviando...' : 'Continuar' }}
+      </button>
+    </form>
+
+    <!-- OAuth Options -->
+    <div class="division"><span>O continúa con</span></div>
+    <ul class="login-list">
+      <li class="login-box">
+        <button (click)="authService.authWithOAuth('google')" class="btn btn-outline">
+          <img class="img-fluid login-icon" src="./assets/images/icon/svg/google.svg" alt="google">
+        </button>
+      </li>
+      <li class="login-box">
+        <button (click)="authService.authWithOAuth('apple')" class="btn btn-outline">
+          <img class="img-fluid login-icon apple-img" src="./assets/images/icon/svg/apple.svg" alt="apple">
+        </button>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- STEP 3: Verificación OTP -->
+<section class="section-lg-t-space section-b-space" *ngIf="isStep3">
+  <div class="custom-container">
+    <div class="auth-title text-center">
+      <h2 class="title-color">Verifica tu teléfono</h2>
+      <h5 class="mt-1 content-color">Ingresa el código enviado por SMS</h5>
+    </div>
+
+    <form class="auth-form" (ngSubmit)="onVerifyOTP()">
+      <div class="form-group">
+        <label class="form-label">Código de verificación</label>
+        <div class="form-input">
+          <input type="text" class="form-control text-center" 
+                 placeholder="••••" maxlength="6"
+                 [(ngModel)]="authForm.otp" name="otp" required>
+        </div>
+      </div>
+
+      <button type="submit" class="btn theme-btn w-100 auth-btn" [disabled]="isLoading">
+        {{ isLoading ? 'Verificando...' : 'Verificar y Crear Solicitud' }}
+      </button>
+    </form>
+
+    <p class="text-center mt-3">
+      <small>
+        ¿No recibiste el código? 
+        <a (click)="authService.requestOTP(authForm.email)" class="link-primary">Reenviar</a>
+      </small>
+    </p>
+  </div>
 </section>
