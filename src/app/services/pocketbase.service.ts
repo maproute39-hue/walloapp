@@ -7,16 +7,19 @@ export class PocketbaseService {
 
   constructor() {
     // URL de tu instancia PocketBase
-    this.pb = new PocketBase('http://0.0.0.0:8055/');
+    this.pb = new PocketBase('https://db.buckapi.site:8055/');
     
     // Auto-cancelar requests anteriores si el componente se destruye
     this.pb.autoCancellation(false);
   }
 
+
   getInstance(): PocketBase {
     return this.pb;
   }
-
+create(): PocketBase {
+    return this.pb;
+}
   // Verificar si hay sesión activa
   isAuthenticated(): boolean {
     return this.pb.authStore.isValid;

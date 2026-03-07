@@ -21,7 +21,7 @@ export class AuthPocketbaseService {
     public user$ = new BehaviorSubject<RecordModel | null>(null);
 
   constructor() {
-    this.pb = new PocketBase('http://0.0.0.0:8055');
+    this.pb = new PocketBase('https://db.buckapi.site:8055');
     this.pb.authStore.onChange((token, model) => {
     this.user$.next(model as any);
   }, true);

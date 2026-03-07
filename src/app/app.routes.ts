@@ -7,10 +7,11 @@ import { Landing } from '@app/pages/landing/landing';
 export const routes: Routes = [
   {
     path: '',
-    component: HomeComponent,
+    component: Landing,
     title: 'Wallo | Install',
-    data: { description: 'Solicita reparaciones a domicilio: plomería, electricidad, pintura y más.', canonical: '/' },
+    data: { description: 'Profesionales de instalacion de papel.', canonical: '/' },
   },
+  { path: 'Home', loadComponent: () => import('./pages/home/home').then(c => c.HomeComponent) },
   { path: 'landing', loadComponent: () => import('./pages/landing/landing').then(c => c.Landing) },
   { path: 'requests', loadComponent: () => import('./pages/requests/requests').then(c => c.Requests) },
   { path: 'request-detail/:id', loadComponent: () => import('./pages/request-detail/request-detail').then(c => c.RequestDetail) },

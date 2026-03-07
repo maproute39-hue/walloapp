@@ -23,7 +23,7 @@
 <!-- STEP 1: Formulario de Proyecto -->
 <section class="section-lg-t-space section-b-space" *ngIf="isStep1">
   <div class="custom-container">
-    <form class="auth-form pt-0" [formGroup]="projectForm" (ngSubmit)="nextStep()">
+    <form class="auth-form pt-0" [formGroup]="projectForm">
       <div class="auth-head">
         <h4 class="fw-medium title-color text-center text-uppercase">Detalles del Proyecto</h4>
       </div>
@@ -31,7 +31,7 @@
       <!-- Ciudad y Código Postal -->
       <div class="form-group">
         <label class="form-label mb-2">Ciudad y Código Postal</label>
-        <div class="d-flex gap-2">
+        <!-- <div class="d-flex gap-2">
           <div class="form-input w-100">
             <input type="text" class="form-control" placeholder="Ciudad" 
                    formControlName="city">
@@ -41,6 +41,30 @@
             <input type="text" class="form-control" placeholder="Código Postal" 
                    formControlName="zip_code">
           </div>
+        </div> -->
+
+ <div class="d-flex align-items-center gap-2">
+                    <div class="form-group w-100">
+                        <label class="form-label without-line mb-2" for="Inputcity">City</label>
+                        <div class="form-input">
+                            <input type="text" class="form-control" id="Inputcity" placeholder="city"  formControlName="city"> 
+                            <i class="iconsax" data-icon="location"></i>
+                        </div>
+                    </div>
+                    <div class="form-group w-100">
+                        <label class="form-label without-line mb-2" for="Inputcode">Zip code</label>
+                        <div class="form-input">
+                            <input type="number"  formControlName="zip_code" class="form-control" id="Inputcode" placeholder="zip code">
+                            <i class="iconsax" data-icon="gps"></i>
+                        </div>
+                    </div>
+                </div>
+
+
+
+        <!-- Validación -->
+        <div *ngIf="projectForm.get('city')?.invalid && projectForm.get('city')?.touched" class="text-danger small mt-1">
+          La ciudad es requerida
         </div>
       </div>
 
@@ -49,6 +73,10 @@
         <label class="form-label mb-2">Tipo de Espacio</label>
         <div class="form-input">
           <input type="text" class="form-control" placeholder="Tipo de espacio" formControlName="space_type">
+          <i class="iconsax" data-icon="category"></i>
+        </div>
+        <div *ngIf="projectForm.get('space_type')?.invalid && projectForm.get('space_type')?.touched" class="text-danger small mt-1">
+          El tipo de espacio es requerido
         </div>
       </div>
 
@@ -57,6 +85,10 @@
         <label class="form-label mb-2">Tamaño en m²</label>
         <div class="form-input">
           <input type="number" class="form-control" placeholder="Tamaño" formControlName="size_sqm">
+          <i class="iconsax" data-icon="ruler"></i>
+        </div>
+        <div *ngIf="projectForm.get('size_sqm')?.invalid && projectForm.get('size_sqm')?.touched" class="text-danger small mt-1">
+          Ingresa un tamaño válido (mínimo 1)
         </div>
       </div>
 
@@ -65,6 +97,7 @@
         <label class="form-label mb-2">Altura en m (opcional)</label>
         <div class="form-input">
           <input type="number" class="form-control" placeholder="Altura" formControlName="height_m">
+          <i class="iconsax" data-icon="arrow-up"></i>
         </div>
       </div>
 
@@ -73,6 +106,10 @@
         <label class="form-label mb-2">Tipo de Papel Tapiz</label>
         <div class="form-input">
           <input type="text" class="form-control" placeholder="Tipo" formControlName="wallpaper_type">
+          <i class="iconsax" data-icon="brush"></i>
+        </div>
+        <div *ngIf="projectForm.get('wallpaper_type')?.invalid && projectForm.get('wallpaper_type')?.touched" class="text-danger small mt-1">
+          El tipo de papel tapiz es requerido
         </div>
       </div>
 
@@ -81,6 +118,7 @@
         <label class="form-label mb-2">Fecha Deseada (opcional)</label>
         <div class="form-input">
           <input type="date" class="form-control" formControlName="desired_date">
+          <i class="iconsax" data-icon="calendar"></i>
         </div>
       </div>
 
@@ -88,39 +126,57 @@
       <div class="form-group">
         <label class="form-label mb-2">Rango de Presupuesto (opcional)</label>
         <div class="form-input">
-          <input type="text" class="form-control" placeholder="Rango" formControlName="budget_range">
+          <input type="text" class="form-control" placeholder="Ej: $500-$1000" formControlName="budget_range">
+          <i class="iconsax" data-icon="dollar-circle"></i>
         </div>
       </div>
 
       <!-- Nivel de Intención -->
-      <div class="form-group">
+      <div class="form-group d-flex align-items-center justify-content-between mt-0 mb-3 gap-3 w-100">
         <label class="form-label mb-2">Nivel de Intención</label>
-        <div class="form-input">
-          <select class="form-control" formControlName="intention_level">
-            <option value="low">Bajo</option>
-            <option value="medium">Medio</option>
-            <option value="high">Alto</option>
-          </select>
+        <div class="form-check form-check2">
+          <input class="form-check-input" type="radio" formControlName="intention_level" [value]="'low'" id="low" name="intention_level">
+          <label class="form-check-label title-color" for="low">Bajo - Solo cotizando</label>
         </div>
+        <div class="form-check form-check2">
+          <input class="form-check-input" type="radio" formControlName="intention_level" [value]="'medium'" id="medium" name="intention_level">
+          <label class="form-check-label title-color" for="medium">Medio - Considerando opciones</label>
+        </div>
+        <div class="form-check form-check2">
+          <input class="form-check-input" type="radio" formControlName="intention_level" [value]="'high'" id="high" name="intention_level">
+          <label class="form-check-label title-color" for="high">Alto - Listo para contratar</label>
+        </div>
+      </div>
+      <div *ngIf="projectForm.get('intention_level')?.invalid && projectForm.get('intention_level')?.touched" class="text-danger small mt-1">
+        Selecciona tu nivel de intención
       </div>
 
       <!-- Fotos -->
       <div class="form-group">
-        <label class="form-label mb-2">Fotos (opcional)</label>
-        <div class="upload-image">
-          <input class="form-control upload-file" type="file" 
-                 (change)="onFileSelected($event)" multiple accept="image/*">
+        <label class="form-label mb-2">Fotos del espacio (opcional, máx 5)</label>
+        <div class="upload-image" (click)="fileInput.click()">
+          <input #fileInput class="form-control upload-file" type="file" 
+                 (change)="onFileSelected($event)" multiple accept="image/*" style="display: none;">
           <i class="iconsax upload-icon" data-icon="camera"></i>
           <h5 class="content-color mb-0">
-            {{ photos.length ? photos.length + ' fotos seleccionadas' : 'Subir fotos del espacio' }}
+            {{ photos.length ? photos.length + ' foto(s) seleccionada(s)' : 'Subir fotos del espacio' }}
           </h5>
+        </div>
+        
+        <!-- Miniaturas de fotos seleccionadas -->
+        <div class="photo-previews mt-2 d-flex flex-wrap gap-2" *ngIf="photos.length > 0">
+          <div *ngFor="let photo of photos; let i = index" class="photo-thumbnail position-relative">
+            <img [src]="photo" class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">
+            <button type="button" class="btn-close btn-sm position-absolute top-0 end-0" 
+                    (click)="removePhoto(i)" aria-label="Remove"></button>
+          </div>
         </div>
       </div>
     </form>
 
     <div class="fixed-btn">
       <div class="custom-container">
-        <button class="btn theme-btn w-100" (click)="nextStep()" [disabled]="isLoading">
+        <button class="btn theme-btn w-100" (click)="nextStep()" [disabled]="projectForm.invalid || isLoading">
           {{ isLoading ? 'Procesando...' : 'Siguiente' }}
         </button>
       </div>
@@ -136,32 +192,45 @@
       <h5 class="mt-1 content-color">Confirma tu contacto</h5>
     </div>
 
-    <form class="auth-form" (ngSubmit)="onRegisterPhone()">
+    <form class="auth-form" (ngSubmit)="onRegisterPhone()" [formGroup]="phoneForm">
       <div class="form-group mt-0">
         <label class="form-label">Número de teléfono</label>
         <div class="d-flex gap-2">
           <div class="dropdown">
             <button type="button" class="btn dropdown-toggle mt-0" 
-                    data-bs-toggle="dropdown">
-              {{ authForm.countryCode }}
+                    data-bs-toggle="dropdown" style="min-width: 80px;">
+              +{{ phoneForm.get('countryCode')?.value }}
               <i class="iconsax dropdown-icon" data-icon="chevron-down"></i>
             </button>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item" (click)="authForm.countryCode = '+58'">+58 🇻🇪</a></li>
-              <li><a class="dropdown-item" (click)="authForm.countryCode = '+57'">+57 🇨🇴</a></li>
-              <li><a class="dropdown-item" (click)="authForm.countryCode = '+1'">+1 🇺🇸</a></li>
+              <li><a class="dropdown-item" (click)="phoneForm.patchValue({countryCode: '58'})">+58 🇻🇪</a></li>
+              <li><a class="dropdown-item" (click)="phoneForm.patchValue({countryCode: '57'})">+57 🇨🇴</a></li>
+              <li><a class="dropdown-item" (click)="phoneForm.patchValue({countryCode: '1'})">+1 🇺🇸</a></li>
             </ul>
           </div>
           <div class="form-input w-100">
             <input type="tel" class="form-control without-icon" 
-                   placeholder="412-1234567" 
-                   [(ngModel)]="authForm.phone" name="phone" required>
+                   placeholder="4121234567" 
+                   formControlName="phone">
           </div>
         </div>
+        
+        <!-- Validación -->
+        <div *ngIf="phoneForm.get('phone')?.invalid && phoneForm.get('phone')?.touched" class="text-danger small mt-1">
+          Ingresa un número válido (7-10 dígitos)
+        </div>
+        
+        <!-- Mensaje de ayuda -->
+        <small class="text-muted">Te enviaremos un código SMS para verificar tu número</small>
       </div>
 
-      <button type="submit" class="btn theme-btn w-100 auth-btn" [disabled]="isLoading">
-        {{ isLoading ? 'Enviando...' : 'Continuar' }}
+      <button type="submit" class="btn theme-btn w-100 auth-btn" 
+              [disabled]="phoneForm.invalid || isLoading">
+        <span *ngIf="!isLoading">Continuar</span>
+        <span *ngIf="isLoading">
+          <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+          Enviando...
+        </span>
       </button>
     </form>
 
@@ -169,16 +238,21 @@
     <div class="division"><span>O continúa con</span></div>
     <ul class="login-list">
       <li class="login-box">
-        <button (click)="authService.authWithOAuth('google')" class="btn btn-outline">
+        <button class="btn btn-outline" >
           <img class="img-fluid login-icon" src="./assets/images/icon/svg/google.svg" alt="google">
         </button>
       </li>
       <li class="login-box">
-        <button (click)="authService.authWithOAuth('apple')" class="btn btn-outline">
+        <button class="btn btn-outline" >
           <img class="img-fluid login-icon apple-img" src="./assets/images/icon/svg/apple.svg" alt="apple">
         </button>
       </li>
     </ul>
+    
+    <!-- Link para volver -->
+    <p class="text-center mt-3">
+      <a (click)="prevStep()" class="link-secondary">← Volver a detalles del proyecto</a>
+    </p>
   </div>
 </section>
 
@@ -187,29 +261,69 @@
   <div class="custom-container">
     <div class="auth-title text-center">
       <h2 class="title-color">Verifica tu teléfono</h2>
-      <h5 class="mt-1 content-color">Ingresa el código enviado por SMS</h5>
+      <h5 class="mt-1 content-color">Ingresa el código enviado por SMS a</h5>
+      <h6 class="fw-bold">{{ fullPhone }}</h6>
     </div>
 
-    <form class="auth-form" (ngSubmit)="onVerifyOTP()">
+    <form class="auth-form" (ngSubmit)="onVerifyOTP()" [formGroup]="otpForm">
       <div class="form-group">
         <label class="form-label">Código de verificación</label>
         <div class="form-input">
           <input type="text" class="form-control text-center" 
-                 placeholder="••••" maxlength="6"
-                 [(ngModel)]="authForm.otp" name="otp" required>
+                 placeholder="••••••" maxlength="6"
+                 formControlName="otp"
+                 inputmode="numeric"
+                 pattern="[0-9]*">
+        </div>
+        
+        <!-- Validación simple -->
+        <div *ngIf="otpForm.get('otp')?.invalid && otpForm.get('otp')?.touched" class="text-danger small mt-1">
+          El código debe tener 6 dígitos
+        </div>
+        
+        <!-- Mensaje de error del servidor -->
+        <div *ngIf="errorMessage" class="text-danger small mt-2">
+          {{ errorMessage }}
         </div>
       </div>
 
-      <button type="submit" class="btn theme-btn w-100 auth-btn" [disabled]="isLoading">
-        {{ isLoading ? 'Verificando...' : 'Verificar y Crear Solicitud' }}
+      <button type="submit" class="btn theme-btn w-100 auth-btn" 
+              [disabled]="otpForm.invalid || isLoading">
+        <span *ngIf="!isLoading">Verificar y Crear Solicitud</span>
+        <span *ngIf="isLoading">
+          <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+          Verificando...
+        </span>
       </button>
     </form>
 
-    <p class="text-center mt-3">
-      <small>
-        ¿No recibiste el código? 
-        <a (click)="authService.requestOTP(authForm.email)" class="link-primary">Reenviar</a>
-      </small>
-    </p>
+    <!-- Opción para cambiar número -->
+    <div class="text-center mt-3">
+      <p class="mt-2">
+        <a (click)="cancelFlow()" class="link-secondary small">
+          ← Usar otro número
+        </a>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- STEP 4: Éxito (opcional) -->
+<section class="section-lg-t-space section-b-space" *ngIf="step === 4">
+  <div class="custom-container">
+    <div class="auth-title text-center">
+      <div class="success-animation mb-4">
+        <i class="iconsax" data-icon="tick-circle" style="font-size: 80px; color: #28a745;"></i>
+      </div>
+      <h2 class="title-color">¡Solicitud creada con éxito!</h2>
+      <h5 class="mt-2 content-color">Hemos recibido tu proyecto</h5>
+      <p class="mt-3">Te contactaremos pronto para coordinar los detalles</p>
+      <div class="mt-4">
+        <div class="spinner-border text-primary" role="status" *ngIf="isLoading">
+          <span class="visually-hidden">Redirigiendo...</span>
+        </div>
+        <p class="small text-muted mt-2">Redirigiendo al seguimiento...</p>
+      </div>
+    </div>
   </div>
 </section>

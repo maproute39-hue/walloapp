@@ -11,7 +11,7 @@ import { RouterLink } from "@angular/router";
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl:   './home.html',
   styleUrl: './home.scss'
 

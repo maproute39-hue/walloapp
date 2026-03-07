@@ -12,7 +12,7 @@ export interface ExpertView extends ExpertRecord { displayName: string; avatarUr
 
 @Injectable({ providedIn: 'root' })
 export class ExpertsService implements OnDestroy {
-  private pb = new PocketBase('http://0.0.0.0:8055');
+  private pb = new PocketBase('https://db.buckapi.site:8055');
   private expertsMap = new Map<string, ExpertView>();
   private experts$ = new BehaviorSubject<ExpertView[]>([]);
   private subscribed = false;
