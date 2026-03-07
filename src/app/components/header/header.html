@@ -1,6 +1,8 @@
 <!-- header start -->
 <header class="header" [hidden]="
 hideHeader || 
+router.url === '' ||
+
 router.url === '/new' ||
 router.url === '/login' || 
 router.url === '/register' || 
@@ -26,75 +28,31 @@ router.url === '/profile'" >
             <a href="home.html#sidebar" class="sidebar-btn" data-bs-toggle="offcanvas">
                 <i class="iconsax" data-icon="text-align-left"></i>
             </a>
-            <!-- <a  class="header-location">
-                <div class="location-icon">
-                    <img class="img-fluid location" src="assets/images/svg/location.svg" alt="location">
-                </div>
-                <div class="location-content">
-                    <div class="d-flex align-items-center gap-1">
-                        <h6>Ubicación actual</h6>
-                        <i class="iconsax d-arrow" data-icon="chevron-down"></i>
-                    </div>
-                    <h5 id="user-location">{{ locationText }}</h5>
-                    <button type="button"
-                    class="chip-toggle"
-                    [class.off]="!locationActive"
-                    (click)="toggleGeo()">
-              {{ locationActive ? 'Envío: Activo' : 'Envío: Inactivo' }}
-            </button>
+              <a [routerLink]="['/home']"  [hidden]="router.url ==='/new' ||
+  router.url !== '/login' && router.url !== '/register'
+  && router.url !== '/home'">
+                  <i class="iconsax icon-btn" data-icon="chevron-left"> </i>
+              </a>
+    <div class="custom-container">
+          <div class="header-panel pb-3">
               
-                  </div>
-            </a> -->
-            <!-- header.component.html -->
-            <a class="header-location">
-                <div class="location-icon" 
-                style="min-width: 32px;">
-                <img class="img-fluid location" 
-              
-                src="assets/images/svg/location.svg" alt="location"
-                
-                (click)="onLocationClick()">
-                </div>
-                <div class="location-content">
-                <div class="d-flex align-items-center gap-1">
-                    <h6>Ubicación actual</h6>
-                    <i class="iconsax d-arrow" data-icon="chevron-down"></i>
-                </div>
-            
-             <h5
-  id="user-location"
-  role="button"
-  tabindex="0"
-  class="cursor-pointer"
-  (click)="onLocationClick()"
->
-  {{ locationText() }}
-</h5>
-            
-                <!-- <button
-                    type="button"
-                    class="chip-toggle"
-                    [class.off]="!locationActive()"
-                    (click)="toggleGeo()">
-                    {{ locationActive() ? 'Envío: Activo' : 'Envío: Inactivo' }}
-                </button> -->
-                </div>
-            </a>
   
-              
+              <img class="img-fluid logo" src="assets/images/logo/logo.png" alt="logo">
+              <!-- <img class="img-fluid logo-dark" src="assets/images/logo/logo-white.png" alt="logo"> -->
+          </div>
+      </div>
+            
             <div class="d-flex align-items-center gap-2">
-                <a href="search.html">
-                    <i class="iconsax icon-btn" data-icon="search-normal-2"></i>
-                </a>
-                <a href="notification.html">
+                   <a href="notification.html">
                     <i class="iconsax icon-btn notification-icon" data-icon="bell-2"></i>
                 </a>
             </div>
         </div>
     </div>
   </header>
-  <header class="auth-header" [hidden]="router.url ==='/new' ||
-  router.url !== '/login' && router.url !== '/register'">
+  <!-- <header class="auth-header" [hidden]="router.url ==='/new' ||
+  router.url !== '/login' && router.url !== '/register'
+  && router.url !== '/home'">
       <div class="custom-container">
           <div class="header-panel pb-3">
               <a [routerLink]="['/home']" >
@@ -105,5 +63,5 @@ router.url === '/profile'" >
               <img class="img-fluid logo-dark" src="assets/images/logo/logo-white.png" alt="logo">
           </div>
       </div>
-  </header>
+  </header> -->
   <!-- header end -->

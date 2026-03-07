@@ -11,7 +11,7 @@ export const routes: Routes = [
     title: 'Wallo | Install',
     data: { description: 'Profesionales de instalacion de papel.', canonical: '/' },
   },
-  { path: 'Home', loadComponent: () => import('./pages/home/home').then(c => c.HomeComponent) },
+  { path: 'home', loadComponent: () => import('./pages/home/home').then(c => c.HomeComponent) },
   { path: 'landing', loadComponent: () => import('./pages/landing/landing').then(c => c.Landing) },
   { path: 'requests', loadComponent: () => import('./pages/requests/requests').then(c => c.Requests) },
   { path: 'request-detail/:id', loadComponent: () => import('./pages/request-detail/request-detail').then(c => c.RequestDetail) },
@@ -57,7 +57,9 @@ export const routes: Routes = [
             .then(c => c.EmergencyInfo)
       },
       { path: 'address',    outlet: 'panel', loadComponent: () => import('./pages/profile/sections/client/address/address').then(c => c.Address) },
-      { path: 'reviews',    outlet: 'panel', loadComponent: () => import('./pages/profile/sections/client/reviews/reviews').then(c => c.Reviews) },
+      { path: 'client-reviews',    outlet: 'panel', loadComponent: () => import('./pages/profile/sections/client/reviews/reviews').then(c => c.Reviews) },
+      { path: 'pro-reviews',    outlet: 'panel', loadComponent: () => import('./pages/profile/sections/client/reviews/reviews').then(c => c.Reviews) },
+     
       { path: 'client-biografy',   outlet: 'panel', loadComponent: () => import('./pages/profile/sections/client/biografy/biografy').then(c => c.BiografyComponent) },
     ],
   },

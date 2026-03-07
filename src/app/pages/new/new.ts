@@ -128,7 +128,34 @@ export class NewRequestComponent implements OnInit, OnDestroy {
       this.step = 2;
     }
   }
+// ========== LOGIN CON APPLE ==========
+async loginWithApple() {
+  try {
+    this.isLoading = true;
+    this.errorMessage = '';
 
+    const authData = await this.pbService.getInstance().collection('users').authWithOAuth2({
+      provider: 'apple',
+    });
+
+    const user = authData.record;
+    
+    if (this.projectForm.valid) {
+      await this.submitRequestToBackend(user.id);
+      this.step = 4;
+      this.showSuccess('¡Solicitud creada con éxito!');
+      setTimeout(() => this.router.navigate(['/Home']), 2000);
+    } else {
+      this.showSuccess('¡Bienvenido! ' + (user['name'] || user['email']));
+    }
+
+  } catch (error: any) {
+    console.error('❌ Error Apple:', error);
+    this.showError('Error con Apple. Intenta con Google o teléfono.');
+  } finally {
+    this.isLoading = false;
+  }
+}
   prevStep(): void {
     if (this.step > 1) {
       this.step--;
@@ -211,7 +238,7 @@ export class NewRequestComponent implements OnInit, OnDestroy {
         
         // Redirigir después de 2 segundos
         setTimeout(() => {
-          this.router.navigate(['/tracking', this.mockUserId]);
+          this.router.navigate(['/Home']);
         }, 2000);
       } else {
         throw new Error('Código inválido. Debe ser un número de 6 dígitos');
@@ -225,7 +252,48 @@ export class NewRequestComponent implements OnInit, OnDestroy {
   }
 
   // ========== ENVÍO DE SOLICITUD AL BACKEND ==========
+// ========== LOGIN CON GOOGLE ==========
 
+// ========== LOGIN CON GOOGLE ==========
+async loginWithGoogle() {
+  try {
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    // ✅ CORRECCIÓN: Usa getInstance() en lugar de .client
+    const authData = await this.pbService.getInstance().collection('users').authWithOAuth2({
+      provider: 'google',
+    });
+
+    const user = authData.record;
+    console.log('✅ Login Google exitoso:', user);
+
+    if (this.step === 2 && this.projectForm.valid) {
+      await this.submitRequestToBackend(user.id);
+      this.step = 4;
+      this.showSuccess('¡Solicitud creada con éxito! Redirigiendo...');
+      
+      setTimeout(() => {
+        this.router.navigate(['/Home']);
+      }, 2000);
+    } else {
+      this.showSuccess('¡Bienvenido! ' + (user['name'] || user['email']));
+    }
+
+  } catch (error: any) {
+    console.error('❌ Error en login Google:', error);
+    
+    if (error?.message?.includes('popup')) {
+      this.showError('El popup fue bloqueado. Permite ventanas emergentes para continuar.');
+    } else if (error?.message?.includes('cancelled')) {
+      this.showError('Login cancelado por el usuario');
+    } else {
+      this.showError('Error al iniciar sesión con Google. Intenta nuevamente.');
+    }
+  } finally {
+    this.isLoading = false;
+  }
+}
   private async submitRequestToBackend(userId: string): Promise<void> {
     try {
       const payload: CreateRequestDTO = {

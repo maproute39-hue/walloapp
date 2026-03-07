@@ -1,5 +1,6 @@
 import { Component, inject, } from '@angular/core';
 import { Provider } from '../../interfaces/provider.interface';
+import { RouterLink } from '@angular/router';
 
 import { ConfigMobileService } from '@app/core/config-mobile.service';
 import { BannerItem } from '@app/interfaces/banner.interface';
@@ -15,7 +16,9 @@ import {
 } from '@angular/forms';
 @Component({
   selector: 'app-landing',
-  imports: [],
+  imports: [
+    RouterLink
+  ],
   templateUrl: './landing.html',
   styleUrl: './landing.scss'
 })

@@ -12,11 +12,14 @@ export class PocketbaseService {
     // Auto-cancelar requests anteriores si el componente se destruye
     this.pb.autoCancellation(false);
   }
-
+ get client(): PocketBase {
+    return this.pb;
+  }
 
   getInstance(): PocketBase {
     return this.pb;
   }
+
 create(): PocketBase {
     return this.pb;
 }

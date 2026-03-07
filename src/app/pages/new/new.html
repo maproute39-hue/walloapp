@@ -72,7 +72,12 @@
       <div class="form-group">
         <label class="form-label mb-2">Tipo de Espacio</label>
         <div class="form-input">
-          <input type="text" class="form-control" placeholder="Tipo de espacio" formControlName="space_type">
+          <select class="form-control" formControlName="space_type">
+            <option value="">Selecciona un tipo</option>
+            <option value="habitacion">Habitación</option>
+            <option value="oficina">Oficina</option>
+            <option value="wallpaper">Wallpaper</option>
+          </select>
           <i class="iconsax" data-icon="category"></i>
         </div>
         <div *ngIf="projectForm.get('space_type')?.invalid && projectForm.get('space_type')?.touched" class="text-danger small mt-1">
@@ -80,24 +85,30 @@
         </div>
       </div>
 
-      <!-- Tamaño en m² -->
-      <div class="form-group">
-        <label class="form-label mb-2">Tamaño en m²</label>
-        <div class="form-input">
-          <input type="number" class="form-control" placeholder="Tamaño" formControlName="size_sqm">
-          <i class="iconsax" data-icon="ruler"></i>
+      <div class="row">
+        <!-- Tamaño en m² -->
+        <div class="col-6">
+          <div class="form-group">
+            <label class="form-label mb-2">Tamaño en m²</label>
+            <div class="form-input">
+              <input type="number" class="form-control" placeholder="Tamaño" formControlName="size_sqm">
+              <i class="iconsax" data-icon="ruler"></i>
+            </div>
+            <div *ngIf="projectForm.get('size_sqm')?.invalid && projectForm.get('size_sqm')?.touched" class="text-danger small mt-1">
+              Ingresa un tamaño válido (mínimo 1)
+            </div>
+          </div>
         </div>
-        <div *ngIf="projectForm.get('size_sqm')?.invalid && projectForm.get('size_sqm')?.touched" class="text-danger small mt-1">
-          Ingresa un tamaño válido (mínimo 1)
-        </div>
-      </div>
 
-      <!-- Altura en m -->
-      <div class="form-group">
-        <label class="form-label mb-2">Altura en m (opcional)</label>
-        <div class="form-input">
-          <input type="number" class="form-control" placeholder="Altura" formControlName="height_m">
-          <i class="iconsax" data-icon="arrow-up"></i>
+        <!-- Altura en m -->
+        <div class="col-6">
+          <div class="form-group">
+            <label class="form-label mb-2">Altura en m </label>
+            <div class="form-input">
+              <input type="number" class="form-control" placeholder="Altura" formControlName="height_m">
+              <i class="iconsax" data-icon="arrow-up"></i>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -105,7 +116,12 @@
       <div class="form-group">
         <label class="form-label mb-2">Tipo de Papel Tapiz</label>
         <div class="form-input">
-          <input type="text" class="form-control" placeholder="Tipo" formControlName="wallpaper_type">
+          <select class="form-control" formControlName="wallpaper_type">
+            <option value="">Selecciona un tipo</option>
+            <option value="vinili">Vinili</option>
+            <option value="papel tapiz">Papel tapiz</option>
+            <option value="wallpaper">Wallpaper</option>
+          </select>
           <i class="iconsax" data-icon="brush"></i>
         </div>
         <div *ngIf="projectForm.get('wallpaper_type')?.invalid && projectForm.get('wallpaper_type')?.touched" class="text-danger small mt-1">
@@ -126,8 +142,11 @@
       <div class="form-group">
         <label class="form-label mb-2">Rango de Presupuesto (opcional)</label>
         <div class="form-input">
-          <input type="text" class="form-control" placeholder="Ej: $500-$1000" formControlName="budget_range">
+          <input type="range" class="form-control" min="550" max="5000" step="100" formControlName="budget_range">
           <i class="iconsax" data-icon="dollar-circle"></i>
+        </div>
+        <div class="mt-2 text-center">
+          <small class="text-muted">{{ projectForm.get('budget_range')?.value || 0 }} USD</small>
         </div>
       </div>
 
@@ -136,15 +155,15 @@
         <label class="form-label mb-2">Nivel de Intención</label>
         <div class="form-check form-check2">
           <input class="form-check-input" type="radio" formControlName="intention_level" [value]="'low'" id="low" name="intention_level">
-          <label class="form-check-label title-color" for="low">Bajo - Solo cotizando</label>
+          <label class="form-check-label title-color" for="low">Bajo</label>
         </div>
         <div class="form-check form-check2">
           <input class="form-check-input" type="radio" formControlName="intention_level" [value]="'medium'" id="medium" name="intention_level">
-          <label class="form-check-label title-color" for="medium">Medio - Considerando opciones</label>
+          <label class="form-check-label title-color" for="medium">Medio </label>
         </div>
         <div class="form-check form-check2">
           <input class="form-check-input" type="radio" formControlName="intention_level" [value]="'high'" id="high" name="intention_level">
-          <label class="form-check-label title-color" for="high">Alto - Listo para contratar</label>
+          <label class="form-check-label title-color" for="high">Alto </label>
         </div>
       </div>
       <div *ngIf="projectForm.get('intention_level')?.invalid && projectForm.get('intention_level')?.touched" class="text-danger small mt-1">
@@ -235,19 +254,29 @@
     </form>
 
     <!-- OAuth Options -->
-    <div class="division"><span>O continúa con</span></div>
-    <ul class="login-list">
-      <li class="login-box">
-        <button class="btn btn-outline" >
-          <img class="img-fluid login-icon" src="./assets/images/icon/svg/google.svg" alt="google">
-        </button>
-      </li>
-      <li class="login-box">
-        <button class="btn btn-outline" >
-          <img class="img-fluid login-icon apple-img" src="./assets/images/icon/svg/apple.svg" alt="apple">
-        </button>
-      </li>
-    </ul>
+  <div class="division"><span>O continúa con</span></div>
+<ul class="login-list">
+  <li class="login-box">
+    <!-- ✅ Google: Agrega type, (click) y [disabled] -->
+    <button 
+      type="button"
+      class="btn btn-outline" 
+      (click)="loginWithGoogle()"
+      [disabled]="isLoading">
+      <img class="img-fluid login-icon" src="./assets/images/icon/svg/google.svg" alt="google">
+    </button>
+  </li>
+  <li class="login-box">
+    <!-- ✅ Apple: Mismo patrón (puedes crear loginWithApple después) -->
+    <button 
+      type="button"
+      class="btn btn-outline"
+     
+      [disabled]="isLoading">
+      <img class="img-fluid login-icon apple-img" src="./assets/images/icon/svg/apple.svg" alt="apple">
+    </button>
+  </li>
+</ul>
     
     <!-- Link para volver -->
     <p class="text-center mt-3">

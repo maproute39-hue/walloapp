@@ -136,6 +136,13 @@ async ngOnInit() {
       this.router.navigate(['/profile', { outlets: { panel: ['client-biografy'] } }]);
     }
   }
+   navigateToReview() {
+    if (this.role === 'provider') {
+      this.router.navigate(['/profile', { outlets: { panel: ['biografy'] } }]);
+    } else {
+      this.router.navigate(['/profile', { outlets: { panel: ['client-reviews'] } }]);
+    }
+  }
 }
 
 

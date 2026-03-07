@@ -1,47 +1,66 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-import { BannerItem } from '../../interfaces/banner.interface';
-import { Provider } from '../../interfaces/provider.interface';
-import { SeoService } from '../../services/seo.service';
-
-import { ConfigMobileService } from '@app/core/config-mobile.service';
-import { RouterLink } from "@angular/router";
+import { RouterLink } from '@angular/router';
+import { PbService } from '../../services/pb.service';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule],
-  templateUrl:   './home.html',
+  imports: [CommonModule, RouterLink],
+  templateUrl: './home.html',
   styleUrl: './home.scss'
+})
+export class HomeComponent implements OnInit, OnDestroy {
+  userId: string = 'alvekaoo07856t0'; // Usuario simulado para pruebas
+  userRequests: any[] = [];
+  private unsubscribe: (() => void) | null = null;
 
-})    
-export class HomeComponent implements OnInit {
-  constructor(public cfg: ConfigMobileService){
-    this.cfg.load();
+  constructor(private pbService: PbService) {}
+
+  async ngOnInit(): Promise<void> {
+    await this.loadUserRequests();
+    await this.subscribeToUserRequests();
   }
-  private seo = inject(SeoService);
 
-  banners: BannerItem[] = [
-    { id: 'b1', title: 'Solicita tu reparación', subtitle: 'Plomería, electricidad y más', imageUrl: '/assets/banners/hero1.jpg', link: '/servicios' }
-  ];
+  ngOnDestroy(): void {
+    if (this.unsubscribe) {
+      this.unsubscribe();
+    }
+  }
 
+  private async loadUserRequests(): Promise<void> {
+    try {
+      // Cargar solicitudes iniciales del usuario usando el índice client_id
+      const records = await this.pbService.pb.collection('requests').getList(1, 50, {
+        filter: `client_id="${this.userId}"`,
+        sort: '-created'
+      });
+      this.userRequests = records.items;
+      console.log('Solicitudes cargadas:', this.userRequests);
+    } catch (error) {
+      console.error('Error loading user requests:', error);
+    }
+  }
 
+  private async subscribeToUserRequests(): Promise<void> {
+    // Suscribirse a cambios en tiempo real para las solicitudes del usuario
+    this.unsubscribe = await this.pbService.pb.collection('requests').subscribe('*', (e) => {
+      console.log('Cambio en solicitudes:', e.action, e.record);
 
-  providers: Provider[] = [
-    { id: 'p1', name: 'Juan Pérez', rating: 4.8, specialties: ['Plomería'], avatarUrl: '/assets/avatars/jp.jpg', slug: 'juan-perez' },
-    { id: 'p2', name: 'Ana Gómez', rating: 4.7, specialties: ['Electricidad'], avatarUrl: '/assets/avatars/ag.jpg', slug: 'ana-gomez' }
-  ];
-
-  ngOnInit() {
-    this.seo.updateTags({
-      title: 'Wallo | Reparaciones y servicios a domicilio',
-      description: 'Encuentra profesionales verificados de plomería, electricidad, pintura y más.',
-      canonicalPath: '/'
+      if (e.record['client_id'] === this.userId) {
+        if (e.action === 'create') {
+          this.userRequests.unshift(e.record);
+        } else if (e.action === 'update') {
+          const index = this.userRequests.findIndex(r => r.id === e.record.id);
+          if (index !== -1) {
+            this.userRequests[index] = e.record;
+          }
+        } else if (e.action === 'delete') {
+          this.userRequests = this.userRequests.filter(r => r.id !== e.record.id);
+        }
+      }
+    }, {
+      filter: `client_id="${this.userId}"`
     });
-  }
-
-  onSelectProvider(p: Provider) {
-    // tracking o navegación avanzada si quieres
   }
 }

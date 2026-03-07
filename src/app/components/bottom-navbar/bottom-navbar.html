@@ -18,18 +18,18 @@
 
 >
     <ul>
-        <li [class.active]="isActive('/')">
-            <a routerLink="">
+        <!-- <li [class.active]="isActive('/')">
+            <a routerLink="/home">
                 <div class="icon">
                     <img class="unactive" src="assets/images/svg/home.svg" alt="home">
                     <img class="active" src="assets/images/svg/home-fill.svg" alt="home">
                 </div>
                 <h5 class="active">home</h5>
             </a>
-        </li>
+        </li> -->
   
-        <li>
-            <a routerLink="/requests">
+        <li [class.active]="isActive('/home')">
+            <a routerLink="/home" >
                 <div class="icon">
                     <img class="unactive" src="assets/images/svg/booking.svg" alt="booking">
                     <img class="active" src="assets/images/svg/booking-fill.svg" alt="booking">
@@ -62,7 +62,7 @@
             </a>
         </li> -->
   
-        <li [class.active]="isActive('/notifications')">
+        <!-- <li [class.active]="isActive('/notifications')">
             <a routerLink="/notifications" >
                 <div class="icon">
                   <i data-icon="bell-2" class=" notification-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -74,7 +74,7 @@
               </div>
                 <h5>Notifications</h5>
             </a>
-        </li>
+        </li> -->
   
         <li [class.active]="isActive('/profile')">
             <a routerLink="/profile">
@@ -82,7 +82,7 @@
                     <img class="unactive" src="assets/images/svg/profile.svg" alt="profile">
                     <img class="active" src="assets/images/svg/profile-fill.svg" alt="profile">
                 </div>
-                <h5>Profile</h5>
+                <h5>Account</h5>
             </a>
         </li>
     </ul>
