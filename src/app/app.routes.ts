@@ -58,7 +58,7 @@ export const routes: Routes = [
       },
       { path: 'address',    outlet: 'panel', loadComponent: () => import('./pages/profile/sections/client/address/address').then(c => c.Address) },
       { path: 'client-reviews',    outlet: 'panel', loadComponent: () => import('./pages/profile/sections/client/reviews/reviews').then(c => c.Reviews) },
-      { path: 'pro-reviews',    outlet: 'panel', loadComponent: () => import('./pages/profile/sections/client/reviews/reviews').then(c => c.Reviews) },
+      // { path: 'pro-reviews',    outlet: 'panel', loadComponent: () => import('./pages/profile/sections/expert/reviews/reviews').then(c => c.Reviews) },
      
       { path: 'client-biografy',   outlet: 'panel', loadComponent: () => import('./pages/profile/sections/client/biografy/biografy').then(c => c.BiografyComponent) },
     ],

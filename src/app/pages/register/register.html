@@ -33,9 +33,13 @@
         </div>
         <ul class="login-list">
             <li class="login-box">
-                <a href="https://www.google.com/" target="_blank">
-                    <img class="img-fluid login-icon" src="./assets/images/icon/svg/google.svg" alt="google">
-                </a>
+                <button 
+                  type="button"
+                  class="btn btn-outline" 
+                  (click)="loginWithGoogle()"
+                  [disabled]="loading()">
+                  <img class="img-fluid login-icon" src="./assets/images/icon/svg/google.svg" alt="google">
+                </button>
             </li>
             <li class="login-box">
                 <a href="https://www.apple.com/" target="_blank">

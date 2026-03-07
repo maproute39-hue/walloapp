@@ -12,6 +12,7 @@ import { AuthPocketbaseService, UserType, RegisterMinimalPayload } from '../../s
 import Swal from 'sweetalert2';
 import { Router, RouterLink } from '@angular/router';
 import { EmailService } from '../../services/email.service';
+import { PocketbaseService } from '../../services/pocketbase.service';
 
 function matchPasswordsValidator(a: string, b: string): ValidatorFn {
   return (group: AbstractControl): ValidationErrors | null => {
@@ -34,6 +35,7 @@ export class Register {
   private auth = inject(AuthPocketbaseService);
   private router = inject(Router);
   private email = inject(EmailService);
+  private pbService = inject(PocketbaseService);
 
   loading = signal(false);
   submitted = signal(false);
@@ -209,4 +211,108 @@ export class Register {
   isType(t: UserType) {
     return this.form.get('type')?.value === t;
   }
+
+  // ========== LOGIN CON GOOGLE ==========
+// ========== LOGIN CON GOOGLE ==========
+async loginWithGoogle() {
+  try {
+    this.loading.set(true);
+    this.errorMsg.set(null);
+
+    // 1. Autenticar con Google
+    const authData = await this.pbService.getInstance().collection('users').authWithOAuth2({
+      provider: 'google',
+    });
+
+    const user = authData.record;
+    console.log('✅ Login Google exitoso:', user);
+
+    // 2. Verificar si es usuario nuevo o existente
+    // PocketBase crea automáticamente el usuario si no existe
+    
+    // 3. Si es nuevo, puede que necesite completar datos (phone, rol)
+    const isNewUser = !user['role'] || !user['phone'];
+    
+    if (isNewUser) {
+      // Guardar info temporal y redirigir a completar perfil
+      sessionStorage.setItem('oauth_user_id', user.id);
+      sessionStorage.setItem('oauth_user_email', user['email']);
+      sessionStorage.setItem('oauth_user_name', user['name'] || '');
+      
+      this.showSuccess('¡Bienvenido! Completa tu perfil para continuar.');
+      this.router.navigate(['/complete-profile']);
+    } else {
+      // Usuario completo, redirigir según rol
+      this.success.set(true);
+      this.showSuccess(`¡Bienvenido ${user['name'] || user['email']}!`);
+      
+      const redirectPath = this.getRedirectPath(user['role']);
+      setTimeout(() => {
+        this.router.navigate([redirectPath]);
+      }, 1500);
+    }
+
+  } catch (error: any) {
+    console.error('❌ Error Google:', error);
+    this.errorMsg.set(error?.message || 'Error con Google');
+    Swal.fire('Error', this.errorMsg() || 'Error desconocido', 'error');
+  } finally {
+    this.loading.set(false);
+  }
+}
+
+private getRedirectPath(role: string): string {
+  switch(role) {
+    case 'professional': return '/provider-dashboard';
+    case 'client': return '/home';
+    default: return '/home';
+  }
+}
+
+private showSuccess(message: string) {
+  Swal.fire({
+    title: '¡Éxito!',
+    text: message,
+    icon: 'success',
+    timer: 2000,
+    showConfirmButton: false
+  });
+}
+
+// ========== LOGIN CON APPLE (opcional) ==========
+async loginWithApple() {
+  try {
+    this.loading.set(true);
+    this.errorMsg.set(null);
+
+    const authData = await this.pbService.getInstance().collection('users').authWithOAuth2({
+      provider: 'apple',
+    });
+
+    const user = authData.record;
+    
+    // Misma lógica que Google
+    const needsProfileCompletion = !user['role'] || !user['phone'];
+    
+    if (needsProfileCompletion) {
+      sessionStorage.setItem('pending_user_id', user.id);
+      sessionStorage.setItem('pending_user_role', 'cliente');
+      this.showSuccess('¡Bienvenido! Completa tu perfil.');
+      this.router.navigate(['/complete-profile']);
+    } else {
+      this.success.set(true);
+      this.showSuccess('¡Bienvenido! ' + (user['username'] || user['email']));
+      const redirectPath = user['role'] === 'proveedor' ? '/provider-dashboard' : '/home';
+      setTimeout(() => this.router.navigate([redirectPath]), 1500);
+    }
+
+  } catch (error: any) {
+    console.error('❌ Error Apple:', error);
+    this.errorMsg.set('Error con Apple. Intenta con email.');
+  } finally {
+    this.loading.set(false);
+  }
+}
+
+
 }
