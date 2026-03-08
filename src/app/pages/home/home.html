@@ -18,7 +18,77 @@
             <a routerLink="/new" class="btn theme-btn">Crear Nueva Solicitud</a>
         </div>
 
-        <div *ngFor="let request of userRequests" class="card mb-3">
+          <ul class="booking-list">
+              
+
+                <li class="booking-box" *ngFor="let request of userRequests">
+                    <div class="booking-details">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="service-content">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <h5 class="theme-color fw-medium">#58964</h5>
+                                </div>
+                                <a href="pending-booking-details.html">
+                                    <h4 class="title-color fw-medium">{{ request.wallpaper_type }}</h4>
+                                </a>
+                                <div class="d-flex align-items-center gap-2 mt-1">
+                                    <h3 class="title-color fw-bold ">{{ request.space_type }}</h3>
+                                    <h6 class="error-color fw-medium">({{ request.size_sqm }} m² x {{ request.height_m }} m) </h6>
+                                </div>
+                            </div>
+                            <div class="service-img">
+                                <img class="img-fluid img" src="../../assets/images/vertical-service/6.jpg" alt="1">
+                            </div>
+                        </div>
+                        <div class="line-box">
+                            <div class="dot1"></div>
+                            <div class="dot2"></div>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between mt-1">
+                            <h6 class="fw-medium content-color">Status</h6>
+                            <h6 class="booking-tag pending-bg">{{ request.status }}</h6>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between mt-2">
+                            <h6 class="fw-medium content-color">Date & Time</h6>
+                            <h6 class="fw-medium title-color">{{ request.created | date:'short' }}</h6>
+                        </div>
+
+                        <div class="d-flex align-items-center Pending   justify-content-between mt-2">
+                            <h6 class="fw-medium content-color">Location</h6>
+                            <h6 class="fw-medium title-color">{{ request.city }}</h6>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between mt-2">
+                            <h6 class="fw-medium content-color">Receivable Amount</h6>
+                            <h6 class="fw-medium success-color">{{ request.budget_range }}</h6>
+                        </div>
+
+                        <!-- <ul class="booking-provider-list">
+                            <li class="booking-provider-box">
+                                <div class="provider-image">
+                                    <img class="img-fluid provider-pic" src="../../assets/images/profile/p9.png"
+                                        alt="p17">
+                                </div>
+                                <div class="provider-content">
+                                    <div>
+                                        <h6 class="content-color fw-medium">Customer</h6>
+                                        <h5 class="name fw-medium title-color">{{ request.user.name }}</h5>
+                                    </div>
+
+                                </div>
+                            </li>
+                        </ul> -->
+                        <div class="d-flex align-items-center gap-3 mt-3">
+                            <a href="home.html#!" class="btn btn-sm outline-btn w-50">Refuse</a>
+                            <a href="booking.html" class="btn btn-sm theme-btn w-50">Accept</a>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+
+
+        <!-- <div *ngFor="let request of userRequests" class="card mb-3">
             <div class="card-body">
                 <h5 class="card-title">{{ request.space_type }} - {{ request.city }}</h5>
                 <p class="card-text">
@@ -29,6 +99,6 @@
                     <small class="text-muted">Creado: {{ request.created | date:'short' }}</small>
                 </p>
             </div>
-        </div>
+        </div> -->
     </div>
 </section>
