@@ -109,65 +109,192 @@ export class Login {
   }
 
   // ========== LOGIN CON GOOGLE ==========
-  async loginWithGoogle() {
-    try {
-      this.loading.set(true);
-      this.errorMsg.set(null);
+  // async loginWithGoogle() {
+  //   try {
+  //     this.loading.set(true);
+  //     this.errorMsg.set(null);
 
-      const authData = await this.pbService.getInstance().collection('users').authWithOAuth2({
-        provider: 'google',
+  //     const authData = await this.pbService.getInstance().collection('users').authWithOAuth2({
+  //       provider: 'google',
+  //     });
+
+  //     const user = authData.record;
+  //     console.log('✅ Login Google exitoso:', user);
+
+  //     // Lógica similar al registro: verificar si necesita completar perfil
+  //     const needsProfileCompletion = !user['type'] || !user['phone'];
+
+  //     if (needsProfileCompletion) {
+  //       // Guardar datos temporales
+  //       sessionStorage.setItem('oauth_user_id', user.id);
+  //       sessionStorage.setItem('oauth_user_email', user['email']);
+  //       sessionStorage.setItem('oauth_user_name', user['name'] || user['username'] || '');
+
+  //       Swal.fire({
+  //         title: '¡Bienvenido!',
+  //         text: 'Completa tu perfil para continuar.',
+  //         icon: 'success',
+  //         timer: 2000,
+  //         showConfirmButton: false
+  //       });
+  //       this.router.navigate(['/complete-profile']);
+  //     } else {
+  //       // Usuario completo, redirigir según tipo
+  //       const redirectPath = this.getRedirectPath(user['type']);
+  //       Swal.fire({
+  //         title: '¡Bienvenido!',
+  //         text: user['name'] || user['username'] || user['email'],
+  //         icon: 'success',
+  //         timer: 1500,
+  //         showConfirmButton: false
+  //       });
+  //       setTimeout(() => this.router.navigate([redirectPath]), 1500);
+  //     }
+
+  //   } catch (error: any) {
+  //     console.error('❌ Error Google:', error);
+
+  //     if (error?.message?.includes('popup')) {
+  //       this.errorMsg.set('Permite las ventanas emergentes para continuar con Google.');
+  //     } else if (error?.message?.includes('cancelled')) {
+  //       this.errorMsg.set('Inicio con Google cancelado.');
+  //     } else {
+  //       this.errorMsg.set('Error con Google. Intenta más tarde.');
+  //     }
+
+  //     Swal.fire('Error', this.errorMsg() || 'Error desconocido', 'error');
+  //   } finally {
+  //     this.loading.set(false);
+  //   }
+  // }
+async loginWithGoogle() {
+  try {
+    this.loading.set(true);
+    this.errorMsg.set(null);
+
+    const authData = await this.pbService.getInstance().collection('users').authWithOAuth2({
+      provider: 'google',
+    });
+
+    let user = authData.record;
+    console.log('✅ Login Google exitoso:', user);
+
+    // 🎯 PASO 1: Si no tiene type, asignar 'client' por defecto
+    if (!user['type'] || user['type'] === '') {
+      await this.pbService.getInstance().collection('users').update(user.id, {
+        type: 'client',
       });
+      user['type'] = 'client';
+      console.log('🔄 Type asignado por defecto: client');
+    }
 
-      const user = authData.record;
-      console.log('✅ Login Google exitoso:', user);
+    // 🎯 PASO 2: Verificar completitud del perfil según el tipo de usuario
+    const userType = user['type'] as 'client' | 'professional';
+    const needsProfileCompletion = await this.checkProfileCompletion(user, userType);
 
-      // Lógica similar al registro: verificar si necesita completar perfil
-      const needsProfileCompletion = !user['type'] || !user['phone'];
+    if (needsProfileCompletion) {
+      // Guardar datos temporales para el formulario de completado
+      sessionStorage.setItem('oauth_user_id', user.id);
+      sessionStorage.setItem('oauth_user_type', userType); // ⭐ CLAVE: guardar el tipo
+      sessionStorage.setItem('oauth_user_email', user['email'] || '');
+      sessionStorage.setItem('oauth_user_name', user['name'] || user['username'] || '');
 
-      if (needsProfileCompletion) {
-        // Guardar datos temporales
-        sessionStorage.setItem('oauth_user_id', user.id);
-        sessionStorage.setItem('oauth_user_email', user['email']);
-        sessionStorage.setItem('oauth_user_name', user['name'] || user['username'] || '');
+      Swal.fire({
+        title: '¡Bienvenido!',
+        text: 'Completa tu perfil para continuar.',
+        icon: 'info',
+        timer: 2000,
+        showConfirmButton: false
+      });
+      this.router.navigate(['/complete-profile']);
+    } else {
+      // Usuario completo, redirigir según tipo
+      const redirectPath = this.getRedirectPath(userType);
+      const userName = user['name'] || user['username'] || user['email'] || 'Usuario';
+      
+      Swal.fire({
+        title: '¡Bienvenido!',
+        text: userName,
+        icon: 'success',
+        timer: 1500,
+        showConfirmButton: false
+      });
+      setTimeout(() => this.router.navigate([redirectPath]), 1500);
+    }
 
-        Swal.fire({
-          title: '¡Bienvenido!',
-          text: 'Completa tu perfil para continuar.',
-          icon: 'success',
-          timer: 2000,
-          showConfirmButton: false
-        });
-        this.router.navigate(['/complete-profile']);
-      } else {
-        // Usuario completo, redirigir según tipo
-        const redirectPath = this.getRedirectPath(user['type']);
-        Swal.fire({
-          title: '¡Bienvenido!',
-          text: user['name'] || user['username'] || user['email'],
-          icon: 'success',
-          timer: 1500,
-          showConfirmButton: false
-        });
-        setTimeout(() => this.router.navigate([redirectPath]), 1500);
-      }
+  } catch (error: any) {
+    console.error('❌ Error Google:', error);
 
+    if (error?.message?.includes('popup')) {
+      this.errorMsg.set('Permite las ventanas emergentes para continuar con Google.');
+    } else if (error?.message?.includes('cancelled')) {
+      this.errorMsg.set('Inicio con Google cancelado.');
+    } else {
+      this.errorMsg.set('Error con Google. Intenta más tarde.');
+    }
+
+    Swal.fire({
+      title: 'Error',
+      text: this.errorMsg() || 'Error desconocido',
+      icon: 'error',
+      confirmButtonText: 'Reintentar'
+    });
+  } finally {
+    this.loading.set(false);
+  }
+}
+/**
+ * Verifica si el usuario necesita completar su perfil según su tipo
+ * - client: solo necesita 'phone' en la colección 'users'
+ * - professional: necesita 'phone' en 'users' Y un registro en 'professional_profiles'
+ */
+private async checkProfileCompletion(
+  user: any, 
+  type: 'client' | 'professional'
+): Promise<boolean> {
+  
+  // 🟢 CASO CLIENT: Solo verificamos que tenga phone en users
+  if (type === 'client') {
+    const hasPhone = user['phone'] && user['phone'].toString().trim() !== '';
+    return !hasPhone; // true = necesita completar
+  }
+  
+  // 🔵 CASO PROFESSIONAL: Verifica phone + perfil en professional_profiles
+  if (type === 'professional') {
+    
+    // 1️⃣ Verificar phone en users
+    const hasPhone = user['phone'] && user['phone'].toString().trim() !== '';
+    if (!hasPhone) {
+      console.log('📱 Professional sin phone: necesita completar');
+      return true;
+    }
+    
+    // 2️⃣ Verificar si existe registro en professional_profiles
+    try {
+      const pb = this.pbService.getInstance();
+      const result = await pb.collection('professional_profiles').getList(1, 1, {
+        filter: `user_id = "${user.id}"`,
+      });
+      
+      const hasProfile = result.items.length > 0;
+      console.log('🔍 Professional profile check:', { 
+        userId: user.id, 
+        hasProfile 
+      });
+      
+      return !hasProfile; // true = necesita crear perfil profesional
+      
     } catch (error: any) {
-      console.error('❌ Error Google:', error);
-
-      if (error?.message?.includes('popup')) {
-        this.errorMsg.set('Permite las ventanas emergentes para continuar con Google.');
-      } else if (error?.message?.includes('cancelled')) {
-        this.errorMsg.set('Inicio con Google cancelado.');
-      } else {
-        this.errorMsg.set('Error con Google. Intenta más tarde.');
-      }
-
-      Swal.fire('Error', this.errorMsg() || 'Error desconocido', 'error');
-    } finally {
-      this.loading.set(false);
+      // 🚨 Manejo seguro: si falla la consulta, asumir que necesita completar
+      console.warn('⚠️ Error verificando professional_profiles:', error?.message || error);
+      return true;
     }
   }
-
+  
+  // 🔴 Tipo desconocido: forzar completado por seguridad
+  console.warn('⚠️ Tipo de usuario desconocido:', type);
+  return true;
+}
   private getRedirectPath(type: string): string {
     switch(type) {
       case 'provider': return '/provider-dashboard';

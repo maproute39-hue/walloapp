@@ -16,12 +16,14 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/home/home').then(c => c.HomeComponent),
     canActivate: [AuthGuard]
   },
+  
   { path: 'landing', loadComponent: () => import('./pages/landing/landing').then(c => c.Landing) },
   { path: 'requests', loadComponent: () => import('./pages/requests/requests').then(c => c.Requests) },
   { path: 'request-detail/:id', loadComponent: () => import('./pages/request-detail/request-detail').then(c => c.RequestDetail) },
   { path: 'register', loadComponent: () => import('./pages/register/register').then(c => c.Register) },
   { path: 'new', loadComponent: () => import('./pages/new/new').then(c => c.NewRequestComponent) },
   { path: 'login', loadComponent: () => import('./pages/login/login').then(c => c.Login) },
+  { path: 'complete-profile', loadComponent: () => import('./pages/complete-profile/complete-profile').then(c => c.CompleteProfile) },
 
   {
     path: 'profile',

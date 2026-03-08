@@ -1,0 +1,209 @@
+<section class="section-lg-t-space section-b-space">
+  <div class="custom-container">
+    
+    <!-- ========== HEADER ========== -->
+    <div class="auth-head text-center mb-4">
+      <h4 class="fw-medium title-color text-uppercase">
+        {{ isClient ? 'Completa tu Perfil' : 'Registro de Profesional' }}
+      </h4>
+      <p class="text-muted mb-0">
+        {{ isClient 
+          ? 'Solo necesitamos tu teléfono para continuar' 
+          : 'Cuéntanos sobre tu experiencia para conectar con clientes' 
+        }}
+      </p>
+    </div>
+
+    <!-- ========== MENSAJES ========== -->
+    <div *ngIf="errorMsg()" class="alert alert-danger alert-dismissible fade show" role="alert">
+      {{ errorMsg() }}
+      <button type="button" class="btn-close" (click)="errorMsg.set(null)"></button>
+    </div>
+    
+    <div *ngIf="successMsg()" class="alert alert-success alert-dismissible fade show" role="alert">
+      {{ successMsg() }}
+      <button type="button" class="btn-close" (click)="successMsg.set(null)"></button>
+    </div>
+
+    <!-- ========== FORMULARIO CLIENT ========== -->
+    <form *ngIf="isClient" [formGroup]="clientForm" (ngSubmit)="onSubmit()" class="auth-form pt-0">
+      
+      <!-- Teléfono -->
+      <div class="form-group">
+        <label class="form-label mb-2">Teléfono <span class="text-danger">*</span></label>
+        <div class="form-input">
+          <input 
+            type="tel" 
+            class="form-control" 
+            formControlName="phone" 
+            placeholder="+58 4XX XXX-XXXX"
+            (input)="clientForm.get('phone')?.markAsTouched()">
+          <i class="phone"></i>
+        </div>
+        
+        <!-- Validaciones -->
+        <div *ngIf="clientForm.get('phone')?.invalid && clientForm.get('phone')?.touched" 
+             class="text-danger small mt-1">
+          <div *ngIf="clientForm.get('phone')?.hasError('required')">
+            El teléfono es requerido
+          </div>
+          <div *ngIf="clientForm.get('phone')?.hasError('invalidPhone')">
+            Ingresa un teléfono válido (7-10 dígitos)
+          </div>
+        </div>
+      </div>
+
+      <!-- Info adicional -->
+      <div class="alert alert-info small">
+        <i class="info-circle me-1"></i>
+        Como cliente, solo necesitas registrar tu teléfono para recibir notificaciones y coordinar servicios.
+      </div>
+
+      <!-- Botón Submit -->
+      <div class="fixed-btn mt-4">
+        <button type="submit" class="btn theme-btn w-100" [disabled]="clientForm.invalid || isLoading()">
+          {{ isLoading() ? 'Guardando...' : 'Completar y Continuar' }}
+        </button>
+      </div>
+    </form>
+
+    <!-- ========== FORMULARIO PROFESSIONAL ========== -->
+    <form *ngIf="isProfessional" [formGroup]="professionalForm" (ngSubmit)="onSubmit()" class="auth-form pt-0">
+      
+      <!-- Teléfono -->
+      <div class="form-group">
+        <label class="form-label mb-2">Teléfono <span class="text-danger">*</span></label>
+        <div class="form-input">
+          <input 
+            type="tel" 
+            class="form-control" 
+            formControlName="phone" 
+            placeholder="+58 4XX XXX-XXXX">
+          <i class="phone"></i>
+        </div>
+        <div *ngIf="professionalForm.get('phone')?.invalid && professionalForm.get('phone')?.touched" 
+             class="text-danger small mt-1">
+          <div *ngIf="professionalForm.get('phone')?.hasError('required')">El teléfono es requerido</div>
+          <div *ngIf="professionalForm.get('phone')?.hasError('invalidPhone')">Teléfono inválido (7-10 dígitos)</div>
+        </div>
+      </div>
+
+      <!-- Nombre Completo -->
+      <div class="form-group">
+        <label class="form-label mb-2">Nombre Completo <span class="text-danger">*</span></label>
+        <div class="form-input">
+          <input 
+            type="text" 
+            class="form-control" 
+            formControlName="full_name" 
+            placeholder="Ej: María González">
+          <i class="user"></i>
+        </div>
+        <div *ngIf="professionalForm.get('full_name')?.invalid && professionalForm.get('full_name')?.touched" 
+             class="text-danger small mt-1">
+          <div *ngIf="professionalForm.get('full_name')?.hasError('required')">El nombre es requerido</div>
+          <div *ngIf="professionalForm.get('full_name')?.hasError('minlength')">Mínimo 3 caracteres</div>
+        </div>
+      </div>
+
+      <!-- Años de Experiencia -->
+      <div class="form-group">
+        <label class="form-label mb-2">Años de Experiencia <span class="text-danger">*</span></label>
+        <div class="form-input">
+          <input 
+            type="number" 
+            class="form-control" 
+            formControlName="experience_years" 
+            placeholder="Ej: 5"
+            min="0" max="50">
+          <i class="calendar"></i>
+        </div>
+        <div *ngIf="professionalForm.get('experience_years')?.touched && getExperienceError()" 
+             class="text-danger small mt-1">
+          {{ getExperienceError() }}
+        </div>
+      </div>
+
+      <!-- Biografía -->
+      <div class="form-group">
+        <label class="form-label mb-2">Biografía Profesional <span class="text-danger">*</span></label>
+        <div class="form-input">
+          <textarea 
+            class="form-control" 
+            formControlName="bio" 
+            placeholder="Describe tu experiencia, especialidades y enfoque de trabajo..."
+            rows="4"></textarea>
+          <i class="edit"></i>
+        </div>
+        <div class="d-flex justify-content-between small text-muted mt-1">
+          <span *ngIf="professionalForm.get('bio')?.invalid && professionalForm.get('bio')?.touched" class="text-danger">
+            Mínimo 20 caracteres
+          </span>
+          <span>{{ professionalForm.get('bio')?.value?.length || 0 }}/500</span>
+        </div>
+      </div>
+
+      <!-- Ciudad -->
+      <div class="form-group">
+        <label class="form-label mb-2">Ciudad de Servicio <span class="text-danger">*</span></label>
+        <div class="form-input">
+          <select class="form-control" formControlName="city">
+            <option value="">Selecciona tu ciudad</option>
+            <option *ngFor="let city of cities" [value]="city.value">{{ city.label }}</option>
+          </select>
+          <i class="location"></i>
+        </div>
+        <div *ngIf="professionalForm.get('city')?.invalid && professionalForm.get('city')?.touched" 
+             class="text-danger small mt-1">
+          La ciudad es requerida
+        </div>
+      </div>
+
+      <!-- Tipos de Wallpaper (Multi-select) -->
+      <div class="form-group">
+        <label class="form-label mb-2">Tipos de Trabajo <span class="text-danger">*</span></label>
+        <p class="small text-muted mb-2">Selecciona los tipos de instalación que realizas</p>
+        
+        <div class="d-flex flex-wrap gap-2">
+          <label *ngFor="let type of wallpaperTypes" 
+                 class="form-check form-check-inline border rounded p-2 px-3 cursor-pointer"
+                 [class.active]="isWallpaperTypeSelected(type.value)">
+            <input 
+              type="checkbox" 
+              class="form-check-input me-1" 
+              [value]="type.value"
+              [checked]="isWallpaperTypeSelected(type.value)"
+              (change)="onWallpaperTypeChange(type.value, $event)">
+            <span class="form-check-label">{{ type.label }}</span>
+          </label>
+        </div>
+        
+        <div *ngIf="professionalForm.get('wallpaper_types')?.invalid && professionalForm.get('wallpaper_types')?.touched" 
+             class="text-danger small mt-1">
+          Selecciona al menos un tipo de trabajo
+        </div>
+      </div>
+
+      <!-- Info de revisión -->
+      <div class="alert alert-warning small">
+        <i class="shield-check me-1"></i>
+        Tu perfil será revisado por nuestro equipo antes de activarse. Recibirás una notificación cuando esté aprobado.
+      </div>
+
+      <!-- Botón Submit -->
+      <div class="fixed-btn mt-4">
+        <button type="submit" class="btn theme-btn w-100" [disabled]="professionalForm.invalid || isLoading()">
+          {{ isLoading() ? 'Enviando...' : 'Enviar para Revisión' }}
+        </button>
+      </div>
+    </form>
+
+    <!-- ========== CANCELAR / VOLVER ========== -->
+    <div class="text-center mt-3">
+      <a routerLink="/login" class="text-muted small">
+        <i class="arrow-left me-1"></i> Volver al inicio
+      </a>
+    </div>
+
+  </div>
+</section>

@@ -1,0 +1,46 @@
+.complete-profile {
+  // Estilos para checkboxes personalizados
+  .form-check-inline {
+    transition: all 0.2s ease;
+    
+    &.active,
+    &:hover {
+      border-color: #ff6b35 !important;
+      background-color: rgba(255, 107, 53, 0.05);
+    }
+    
+    .form-check-input:checked {
+      background-color: #ff6b35;
+      border-color: #ff6b35;
+    }
+  }
+
+  // Textarea con contador
+  textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  // Mensajes de validación
+  .text-danger.small {
+    font-size: 0.8rem;
+    animation: fadeIn 0.2s ease;
+  }
+
+  // Botón fijo en móvil
+  .fixed-btn {
+    @media (max-width: 768px) {
+      position: sticky;
+      bottom: 0;
+      background: white;
+      padding: 1rem 0;
+      border-top: 1px solid #eee;
+      z-index: 100;
+    }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}

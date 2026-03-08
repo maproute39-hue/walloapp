@@ -44,7 +44,73 @@ export class Register {
 
   // preview del avatar
   avatarPreview = signal<string | null>(null);
-
+/**
+ * Verifica si el usuario necesita completar su perfil según su tipo
+ * - client: solo necesita 'phone' en la colección 'users'
+ * - professional: necesita 'phone' en 'users' Y un registro en 'professional_profiles'
+ * 
+ * @param user - Objeto usuario retornado por PocketBase auth
+ * @param type - Tipo de usuario: 'client' | 'professional'
+ * @returns Promise<boolean> - true si necesita completar perfil, false si está completo
+ */
+private async checkProfileCompletion(
+  user: any, 
+  type: 'client' | 'professional'
+): Promise<boolean> {
+  
+  // 🟢 CASO CLIENT: Solo verificamos que tenga phone en la colección users
+  if (type === 'client') {
+    const hasPhone = user['phone'] && user['phone'].trim() !== '';
+    return !hasPhone; // Retorna true si NO tiene phone (necesita completar)
+  }
+  
+  // 🔵 CASO PROFESSIONAL: Verifica phone + perfil en professional_profiles
+  if (type === 'professional') {
+    
+    // 1️⃣ Verificar que tenga phone en users
+    const hasPhone = user['phone'] && user['phone'].trim() !== '';
+    if (!hasPhone) {
+      console.log('📱 Professional sin phone: necesita completar');
+      return true;
+    }
+    
+    // 2️⃣ Verificar si existe registro en professional_profiles
+    try {
+      const pb = this.pbService.getInstance();
+      const result = await pb.collection('professional_profiles').getList(1, 1, {
+        filter: `user_id = "${user.id}"`,
+        $cancelKey: `check-profile-${user.id}`, // Evita race conditions
+      });
+      
+      const hasProfile = result.items.length > 0;
+      console.log('🔍 Professional profile check:', { 
+        userId: user.id, 
+        hasProfile,
+        itemsFound: result.items.length 
+      });
+      
+      // Retorna true si NO tiene perfil profesional (necesita completar)
+      return !hasProfile;
+      
+    } catch (error: any) {
+      // 🚨 Manejo seguro de errores: si falla la consulta, asumir que necesita completar
+      console.warn('⚠️ Error verificando professional_profiles:', {
+        error: error?.message || error,
+        userId: user.id
+      });
+      
+      // Opción conservadora: pedir completar perfil si hay error de consulta
+      return true;
+      
+      // Opción alternativa: permitir continuar si es error de red temporal
+      // return false;
+    }
+  }
+  
+  // 🔴 Tipo desconocido o inválido: forzar completado de perfil por seguridad
+  console.warn('⚠️ Tipo de usuario desconocido:', type);
+  return true;
+}
   // Validador de archivo (tipo y tamaño); valida solo si el valor es un File
   private fileValidator = (control: AbstractControl): ValidationErrors | null => {
     const val = control.value as unknown;
@@ -232,6 +298,63 @@ export class Register {
 
   // ========== LOGIN CON GOOGLE ==========
 // ========== LOGIN CON GOOGLE ==========
+// async loginWithGoogle() {
+//   try {
+//     this.loading.set(true);
+//     this.errorMsg.set(null);
+
+//     const authData = await this.pbService.getInstance().collection('users').authWithOAuth2({
+//       provider: 'google',
+//     });
+
+//     const user = authData.record;
+//         // Si no tiene type, asignarlo
+//     if (!user['type']) {
+//       await this.pbService.getInstance().collection('users').update(user.id, {
+//         type: 'professional', // o 'client'
+//         phone: user['phone'] || '', // opcional
+//       });
+      
+//       // Actualizar el objeto user localmente
+//       user['type'] = 'professional';
+//     }
+    
+//     // Verificar si el usuario necesita completar el perfil
+//     // (mismo criterio que usas para Apple)
+//     const needsProfileCompletion = !user['type'] || !user['phone'];
+    
+//     if (needsProfileCompletion) {
+//       // Guardar datos temporales para el formulario de completado
+//       sessionStorage.setItem('oauth_user_id', user.id);
+//       sessionStorage.setItem('oauth_user_name', user['name'] || user['username'] || '');
+//       sessionStorage.setItem('oauth_user_email', user['email'] || '');
+      
+//       this.showSuccess('¡Bienvenido! Completa tu perfil para continuar.');
+//       this.router.navigate(['/complete-profile']);
+//     } else {
+//       // Usuario completo, redirigir según su rol
+//       this.success.set(true);
+//       this.showSuccess('¡Bienvenido! ' + (user['name'] || user['username'] || user['email']));
+      
+//       const redirectPath = this.getRedirectPath(user['type']);
+//       setTimeout(() => this.router.navigate([redirectPath]), 1500);
+//     }
+
+//   } catch (error: any) {
+//     console.error('❌ Error Google:', error);
+    
+//     // Manejo de errores específicos de OAuth
+//     if (error?.message?.includes('popup')) {
+//       this.errorMsg.set('Permite las ventanas emergentes para continuar con Google.');
+//     } else if (error?.message?.includes('cancelled')) {
+//       this.errorMsg.set('Inicio con Google cancelado.');
+//     } else {
+//       this.errorMsg.set('Error con Google. Intenta con email.');
+//     }
+//   } finally {
+//     this.loading.set(false);
+//   }
+// }
 async loginWithGoogle() {
   try {
     this.loading.set(true);
@@ -241,43 +364,42 @@ async loginWithGoogle() {
       provider: 'google',
     });
 
-    const user = authData.record;
-        // Si no tiene type, asignarlo
-    if (!user['type']) {
+    let user = authData.record;
+
+    // 🎯 PASO 1: Si no tiene type, asignar por defecto 'client' 
+    // (o mostrar modal para que elija, según tu flujo)
+    if (!user['type'] || user['type'] === '') {
       await this.pbService.getInstance().collection('users').update(user.id, {
-        type: 'professional', // o 'client'
-        phone: user['phone'] || '', // opcional
+        type: 'professional', // ⭐ Default seguro, luego puede cambiar en complete-profile
       });
-      
-      // Actualizar el objeto user localmente
       user['type'] = 'professional';
     }
-    
-    // Verificar si el usuario necesita completar el perfil
-    // (mismo criterio que usas para Apple)
-    const needsProfileCompletion = !user['type'] || !user['phone'];
+
+    // 🎯 PASO 2: Determinar si necesita completar perfil según su tipo
+    const userType = user['type'] as 'client' | 'professional';
+    const needsProfileCompletion = await this.checkProfileCompletion(user, userType);
     
     if (needsProfileCompletion) {
       // Guardar datos temporales para el formulario de completado
       sessionStorage.setItem('oauth_user_id', user.id);
+      sessionStorage.setItem('oauth_user_type', userType); // ⭐ CLAVE: guardar el tipo
       sessionStorage.setItem('oauth_user_name', user['name'] || user['username'] || '');
       sessionStorage.setItem('oauth_user_email', user['email'] || '');
       
       this.showSuccess('¡Bienvenido! Completa tu perfil para continuar.');
-      this.router.navigate(['/complete-profile']);
+      setTimeout(() => this.router.navigate(['/complete-profile']), 1500);
     } else {
       // Usuario completo, redirigir según su rol
       this.success.set(true);
       this.showSuccess('¡Bienvenido! ' + (user['name'] || user['username'] || user['email']));
       
-      const redirectPath = this.getRedirectPath(user['type']);
+      const redirectPath = this.getRedirectPath(userType);
       setTimeout(() => this.router.navigate([redirectPath]), 1500);
     }
 
   } catch (error: any) {
     console.error('❌ Error Google:', error);
     
-    // Manejo de errores específicos de OAuth
     if (error?.message?.includes('popup')) {
       this.errorMsg.set('Permite las ventanas emergentes para continuar con Google.');
     } else if (error?.message?.includes('cancelled')) {
@@ -289,7 +411,6 @@ async loginWithGoogle() {
     this.loading.set(false);
   }
 }
-
   // ========== LOGIN CON APPLE ==========
   async loginWithApple() {
     try {
