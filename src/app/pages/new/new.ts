@@ -144,7 +144,7 @@ async loginWithApple() {
       await this.submitRequestToBackend(user.id);
       this.step = 4;
       this.showSuccess('¡Solicitud creada con éxito!');
-      setTimeout(() => this.router.navigate(['/Home']), 2000);
+      setTimeout(() => this.router.navigate(['/home']), 2000);
     } else {
       this.showSuccess('¡Bienvenido! ' + (user['name'] || user['email']));
     }
@@ -238,7 +238,7 @@ async loginWithApple() {
         
         // Redirigir después de 2 segundos
         setTimeout(() => {
-          this.router.navigate(['/Home']);
+          this.router.navigate(['/home']);
         }, 2000);
       } else {
         throw new Error('Código inválido. Debe ser un número de 6 dígitos');
@@ -265,16 +265,29 @@ async loginWithGoogle() {
       provider: 'google',
     });
 
-    const user = authData.record;
+    let user = authData.record;
     console.log('✅ Login Google exitoso:', user);
 
+    // 🎯 ASIGNAR ROL 'CLIENT' SI NO TIENE TYPE
+    if (!user['type'] || user['type'] === '') {
+      try {
+        const updatedUser = await this.pbService.getInstance().collection('users').update(user.id, {
+          type: 'client',
+        });
+        user = updatedUser; // Actualizamos la referencia local
+        console.log('🔄 Type actualizado a "client"');
+      } catch (updateError: any) {
+        console.warn('⚠️ No se pudo actualizar el type:', updateError?.message);
+        // Continuamos igual, no bloqueamos el flujo por esto
+      }
+    }
     if (this.step === 2 && this.projectForm.valid) {
       await this.submitRequestToBackend(user.id);
       this.step = 4;
       this.showSuccess('¡Solicitud creada con éxito! Redirigiendo...');
       
       setTimeout(() => {
-        this.router.navigate(['/Home']);
+        this.router.navigate(['/home']);
       }, 2000);
     } else {
       this.showSuccess('¡Bienvenido! ' + (user['name'] || user['email']));

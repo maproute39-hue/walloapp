@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, OnDestroy } from '@angular/core';
-import { Router, NavigationEnd } from '@angular/router';
+import { Router, NavigationEnd, RouterLink } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
 
@@ -17,7 +17,7 @@ declare global {
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './sidebar.html',
   styleUrls: ['./sidebar.scss'],
 })

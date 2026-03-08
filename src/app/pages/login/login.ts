@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import Swal from 'sweetalert2';
 import { AuthPocketbaseService } from '../../services/auth-pocketbase.service';
+import { PocketbaseService } from '../../services/pocketbase.service';
 
 @Component({
   selector: 'app-login',
@@ -16,6 +17,7 @@ export class Login {
   private fb = inject(FormBuilder);
   private auth = inject(AuthPocketbaseService);
   private router = inject(Router);
+  private pbService = inject(PocketbaseService);
 
   loading = signal(false);
   submitted = signal(false);
@@ -103,6 +105,74 @@ export class Login {
       this.errorMsg.set(msg);
     } finally {
       this.loading.set(false);
+    }
+  }
+
+  // ========== LOGIN CON GOOGLE ==========
+  async loginWithGoogle() {
+    try {
+      this.loading.set(true);
+      this.errorMsg.set(null);
+
+      const authData = await this.pbService.getInstance().collection('users').authWithOAuth2({
+        provider: 'google',
+      });
+
+      const user = authData.record;
+      console.log('✅ Login Google exitoso:', user);
+
+      // Lógica similar al registro: verificar si necesita completar perfil
+      const needsProfileCompletion = !user['type'] || !user['phone'];
+
+      if (needsProfileCompletion) {
+        // Guardar datos temporales
+        sessionStorage.setItem('oauth_user_id', user.id);
+        sessionStorage.setItem('oauth_user_email', user['email']);
+        sessionStorage.setItem('oauth_user_name', user['name'] || user['username'] || '');
+
+        Swal.fire({
+          title: '¡Bienvenido!',
+          text: 'Completa tu perfil para continuar.',
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false
+        });
+        this.router.navigate(['/complete-profile']);
+      } else {
+        // Usuario completo, redirigir según tipo
+        const redirectPath = this.getRedirectPath(user['type']);
+        Swal.fire({
+          title: '¡Bienvenido!',
+          text: user['name'] || user['username'] || user['email'],
+          icon: 'success',
+          timer: 1500,
+          showConfirmButton: false
+        });
+        setTimeout(() => this.router.navigate([redirectPath]), 1500);
+      }
+
+    } catch (error: any) {
+      console.error('❌ Error Google:', error);
+
+      if (error?.message?.includes('popup')) {
+        this.errorMsg.set('Permite las ventanas emergentes para continuar con Google.');
+      } else if (error?.message?.includes('cancelled')) {
+        this.errorMsg.set('Inicio con Google cancelado.');
+      } else {
+        this.errorMsg.set('Error con Google. Intenta más tarde.');
+      }
+
+      Swal.fire('Error', this.errorMsg() || 'Error desconocido', 'error');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  private getRedirectPath(type: string): string {
+    switch(type) {
+      case 'provider': return '/provider-dashboard';
+      case 'client': return '/home';
+      default: return '/home';
     }
   }
 

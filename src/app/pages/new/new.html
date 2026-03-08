@@ -211,7 +211,7 @@
       <h5 class="mt-1 content-color">Confirma tu contacto</h5>
     </div>
 
-    <form class="auth-form" (ngSubmit)="onRegisterPhone()" [formGroup]="phoneForm">
+    <!-- <form class="auth-form" (ngSubmit)="onRegisterPhone()" [formGroup]="phoneForm">
       <div class="form-group mt-0">
         <label class="form-label">Número de teléfono</label>
         <div class="d-flex gap-2">
@@ -234,12 +234,10 @@
           </div>
         </div>
         
-        <!-- Validación -->
         <div *ngIf="phoneForm.get('phone')?.invalid && phoneForm.get('phone')?.touched" class="text-danger small mt-1">
           Ingresa un número válido (7-10 dígitos)
         </div>
         
-        <!-- Mensaje de ayuda -->
         <small class="text-muted">Te enviaremos un código SMS para verificar tu número</small>
       </div>
 
@@ -251,10 +249,10 @@
           Enviando...
         </span>
       </button>
-    </form>
+    </form> -->
 
     <!-- OAuth Options -->
-  <div class="division"><span>O continúa con</span></div>
+  <div class="division"><span>Continúa con</span></div>
 <ul class="login-list">
   <li class="login-box">
     <!-- ✅ Google: Agrega type, (click) y [disabled] -->
@@ -266,8 +264,7 @@
       <img class="img-fluid login-icon" src="./assets/images/icon/svg/google.svg" alt="google">
     </button>
   </li>
-  <li class="login-box">
-    <!-- ✅ Apple: Mismo patrón (puedes crear loginWithApple después) -->
+  <!-- <li class="login-box">
     <button 
       type="button"
       class="btn btn-outline"
@@ -275,7 +272,7 @@
       [disabled]="isLoading">
       <img class="img-fluid login-icon apple-img" src="./assets/images/icon/svg/apple.svg" alt="apple">
     </button>
-  </li>
+  </li> -->
 </ul>
     
     <!-- Link para volver -->

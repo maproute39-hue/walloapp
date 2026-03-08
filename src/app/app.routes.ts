@@ -2,16 +2,20 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from '@app/pages/home/home';
 import { NewRequestComponent } from '@app/pages/new/new';
+import { AuthGuard } from './guards/auth.guard';
 
 import { Landing } from '@app/pages/landing/landing';
 export const routes: Routes = [
   {
     path: '',
-    component: Landing,
-    title: 'Wallo | Install',
-    data: { description: 'Profesionales de instalacion de papel.', canonical: '/' },
+    redirectTo: 'home',
+    pathMatch: 'full'
   },
-  { path: 'home', loadComponent: () => import('./pages/home/home').then(c => c.HomeComponent) },
+  { 
+    path: 'home', 
+    loadComponent: () => import('./pages/home/home').then(c => c.HomeComponent),
+    canActivate: [AuthGuard]
+  },
   { path: 'landing', loadComponent: () => import('./pages/landing/landing').then(c => c.Landing) },
   { path: 'requests', loadComponent: () => import('./pages/requests/requests').then(c => c.Requests) },
   { path: 'request-detail/:id', loadComponent: () => import('./pages/request-detail/request-detail').then(c => c.RequestDetail) },

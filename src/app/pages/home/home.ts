@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { PbService } from '../../services/pb.service';
+import { PocketbaseService } from '@app/services/pocketbase.service';
 
 @Component({
   selector: 'app-home',
@@ -11,11 +12,13 @@ import { PbService } from '../../services/pb.service';
   styleUrl: './home.scss'
 })
 export class HomeComponent implements OnInit, OnDestroy {
-  userId: string = 'alvekaoo07856t0'; // Usuario simulado para pruebas
+  userId: string = ''; // Usuario simulado para pruebas
   userRequests: any[] = [];
   private unsubscribe: (() => void) | null = null;
 
-  constructor(private pbService: PbService) {}
+  constructor(
+    private pocketbaseService: PocketbaseService,
+    private pbService: PbService) {}
 
   async ngOnInit(): Promise<void> {
     await this.loadUserRequests();
@@ -32,7 +35,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     try {
       // Cargar solicitudes iniciales del usuario usando el índice client_id
       const records = await this.pbService.pb.collection('requests').getList(1, 50, {
-        filter: `client_id="${this.userId}"`,
+        filter: `client_id="${this.pocketbaseService.getCurrentUser()?.id}"`,
         sort: '-created'
       });
       this.userRequests = records.items;
@@ -47,7 +50,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.unsubscribe = await this.pbService.pb.collection('requests').subscribe('*', (e) => {
       console.log('Cambio en solicitudes:', e.action, e.record);
 
-      if (e.record['client_id'] === this.userId) {
+      if (e.record['client_id'] === this.pocketbaseService.getCurrentUser()?.id) {
         if (e.action === 'create') {
           this.userRequests.unshift(e.record);
         } else if (e.action === 'update') {
@@ -60,7 +63,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         }
       }
     }, {
-      filter: `client_id="${this.userId}"`
+      filter: `client_id="${this.pocketbaseService.getCurrentUser()?.id}"`
     });
   }
 }

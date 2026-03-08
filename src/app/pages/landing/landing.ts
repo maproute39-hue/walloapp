@@ -1,10 +1,12 @@
 import { Component, inject, } from '@angular/core';
 import { Provider } from '../../interfaces/provider.interface';
 import { RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 import { ConfigMobileService } from '@app/core/config-mobile.service';
 import { BannerItem } from '@app/interfaces/banner.interface';
 import { SeoService } from '@app/services/seo.service';
+import { AuthPocketbaseService } from '../../services/auth-pocketbase.service';
 import { 
   FormsModule, 
   ReactiveFormsModule, 
@@ -17,7 +19,8 @@ import {
 @Component({
   selector: 'app-landing',
   imports: [
-    RouterLink
+    RouterLink,
+    CommonModule
   ],
   templateUrl: './landing.html',
   styleUrl: './landing.scss'
@@ -27,6 +30,12 @@ constructor(public cfg: ConfigMobileService){
     this.cfg.load();
   }
   private seo = inject(SeoService);
+  private auth = inject(AuthPocketbaseService);
+
+  // Getter para verificar si el usuario está logueado
+  get isLoggedIn(): boolean {
+    return this.auth.isLoggedIn();
+  }
 
   banners: BannerItem[] = [
     { id: 'b1', title: 'Solicita tu reparación', subtitle: 'Plomería, electricidad y más', imageUrl: '/assets/banners/hero1.jpg', link: '/servicios' }

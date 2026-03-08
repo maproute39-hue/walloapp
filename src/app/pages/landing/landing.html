@@ -248,7 +248,7 @@
         </section>
     </div>
 
-    <div class="grid-btn fixed-button">
+    <div class="grid-btn fixed-button" *ngIf="!isLoggedIn">
         <div class="custom-container">
             <div class="d-flex align-items-center gap-3">
                 <a routerLink="/register" class="btn theme-outline-btn w-50" style="background-color: transparent;      color: rgba(var(--theme-color), 1);      border-color: rgba(var(--theme-color), 1);      font-weight: 500;      font-size: 14px;      border-radius: 8px;">I'm Pro</a>
