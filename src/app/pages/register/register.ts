@@ -58,7 +58,7 @@ export class Register {
   };
 
   form = this.fb.group({
-    type: ['cliente' as UserType, [Validators.required]],
+    type: ['client' as UserType, [Validators.required]],
     username: ['', [Validators.required, Validators.minLength(3)]],
     email: ['', [Validators.required, Validators.email]],
     phone: [
@@ -134,8 +134,8 @@ export class Register {
       // Emails
       const createdAt = new Date().toISOString();
       try {
-        if (v.type === 'cliente') {
-          await this.email.sendBienvenidaCliente(v.email!, v.username!, {
+        if (v.type === 'client') {
+          await this.email.sendBienvenidaClient(v.email!, v.username!, {
             name: v.username!,
             email: v.email!,
             type: v.type!,
@@ -143,14 +143,14 @@ export class Register {
             created: createdAt,
           });
         } else {
-          await this.email.sendBienvenidaProveedor(v.email!, v.username!, {
+          await this.email.sendBienvenidaProfessional(v.email!, v.username!, {
             name: v.username!,
             email: v.email!,
             type: v.type!,
             phone: v.phone!,
             created: createdAt,
           });
-          await this.email.notifyAdminNuevoProveedor({
+          await this.email.notifyAdminNuevoProfessional({
             name: v.username!,
             email: v.email!,
             type: v.type!,
@@ -162,10 +162,10 @@ export class Register {
         console.error('Fallo envío de email:', mailErr?.message || mailErr);
       }
 
-      if (v.type === 'cliente') {
+      if (v.type === 'client') {
         await Swal.fire({
           title: '¡Cuenta creada!',
-          text: `Bienvenido ${v.username}, tu cuenta de cliente fue activada correctamente.`,
+          text: `Bienvenido ${v.username}, tu cuenta de client fue activada correctamente.`,
           icon: 'success',
           confirmButtonText: 'Ir al inicio',
         });
@@ -196,7 +196,7 @@ export class Register {
     const dniCtrl = this.form.get('dni')!;
     const avatarCtrl = this.form.get('avatar')!;
 
-    if (t === 'proveedor') {
+    if (t === 'professional') {
       dniCtrl.addValidators([Validators.required]);
       avatarCtrl.addValidators([Validators.required, this.fileValidator]);
     } else {
@@ -212,6 +212,24 @@ export class Register {
     return this.form.get('type')?.value === t;
   }
 
+  private getRedirectPath(type: string): string {
+    switch(type) {
+      case 'professional': return '/provider-dashboard';
+      case 'client': return '/home';
+      default: return '/home';
+    }
+  }
+
+  private showSuccess(message: string) {
+    Swal.fire({
+      title: '¡Éxito!',
+      text: message,
+      icon: 'success',
+      timer: 2000,
+      showConfirmButton: false
+    });
+  }
+
   // ========== LOGIN CON GOOGLE ==========
 // ========== LOGIN CON GOOGLE ==========
 async loginWithGoogle() {
@@ -219,100 +237,91 @@ async loginWithGoogle() {
     this.loading.set(true);
     this.errorMsg.set(null);
 
-    // 1. Autenticar con Google
     const authData = await this.pbService.getInstance().collection('users').authWithOAuth2({
       provider: 'google',
     });
 
     const user = authData.record;
-    console.log('✅ Login Google exitoso:', user);
-
-    // 2. Verificar si es usuario nuevo o existente
-    // PocketBase crea automáticamente el usuario si no existe
+        // Si no tiene type, asignarlo
+    if (!user['type']) {
+      await this.pbService.getInstance().collection('users').update(user.id, {
+        type: 'professional', // o 'client'
+        phone: user['phone'] || '', // opcional
+      });
+      
+      // Actualizar el objeto user localmente
+      user['rol'] = 'professional';
+    }
     
-    // 3. Si es nuevo, puede que necesite completar datos (phone, rol)
-    const isNewUser = !user['role'] || !user['phone'];
+    // Verificar si el usuario necesita completar el perfil
+    // (mismo criterio que usas para Apple)
+    const needsProfileCompletion = !user['type'] || !user['phone'];
     
-    if (isNewUser) {
-      // Guardar info temporal y redirigir a completar perfil
+    if (needsProfileCompletion) {
+      // Guardar datos temporales para el formulario de completado
       sessionStorage.setItem('oauth_user_id', user.id);
-      sessionStorage.setItem('oauth_user_email', user['email']);
-      sessionStorage.setItem('oauth_user_name', user['name'] || '');
+      sessionStorage.setItem('oauth_user_name', user['name'] || user['username'] || '');
+      sessionStorage.setItem('oauth_user_email', user['email'] || '');
       
       this.showSuccess('¡Bienvenido! Completa tu perfil para continuar.');
       this.router.navigate(['/complete-profile']);
     } else {
-      // Usuario completo, redirigir según rol
+      // Usuario completo, redirigir según su rol
       this.success.set(true);
-      this.showSuccess(`¡Bienvenido ${user['name'] || user['email']}!`);
+      this.showSuccess('¡Bienvenido! ' + (user['name'] || user['username'] || user['email']));
       
-      const redirectPath = this.getRedirectPath(user['role']);
-      setTimeout(() => {
-        this.router.navigate([redirectPath]);
-      }, 1500);
-    }
-
-  } catch (error: any) {
-    console.error('❌ Error Google:', error);
-    this.errorMsg.set(error?.message || 'Error con Google');
-    Swal.fire('Error', this.errorMsg() || 'Error desconocido', 'error');
-  } finally {
-    this.loading.set(false);
-  }
-}
-
-private getRedirectPath(role: string): string {
-  switch(role) {
-    case 'professional': return '/provider-dashboard';
-    case 'client': return '/home';
-    default: return '/home';
-  }
-}
-
-private showSuccess(message: string) {
-  Swal.fire({
-    title: '¡Éxito!',
-    text: message,
-    icon: 'success',
-    timer: 2000,
-    showConfirmButton: false
-  });
-}
-
-// ========== LOGIN CON APPLE (opcional) ==========
-async loginWithApple() {
-  try {
-    this.loading.set(true);
-    this.errorMsg.set(null);
-
-    const authData = await this.pbService.getInstance().collection('users').authWithOAuth2({
-      provider: 'apple',
-    });
-
-    const user = authData.record;
-    
-    // Misma lógica que Google
-    const needsProfileCompletion = !user['role'] || !user['phone'];
-    
-    if (needsProfileCompletion) {
-      sessionStorage.setItem('pending_user_id', user.id);
-      sessionStorage.setItem('pending_user_role', 'cliente');
-      this.showSuccess('¡Bienvenido! Completa tu perfil.');
-      this.router.navigate(['/complete-profile']);
-    } else {
-      this.success.set(true);
-      this.showSuccess('¡Bienvenido! ' + (user['username'] || user['email']));
-      const redirectPath = user['role'] === 'proveedor' ? '/provider-dashboard' : '/home';
+      const redirectPath = this.getRedirectPath(user['type']);
       setTimeout(() => this.router.navigate([redirectPath]), 1500);
     }
 
   } catch (error: any) {
-    console.error('❌ Error Apple:', error);
-    this.errorMsg.set('Error con Apple. Intenta con email.');
+    console.error('❌ Error Google:', error);
+    
+    // Manejo de errores específicos de OAuth
+    if (error?.message?.includes('popup')) {
+      this.errorMsg.set('Permite las ventanas emergentes para continuar con Google.');
+    } else if (error?.message?.includes('cancelled')) {
+      this.errorMsg.set('Inicio con Google cancelado.');
+    } else {
+      this.errorMsg.set('Error con Google. Intenta con email.');
+    }
   } finally {
     this.loading.set(false);
   }
 }
 
+  // ========== LOGIN CON APPLE ==========
+  async loginWithApple() {
+    try {
+      this.loading.set(true);
+      this.errorMsg.set(null);
 
+      const authData = await this.pbService.getInstance().collection('users').authWithOAuth2({
+        provider: 'apple',
+      });
+
+      const user = authData.record;
+      
+      // Misma lógica que Google
+      const needsProfileCompletion = !user['type'] || !user['phone'];
+      
+      if (needsProfileCompletion) {
+        sessionStorage.setItem('oauth_user_id', user.id);
+        sessionStorage.setItem('oauth_user_name', user['name'] || user['username'] || '');
+        this.showSuccess('¡Bienvenido! Completa tu perfil.');
+        this.router.navigate(['/complete-profile']);
+      } else {
+        this.success.set(true);
+        this.showSuccess('¡Bienvenido! ' + (user['name'] || user['username'] || user['email']));
+        const redirectPath = this.getRedirectPath(user['type']);
+        setTimeout(() => this.router.navigate([redirectPath]), 1500);
+      }
+
+    } catch (error: any) {
+      console.error('❌ Error Apple:', error);
+      this.errorMsg.set('Error con Apple. Intenta con email.');
+    } finally {
+      this.loading.set(false);
+    }
+  }
 }

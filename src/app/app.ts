@@ -32,12 +32,8 @@ export class App implements AfterViewInit {
   
   constructor(
     public scriptLoaderService: ScriptLoaderService,
-    public router: Router,private cfg: ConfigMobileService) {
-    this.cfg.load();
-    this.router.events.subscribe(() => {
-      this.hideHeader = this.router.url === '/register';
-    });
-  }
+    public router: Router
+  ) {}
   async ngAfterViewInit() {
     // Re-inicializa iconsax en cada navegación (después de que el DOM cambie)
     this.router.events

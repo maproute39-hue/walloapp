@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import PocketBase, { RecordModel } from 'pocketbase';
 import { BehaviorSubject } from 'rxjs';
-export type UserType = 'cliente' | 'proveedor';
+export type UserType = 'client' | 'professional';
 
 export interface RegisterMinimalPayload {
   username: string;
@@ -102,19 +102,19 @@ export class AuthPocketbaseService {
     throw new Error('La contraseña es obligatoria y debe coincidir.');
   }
 
-  const rolwMap: Record<UserType, 'client' | 'provider'> = {
-    cliente: 'client',
-    proveedor: 'provider',
+  const rolwMap: Record<UserType, 'client' | 'professional'> = {
+    client: 'client',
+    professional: 'professional',
   };
   const rolwValue = rolwMap[payload.type];
-  const isActive = payload.type === 'cliente';
+  const isActive = payload.type === 'client';
 
   const data: any = {
     email: payload.email.trim().toLowerCase(),
     emailVisibility: true,
     password,
     passwordConfirm,
-    username: payload.username,
+    username: payload.username, 
     name: payload.username,
     phone: payload.phone,
     dni: payload.dni ?? '',
@@ -175,7 +175,7 @@ private toFormData(data: Record<string, any>): FormData {
     else fd.append(k, v);
   });
   return fd;
-}
+} 
 
 async updateProfile(data: any): Promise<RecordModel> {
   this.ensureLoggedIn();

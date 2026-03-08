@@ -29,17 +29,17 @@ export class EmailService {
     );
   }
 
-  async sendBienvenidaCliente(toEmail: string, toName: string, params?: Record<string, any>) {
+  async sendBienvenidaClient(toEmail: string, toName: string, params?: Record<string, any>) {
     const body: BrevoBody = { toEmail, toName, templateId: this.TEMPLATE_CLIENTE, params };
     await firstValueFrom(this.post(`/bienvenidacliente`, body));
   }
 
-  async sendBienvenidaProveedor(toEmail: string, toName: string, params?: Record<string, any>) {
+  async sendBienvenidaProfessional(toEmail: string, toName: string, params?: Record<string, any>) {
     const body: BrevoBody = { toEmail, toName, templateId: this.TEMPLATE_PROVEEDOR, params };
     await firstValueFrom(this.post(`/bienvenidaexperto`, body));
   }
 
-  async notifyAdminNuevoProveedor(params: { 
+  async notifyAdminNuevoProfessional(params: { 
     name: string; 
     email: string; 
     type: string; 
