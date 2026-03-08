@@ -250,7 +250,7 @@ async loginWithGoogle() {
       });
       
       // Actualizar el objeto user localmente
-      user['rol'] = 'professional';
+      user['type'] = 'professional';
     }
     
     // Verificar si el usuario necesita completar el perfil

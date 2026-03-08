@@ -27,7 +27,7 @@ import {
 })
 export class Landing {
 constructor(public cfg: ConfigMobileService){
-    this.cfg.load();
+    // this.cfg.load();
   }
   private seo = inject(SeoService);
   private auth = inject(AuthPocketbaseService);

@@ -30,39 +30,39 @@ export class ConfigMobileService {
   private _loading = false;
 
   /** Cargar una vez y suscribirse */
-  async load(): Promise<AppConfigRecord> {
-    if (this.cfg()) return this.cfg()!;
-    if (this._loading) {
-      return await new Promise<AppConfigRecord>((resolve) => {
-        const t = setInterval(() => {
-          if (this.cfg()) { clearInterval(t); resolve(this.cfg()!); }
-        }, 40);
-      });
-    }
-    this._loading = true;
+  // async load(): Promise<AppConfigRecord> {
+  //   if (this.cfg()) return this.cfg()!;
+  //   if (this._loading) {
+  //     return await new Promise<AppConfigRecord>((resolve) => {
+  //       const t = setInterval(() => {
+  //         if (this.cfg()) { clearInterval(t); resolve(this.cfg()!); }
+  //       }, 40);
+  //     });
+  //   }
+  //   this._loading = true;
 
-    // Si no usas _key, toma el más reciente
-    const list = await this.pb.collection('config')
-      .getList<AppConfigRecord>(1, 1, { sort: '-updated' });
-    const rec = list.items?.[0];
-    if (!rec) throw new Error('No hay registros en la colección config.');
+  //   // Si no usas _key, toma el más reciente
+  //   const list = await this.pb.collection('config')
+  //     .getList<AppConfigRecord>(1, 1, { sort: '-updated' });
+  //   const rec = list.items?.[0];
+  //   if (!rec) throw new Error('No hay registros en la colección config.');
 
-    this.cfg.set(rec);
-    this.loaded.set(true);
+  //   this.cfg.set(rec);
+  //   this.loaded.set(true);
 
-    // Realtime: 1 sola suscripción al id actual
-    if (this._subscribedId !== rec.id) {
-      if (this._subscribedId) await this.pb.collection('config').unsubscribe(this._subscribedId);
-      await this.pb.collection('config').subscribe(
-        rec.id,
-        (e: RecordSubscription<AppConfigRecord>) => this.cfg.set(e.record)
-      );
-      this._subscribedId = rec.id;
-    }
+  //   // Realtime: 1 sola suscripción al id actual
+  //   if (this._subscribedId !== rec.id) {
+  //     if (this._subscribedId) await this.pb.collection('config').unsubscribe(this._subscribedId);
+  //     await this.pb.collection('config').subscribe(
+  //       rec.id,
+  //       (e: RecordSubscription<AppConfigRecord>) => this.cfg.set(e.record)
+  //     );
+  //     this._subscribedId = rec.id;
+  //   }
 
-    this._loading = false;
-    return rec;
-  }
+  //   this._loading = false;
+  //   return rec;
+  // }
 
   /** true si la sección está ON (solo cuando loaded=true) */
   isOn<K extends keyof AppSections>(key: K): boolean {

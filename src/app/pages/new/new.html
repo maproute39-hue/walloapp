@@ -2,10 +2,10 @@
   <div class="custom-container">
     <div class="header-panel pb-3">
       <a *ngIf="step > 1">
-        <i class="iconsax icon-btn" (click)="prevStep()" data-icon="chevron-left"> <</i>
+        <i class="icon-icon-chevron-left icon-btn"  (click)="prevStep()"> <</i>
       </a>
       <a routerLink="/" *ngIf="step === 1">
-        <i class="icon iconsax icon-btn" data-icon="chevron-left"> <</i>
+        <i class="icon-chevron-left icon-btn"> <</i>
       </a>
       <img class="img-fluid logo" src="assets/images/logo/logo.png" alt="logo">
       <img class="img-fluid logo-dark" src="assets/images/logo/logo-white.png" alt="logo">
@@ -35,7 +35,7 @@
           <div class="form-input w-100">
             <input type="text" class="form-control" placeholder="Ciudad" 
                    formControlName="city">
-            <i class="iconsax" data-icon="location"></i>
+            <i class="location"></i>
           </div>
           <div class="form-input w-100">
             <input type="text" class="form-control" placeholder="Código Postal" 
@@ -48,14 +48,14 @@
                         <label class="form-label without-line mb-2" for="Inputcity">City</label>
                         <div class="form-input">
                             <input type="text" class="form-control" id="Inputcity" placeholder="city"  formControlName="city"> 
-                            <i class="iconsax" data-icon="location"></i>
+                            <i class="location"></i>
                         </div>
                     </div>
                     <div class="form-group w-100">
                         <label class="form-label without-line mb-2" for="Inputcode">Zip code</label>
                         <div class="form-input">
                             <input type="number"  formControlName="zip_code" class="form-control" id="Inputcode" placeholder="zip code">
-                            <i class="iconsax" data-icon="gps"></i>
+                            <i class="gps"></i>
                         </div>
                     </div>
                 </div>
@@ -78,7 +78,7 @@
             <option value="oficina">Oficina</option>
             <option value="wallpaper">Wallpaper</option>
           </select>
-          <i class="iconsax" data-icon="category"></i>
+          <i class="category"></i>
         </div>
         <div *ngIf="projectForm.get('space_type')?.invalid && projectForm.get('space_type')?.touched" class="text-danger small mt-1">
           El tipo de espacio es requerido
@@ -92,7 +92,7 @@
             <label class="form-label mb-2">Tamaño en m²</label>
             <div class="form-input">
               <input type="number" class="form-control" placeholder="Tamaño" formControlName="size_sqm">
-              <i class="iconsax" data-icon="ruler"></i>
+              <i class="ruler"></i>
             </div>
             <div *ngIf="projectForm.get('size_sqm')?.invalid && projectForm.get('size_sqm')?.touched" class="text-danger small mt-1">
               Ingresa un tamaño válido (mínimo 1)
@@ -106,7 +106,7 @@
             <label class="form-label mb-2">Altura en m </label>
             <div class="form-input">
               <input type="number" class="form-control" placeholder="Altura" formControlName="height_m">
-              <i class="iconsax" data-icon="arrow-up"></i>
+              <i class="arrow-up"></i>
             </div>
           </div>
         </div>
@@ -122,7 +122,7 @@
             <option value="papel tapiz">Papel tapiz</option>
             <option value="wallpaper">Wallpaper</option>
           </select>
-          <i class="iconsax" data-icon="brush"></i>
+          <i class="brush"></i>
         </div>
         <div *ngIf="projectForm.get('wallpaper_type')?.invalid && projectForm.get('wallpaper_type')?.touched" class="text-danger small mt-1">
           El tipo de papel tapiz es requerido
@@ -134,7 +134,7 @@
         <label class="form-label mb-2">Fecha Deseada (opcional)</label>
         <div class="form-input">
           <input type="date" class="form-control" formControlName="desired_date">
-          <i class="iconsax" data-icon="calendar"></i>
+          <i class="calendar"></i>
         </div>
       </div>
 
@@ -143,7 +143,7 @@
         <label class="form-label mb-2">Rango de Presupuesto (opcional)</label>
         <div class="form-input">
           <input type="range" class="form-control" min="550" max="5000" step="100" formControlName="budget_range">
-          <i class="iconsax" data-icon="dollar-circle"></i>
+          <i class="dollar-circle"></i>
         </div>
         <div class="mt-2 text-center">
           <small class="text-muted">{{ projectForm.get('budget_range')?.value || 0 }} USD</small>
@@ -176,7 +176,7 @@
         <div class="upload-image" (click)="fileInput.click()">
           <input #fileInput class="form-control upload-file" type="file" 
                  (change)="onFileSelected($event)" multiple accept="image/*" style="display: none;">
-          <i class="iconsax upload-icon" data-icon="camera"></i>
+          <i class="icon-camera upload-icon"></i>
           <h5 class="content-color mb-0">
             {{ photos.length ? photos.length + ' foto(s) seleccionada(s)' : 'Subir fotos del espacio' }}
           </h5>
@@ -219,7 +219,7 @@
             <button type="button" class="btn dropdown-toggle mt-0" 
                     data-bs-toggle="dropdown" style="min-width: 80px;">
               +{{ phoneForm.get('countryCode')?.value }}
-              <i class="iconsax dropdown-icon" data-icon="chevron-down"></i>
+              <i class="icon-chevron-down dropdown-icon"></i>
             </button>
             <ul class="dropdown-menu">
               <li><a class="dropdown-item" (click)="phoneForm.patchValue({countryCode: '58'})">+58 🇻🇪</a></li>
@@ -339,7 +339,7 @@
   <div class="custom-container">
     <div class="auth-title text-center">
       <div class="success-animation mb-4">
-        <i class="iconsax" data-icon="tick-circle" style="font-size: 80px; color: #28a745;"></i>
+        <i class="tick-circle" style="font-size: 80px; color: #28a745;"></i>
       </div>
       <h2 class="title-color">¡Solicitud creada con éxito!</h2>
       <h5 class="mt-2 content-color">Hemos recibido tu proyecto</h5>

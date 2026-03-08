@@ -11,8 +11,9 @@
 
 <section class="section-lg-t-space section-b-space" style="padding-top: 100px;">
     <div class="custom-container">
-        <h2 class="section-title">Mis Solicitudes de Servicio</h2>
-
+        <div class="title">
+            <h2>Mis Solicitudes de Servicio</h2>
+        </div>
         <div *ngIf="userRequests.length === 0" class="text-center mt-4">
             <p class="content-color">No tienes solicitudes activas.</p>
             <a routerLink="/new" class="btn theme-btn">Crear Nueva Solicitud</a>
