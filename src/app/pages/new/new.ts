@@ -83,11 +83,20 @@ export class NewRequestComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.initForms();
     this.loadZipCodesForAutocomplete();  // ← NUEVO: Cargar datos al iniciar
-
+    this.initializeIcons();
   }
 
   ngOnDestroy(): void {
     // No hay timers que limpiar porque usamos el sistema nativo
+  }
+
+  private initializeIcons(): void {
+    // Initialize iconsax library after component loads
+    setTimeout(() => {
+      if (typeof window !== 'undefined' && (window as any).iconsax) {
+        (window as any).iconsax();
+      }
+    }, 100);
   }
     // ========== NUEVO: Cargar zip codes desde PocketBase ==========
   async loadZipCodesForAutocomplete(): Promise<void> {

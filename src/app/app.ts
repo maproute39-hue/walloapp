@@ -47,7 +47,7 @@ export class App implements AfterViewInit {
       await this.scriptLoaderService.loadAll([
         { src: 'assets/js/swiper-bundle.min.js', attr: { defer: 'true' } },
         { src: 'assets/js/custom-swiper.js', attr: { defer: 'true' } },
-        // { src: 'assets/js/iconsax.js', attr: { defer: 'true' } }, // ❌ eliminado
+       { src: '../../assets/js/iconsax.js', attr: { defer: 'true' } }, // ❌ eliminado
         { src: 'assets/js/bootstrap.bundle.min.js', attr: { defer: 'true' } },
         // { src: 'assets/js/template-setting.js', attr: { defer: 'true' } },
         { src: 'assets/js/script.js', attr: { defer: 'true' } },
