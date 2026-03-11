@@ -280,7 +280,7 @@ private async checkProfileCompletion(
 
   private getRedirectPath(type: string): string {
     switch(type) {
-      case 'professional': return '/provider-dashboard';
+      case 'professional': return '/professional-home';
       case 'client': return '/home';
       default: return '/home';
     }

@@ -42,30 +42,82 @@
                    formControlName="zip_code">
           </div>
         </div> -->
-
- <div class="d-flex align-items-center gap-2">
-                    <div class="form-group w-100">
-                        <label class="form-label without-line mb-2" for="Inputcity">City</label>
-                        <div class="form-input">
-                            <input type="text" class="form-control" id="Inputcity" placeholder="city"  formControlName="city"> 
-                            <i class="location"></i>
-                        </div>
-                    </div>
-                    <div class="form-group w-100">
-                        <label class="form-label without-line mb-2" for="Inputcode">Zip code</label>
-                        <div class="form-input">
-                            <input type="number"  formControlName="zip_code" class="form-control" id="Inputcode" placeholder="zip code">
-                            <i class="gps"></i>
-                        </div>
-                    </div>
-                </div>
-
-
-
-        <!-- Validación -->
-        <div *ngIf="projectForm.get('city')?.invalid && projectForm.get('city')?.touched" class="text-danger small mt-1">
-          La ciudad es requerida
+<!-- Ciudad y Código Postal con Autocomplete -->
+<div class="form-group">
+  <label class="form-label mb-2">Ubicación</label>
+  
+  <div class="row">
+    
+    <!-- Ciudad con datalist -->
+    <div class="col-6">
+      <div class="form-group">
+        <label class="form-label without-line mb-2" for="Inputcity">Ciudad</label>
+        <div class="form-input position-relative">
+          <input 
+            type="text" 
+            class="form-control" 
+            id="Inputcity" 
+            placeholder="Ej: Raleigh" 
+            formControlName="city"
+            list="citiesList"
+            (input)="onCityInput($event)"
+            (change)="onCityChange($event)"
+          >
+          <i class="location"></i>
+          <!-- Datalist dinámico para ciudades -->
+          <datalist id="citiesList">
+            <option *ngFor="let city of filteredCities" [value]="city">
+              {{ city }}, NC
+            </option>
+          </datalist>
         </div>
+      </div>
+    </div>
+
+    <!-- Zip Code con datalist -->
+    <div class="col-6">
+      <div class="form-group">
+        <label class="form-label without-line mb-2" for="Inputcode">Código Postal</label>
+        <div class="form-input position-relative">
+          <input 
+            type="text" 
+            formControlName="zip_code" 
+            class="form-control" 
+            id="Inputcode" 
+            placeholder="Ej: 27601"
+            maxlength="5"
+            list="zipsList"
+            (input)="onZipInput($event)"
+            (change)="onZipChange($event)"
+          >
+          <i class="gps"></i>
+          <!-- Datalist dinámico para zip codes -->
+          <datalist id="zipsList">
+            <option *ngFor="let zip of filteredZips" [value]="zip">
+              {{ zip }} - {{ getCityForZip(zip) }}
+            </option>
+          </datalist>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Validación -->
+  <div *ngIf="projectForm.get('city')?.invalid && projectForm.get('city')?.touched" 
+       class="text-danger small mt-1">
+    La ciudad es requerida
+  </div>
+  <div *ngIf="projectForm.get('zip_code')?.invalid && projectForm.get('zip_code')?.touched" 
+       class="text-danger small mt-1">
+    El código postal es requerido
+  </div>
+  
+  <!-- Ayuda contextual -->
+  <small class="text-muted d-block mt-1">
+    <i class="icon-info-circle"></i> 
+    Escribe tu ciudad para ver códigos postales disponibles
+  </small>
+</div>
       </div>
 
       <!-- Tipo de Espacio -->

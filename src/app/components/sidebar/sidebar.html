@@ -1,5 +1,3 @@
-
-<!-- sidebar starts -->
 <div class="offcanvas sidebar-offcanvas offcanvas-start" tabindex="-1" id="sidebar">
     <div class="offcanvas-header sidebar-header">
         <div class="sidebar-logo">
@@ -8,81 +6,55 @@
         </div>
     </div>
     <div class="offcanvas-body">
-        <div class="profile-background">
+        <div *ngIf="isLogged()" class="profile-background">
             <div class="profile-part p-0">
                 <div class="profile-image">
-                    <img id="output" class="img-fluid profile-pic" src="assets/images/profile/profile2.png"
-                        alt="11">
+                    <img id="output" class="img-fluid profile-pic" src="assets/images/profile/profile2.png" alt="11">
                 </div>
-  
-                <h3>Smitha Williams</h3>
-                <h4>smithwilliams452@gmail.com</h4>
+
+                <h3>{{ userName }}</h3>
+                <h4>{{ userEmail }}</h4>
             </div>
         </div>
-  
-  
-        <ul class="profile-list">
-          <!-- Sidebar Cliente – PMV -->
-             <li>
-      <a routerLink="/home" class="setting-box">
-        <div class="setting-icon">
-  <i class="icon-book-closed main-icon"> </i>
+        <div *ngIf="!isLogged()" class="login-register-section text-center">
+            <p class="mb-3">Bienvenido a Wallo</p>
+            <div class="row" style="padding: 15px !important;">
+                <div class="col-6">
+                    <button routerLink="/register" class="btn theme-outline-btn w-100"
+                        style="background-color: transparent;      color: rgba(var(--theme-color), 1);      border-color: rgba(var(--theme-color), 1);      font-weight: 500;      font-size: 14px;      border-radius: 8px;">Registrarse</button>
+                </div>
+                <div class="col-6">
+                    <button routerLink="/login" class="btn theme-btn w-100 mb-2">Iniciar Sesión</button>
+                </div>
+            </div>
         </div>
-        <div class="setting-content">
-          <h5>My Wallo</h5>
-          <i class="icon-chevron-right arrow"></i>
-       
-                    
-                  
-        </div>
-      </a>
-    </li>
-  <li>
-      <a href="" class="setting-box">
-        <div class="setting-icon">
-          <i class="icon-document-text-1 main-icon"></i>
-        </div>
-        <div class="setting-content">
-          <h5>Términos y privacidad</h5>
-          <i class="icon-chevron-right arrow"></i>
-        </div>
-      </a>
-    </li>
-     <li>
-                    <div class="setting-box">
-                        <div class="setting-icon">
-                            <i class="icon-brush-3 main-icon"> </i>
-                        </div>
-                        <div class="setting-content">
-                            <h5>Dark</h5>
-                            <div class="switch-btn">
-                                <input id="dark-switch" type="checkbox">
-                            </div>
-                        </div>
-                    </div>
-                </li>
-    
-  
-    
-  
-            <!-- <li>
-                <div class="setting-box">
+        <ul class="profile-list" *ngIf="isLogged()" >
+            <li>
+                <a routerLink="/home" class="setting-box">
                     <div class="setting-icon">
-                        <i class="iconsax main-icon" data-icon="repeat"> </i>
+                        <i class="icon-book-closed main-icon"> </i>
                     </div>
                     <div class="setting-content">
-                        <h5>RTL</h5>
-                        <div class="switch-btn">
-                            <input id="dir-switch" type="checkbox">
-                        </div>
+                        <h5>My Wallo</h5>
+                        <i class="icon-chevron-right arrow"></i>
                     </div>
-                </div>
-            </li> -->
-  
-            <!-- <li>
+                </a>
+            </li>
+            <li>
+                <a href="" class="setting-box">
+                    <div class="setting-icon">
+                        <i class="icon-document-text-1 main-icon"></i>
+                    </div>
+                    <div class="setting-content">
+                        <h5>Términos y privacidad</h5>
+                        <i class="icon-chevron-right arrow"></i>
+                    </div>
+                </a>
+            </li>
+            <li>
                 <div class="setting-box">
                     <div class="setting-icon">
-                        <i class="iconsax main-icon" data-icon="brush-3"> </i>
+                        <i class="icon-brush-3 main-icon"> </i>
                     </div>
                     <div class="setting-content">
                         <h5>Dark</h5>
@@ -91,9 +63,8 @@
                         </div>
                     </div>
                 </div>
-            </li> -->
+            </li>
         </ul>
-  
         <div class="bottom-sidebar" [hidden]="!isLogged()">
             <a (click)="logout()" class="pages">
                 <i class="icon-logout-2 sidebar-icon"> </i>
@@ -101,6 +72,4 @@
             </a>
         </div>
     </div>
-  </div>
-  <!-- sidebar end -->
-  
+</div>

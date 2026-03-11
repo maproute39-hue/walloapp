@@ -10,7 +10,6 @@ import {
   AbstractControl,
   ValidationErrors
 } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 
 import { RequestService, CreateRequestDTO } from '../../services/request.service';
 import { PocketbaseService } from '../../services/pocketbase.service';
@@ -18,11 +17,17 @@ import { PhoneAuthService } from '../../services/phone-auth.service';
 
 @Component({
   selector: 'app-new',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
+  standalone:true,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './new.html',
   styleUrl: './new.scss'
 })
 export class NewRequestComponent implements OnInit, OnDestroy {
+    // ========== NUEVO: Datos para autocomplete ==========
+  zipCodesList: any[] = [];           // Lista completa de zip codes de PocketBase
+  filteredCities: string[] = [];      // Ciudades filtradas para datalist
+  filteredZips: string[] = [];        // Zip codes filtrados para datalist
+  selectedCity: string = '';   
   // ========== CONTROL DE PASOS ==========
   step: number = 1; // 1: Proyecto, 2: Registro, 3: OTP, 4: Éxito
   otpId: string = '';
@@ -77,10 +82,122 @@ export class NewRequestComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.initForms();
+    this.loadZipCodesForAutocomplete();  // ← NUEVO: Cargar datos al iniciar
+
   }
 
   ngOnDestroy(): void {
     // No hay timers que limpiar porque usamos el sistema nativo
+  }
+    // ========== NUEVO: Cargar zip codes desde PocketBase ==========
+  async loadZipCodesForAutocomplete(): Promise<void> {
+    try {
+      // Obtener zip codes activos de NC (ajusta el filtro según necesites)
+      const records = await this.pbService.getInstance()
+        .collection('zipcodes')
+        .getList(1, 2000, {
+          filter: 'active = true && state = "NC"',
+          sort: 'city,code'
+        });
+
+      this.zipCodesList = records.items;
+      
+      // Extraer ciudades únicas para el datalist de ciudad
+      const cities = [...new Set(
+        this.zipCodesList.map((z: any) => z.city)
+      )].sort();
+      
+      this.filteredCities = cities;
+      
+    } catch (error) {
+      console.error('Error cargando zip codes:', error);
+      // Fallback: lista mínima para que no falle la UI
+      this.filteredCities = ['Raleigh', 'Charlotte', 'Durham'];
+    }
+  }
+
+  // ========== NUEVO: Filtrar ciudades mientras escribe ==========
+  onCityInput(event: Event): void {
+    const input = (event.target as HTMLInputElement).value.toLowerCase();
+    
+    if (input.length >= 2) {
+      this.filteredCities = [...new Set(
+        this.zipCodesList
+          .filter((z: any) => z.city.toLowerCase().includes(input))
+          .map((z: any) => z.city)
+      )].sort().slice(0, 10); // Limitar a 10 sugerencias
+    } else {
+      // Recargar todas las ciudades si borra
+      const cities = [...new Set(
+        this.zipCodesList.map((z: any) => z.city)
+      )].sort();
+      this.filteredCities = cities;
+    }
+  }
+
+  // ========== NUEVO: Cuando selecciona ciudad, filtrar zip codes ==========
+  onCityChange(event: Event): void {
+    const city = (event.target as HTMLInputElement).value;
+    this.selectedCity = city;
+    
+    // Filtrar zip codes de esa ciudad
+    const zips = this.zipCodesList
+      .filter((z: any) => z.city === city)
+      .map((z: any) => z.code)
+      .sort();
+    
+    this.filteredZips = zips;
+    
+    // Actualizar el campo de zip_code en el formulario
+    this.projectForm.patchValue({ zip_code: '' });
+  }
+
+  // ========== NUEVO: Filtrar zip codes mientras escribe ==========
+  onZipInput(event: Event): void {
+    const input = (event.target as HTMLInputElement).value;
+    
+    if (this.selectedCity && input.length >= 1) {
+      this.filteredZips = this.zipCodesList
+        .filter((z: any) => 
+          z.city === this.selectedCity && 
+          z.code.startsWith(input)
+        )
+        .map((z: any) => z.code)
+        .sort()
+        .slice(0, 10);
+    } else if (!this.selectedCity && input.length >= 3) {
+      // Si no hay ciudad seleccionada, buscar por código en todo NC
+      this.filteredZips = this.zipCodesList
+        .filter((z: any) => z.code.startsWith(input))
+        .map((z: any) => z.code)
+        .sort()
+        .slice(0, 10);
+    } else {
+      // Mostrar todos los zips de la ciudad seleccionada
+      if (this.selectedCity) {
+        this.filteredZips = this.zipCodesList
+          .filter((z: any) => z.city === this.selectedCity)
+          .map((z: any) => z.code)
+          .sort();
+      }
+    }
+  }
+
+  // ========== NUEVO: Cuando selecciona zip, auto-completar ciudad ==========
+  onZipChange(event: Event): void {
+    const zipCode = (event.target as HTMLInputElement).value;
+    
+    // Buscar el registro completo en nuestra lista local
+    const zipRecord = this.zipCodesList.find((z: any) => z.code === zipCode);
+    
+    if (zipRecord) {
+      // Auto-completar ciudad y estado si están en el formulario
+      this.projectForm.patchValue({
+        city: zipRecord.city
+        // Si tienes campo de estado: state: zipRecord.state
+      });
+      this.selectedCity = zipRecord.city;
+    }
   }
 
   private initForms(): void {
@@ -383,6 +500,13 @@ async loginWithGoogle() {
   private clearMessages(): void {
     this.errorMessage = '';
     this.successMessage = '';
+  }
+
+  // ========== HELPER METHODS FOR TEMPLATE ==========
+
+  getCityForZip(zipCode: string): string {
+    const zipRecord = this.zipCodesList.find(z => z.code === zipCode);
+    return zipRecord ? zipRecord.city : '';
   }
 
   /**

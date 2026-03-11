@@ -274,7 +274,7 @@ export class CompleteProfile implements OnInit, OnDestroy  {
 
   private getRedirectPath(): string {
     switch (this.userType) {
-      case 'professional': return '/provider-dashboard';
+      case 'professional': return '/professional-home';
       case 'client': return '/home';
       default: return '/home';
     }

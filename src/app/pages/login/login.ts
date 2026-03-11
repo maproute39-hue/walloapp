@@ -297,7 +297,7 @@ private async checkProfileCompletion(
 }
   private getRedirectPath(type: string): string {
     switch(type) {
-      case 'provider': return '/provider-dashboard';
+      case 'provider': return '/professional-home';
       case 'client': return '/home';
       default: return '/home';
     }

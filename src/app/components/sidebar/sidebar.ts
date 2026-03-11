@@ -1,5 +1,6 @@
 import { AfterViewInit, Component, OnDestroy } from '@angular/core';
 import { Router, NavigationEnd, RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { filter, Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
 
@@ -17,7 +18,7 @@ declare global {
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink,CommonModule],
   templateUrl: './sidebar.html',
   styleUrls: ['./sidebar.scss'],
 })
@@ -29,6 +30,14 @@ export class Sidebar implements AfterViewInit, OnDestroy {
     private authService: AuthPocketbaseService,
     private router: Router
   ) {}
+
+  get userName(): string {
+    return this.authService.currentUser()?.['name'] || 'Usuario';
+  }
+
+  get userEmail(): string {
+    return this.authService.currentUser()?.['email'] || '';
+  }
 
   isLogged() {
     return this.authService.currentUser() !== null;

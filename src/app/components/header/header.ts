@@ -45,7 +45,7 @@ export class Header implements OnDestroy {
 
     // Si ya hay sesión, inicia el tracker
     if (this.auth.isLoggedIn()) {
-      this.loc.start();
+      // this.loc.start();
     }
   }
 

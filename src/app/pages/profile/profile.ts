@@ -92,7 +92,7 @@ async ngOnInit() {
   }
 
   get userName(): string {
-    return this.user?.username || 'Usuario';
+    return this.user?.name || 'Usuario';
   }
   get userEmail(): string {
     return this.user?.email || '';
