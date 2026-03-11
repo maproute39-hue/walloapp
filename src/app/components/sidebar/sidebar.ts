@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { Router, NavigationEnd, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { filter, Subscription } from 'rxjs';
@@ -80,6 +80,25 @@ export class Sidebar implements AfterViewInit, OnDestroy {
         text: e?.message ?? 'Intenta de nuevo.',
       });
     }
+  }
+
+  closeSidebar() {
+    // Close the offcanvas sidebar using Bootstrap's API
+    const sidebarElement = document.getElementById('sidebar');
+    if (sidebarElement) {
+      const bsOffcanvas = (window as any).bootstrap?.Offcanvas?.getInstance(sidebarElement);
+      if (bsOffcanvas) {
+        bsOffcanvas.hide();
+      } else {
+        // Fallback: manually hide by removing classes
+        sidebarElement.classList.remove('show');
+        sidebarElement.style.display = 'none';
+      }
+    }
+    
+    // Remove backdrop elements
+    const backdrops = document.querySelectorAll('.offcanvas-backdrop');
+    backdrops.forEach(backdrop => backdrop.remove());
   }
 
   async ngAfterViewInit() {
