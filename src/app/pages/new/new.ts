@@ -1,5 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+
 import { CommonModule } from '@angular/common';
 import { 
   FormsModule, 
@@ -14,15 +16,17 @@ import {
 import { RequestService, CreateRequestDTO } from '../../services/request.service';
 import { PocketbaseService } from '../../services/pocketbase.service';
 import { PhoneAuthService } from '../../services/phone-auth.service';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-new',
   standalone:true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule,RouterLink],
   templateUrl: './new.html',
   styleUrl: './new.scss'
 })
 export class NewRequestComponent implements OnInit, OnDestroy {
+   icons: { [key: string]: SafeHtml } = {};
     // ========== NUEVO: Datos para autocomplete ==========
   zipCodesList: any[] = [];           // Lista completa de zip codes de PocketBase
   filteredCities: string[] = [];      // Ciudades filtradas para datalist
@@ -74,6 +78,8 @@ export class NewRequestComponent implements OnInit, OnDestroy {
   }
 
   constructor(
+     private http: HttpClient,
+    private sanitizer: DomSanitizer,
     private router: Router,
     private requestService: RequestService,
     private pbService: PocketbaseService,
@@ -84,10 +90,25 @@ export class NewRequestComponent implements OnInit, OnDestroy {
     this.initForms();
     this.loadZipCodesForAutocomplete();  // ← NUEVO: Cargar datos al iniciar
     this.initializeIcons();
+      // this.loadIcons(['location', 'gps', 'ruler']);
   }
 
   ngOnDestroy(): void {
     // No hay timers que limpiar porque usamos el sistema nativo
+  }
+  async loadIcons(iconNames: string[]) {
+    for (const name of iconNames) {
+      try {
+        const svg = await this.http
+          .get(`assets/iconsax/iconsax-${name}.svg`, { responseType: 'text' })
+          .toPromise();
+        if (svg) {
+          this.icons[name] = this.sanitizer.bypassSecurityTrustHtml(svg);
+        }
+      } catch (error) {
+        console.error(`Error loading icon ${name}:`, error);
+      }
+    }
   }
 
   private initializeIcons(): void {

@@ -11,7 +11,7 @@
         </i>
         <!-- <i class="icon-chevron-left icon-btn"  > </i> -->
       </a>
-      <a routerLink="/" *ngIf="step === 1">
+      <a routerLink="/home" *ngIf="step === 1">
         <i class="iconsax icon-btn" data-icon="chevron-left"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"
             xmlns="http://www.w3.org/2000/svg">
             <path
@@ -153,7 +153,8 @@
             <label class="form-label mb-2">Size in m²</label>
             <div class="form-input">
               <input type="number" class="form-control" placeholder="Size" formControlName="size_sqm">
-              <i class="ruler"></i>
+              <!-- <i class="ruler"></i> -->
+                <span [innerHTML]="icons['ruler']" class="icon"></span>
             </div>
             <div *ngIf="projectForm.get('size_sqm')?.invalid && projectForm.get('size_sqm')?.touched"
               class="text-danger small mt-1">
