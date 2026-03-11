@@ -2,14 +2,14 @@
   "background_color": "#ffffff",
   "dir": "ltr",
   "display": "fullscreen",
-  "description": "Plataforma móvil oficial de Verificar IT diseñada para optimizar el proceso de inspección vehicular. Permite realizar evaluaciones técnicas completas para camionetas, busetas y transporte pesado de manera eficiente.",
-  "name": "VerificarIT",
+  "description": "Wallpaper Installers.",
+  "name": "Wallizo",
   "orientation": "any",
   "lang": "es",
   "scope": "/",
-  "short_name": "VerificarIT",
+  "short_name": "Wallizo",
   "start_url": "/",
-  "theme_color": "#ffffff",
+  "theme_color": "#da743f",
   "categories": ["business", "utilities", "productivity"],
   "screenshots": [
     {
@@ -17,14 +17,14 @@
       "sizes": "702x1525",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Pantalla principal de VerificarIT"
+      "label": "Pantalla principal de Wallizo"
     },
     {
       "src": "assets/screenshots/desktop-screenshot.png",
       "sizes": "1600x900",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Vista de escritorio de VerificarIT"
+      "label": "Vista de escritorio de Wallizo"
     }
   ],
   "icons": [
