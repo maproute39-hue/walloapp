@@ -50,8 +50,8 @@ constructor(public cfg: ConfigMobileService){
 
   ngOnInit() {
     this.seo.updateTags({
-      title: 'Wallo | Reparaciones y servicios a domicilio',
-      description: 'Encuentra profesionales verificados de plomería, electricidad, pintura y más.',
+      title: 'Wallizo | Professional wallpaper installation',
+      description: 'Find verified professionals for wallpaper installation.',
       canonicalPath: '/'
     });
   }

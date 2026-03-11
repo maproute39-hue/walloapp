@@ -16,12 +16,12 @@ import { AuthPocketbaseService } from '../../services/auth-pocketbase.service';
 
 @Component({
   selector: 'app-complete-profile',
-  standalone:true,
+  standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './complete-profile.html',
   styleUrl: './complete-profile.scss'
 })
-export class CompleteProfile implements OnInit, OnDestroy  {
+export class CompleteProfile implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private pb = inject(PocketbaseService);
@@ -39,30 +39,30 @@ export class CompleteProfile implements OnInit, OnDestroy  {
   oauthUserEmail: string | null = null;
 
   // Formularios
-  clientForm!: FormGroup;        // Para client: solo phone
-  professionalForm!: FormGroup;  // Para professional: perfil completo
+  clientForm!: FormGroup;
+  professionalForm!: FormGroup;
 
-  // Opciones para selects
+  // ========== NUEVO: Datos para autocomplete de zip/city ==========
+  zipCodesList: any[] = [];           // Lista completa de zip codes de PocketBase
+  filteredCities: string[] = [];      // Ciudades filtradas para datalist
+  filteredZips: string[] = [];        // Zip codes filtrados para datalist
+  selectedCity: string = '';
+  // ================================================================
+
+  // Opciones para selects (se mantienen como fallback o para otros usos)
   wallpaperTypes = [
     { value: 'vinilo', label: 'Vinilo' },
     { value: 'wallpaper', label: 'Wallpaper' },
     { value: 'papel tapíz', label: 'Papel tapiz' },
   ];
 
-  cities = [
-    { value: 'caracas', label: 'Caracas' },
-    { value: 'maracaibo', label: 'Maracaibo' },
-    { value: 'valencia', label: 'Valencia' },
-    { value: 'barquisimeto', label: 'Barquisimeto' },
-    { value: 'maracay', label: 'Maracay' },
-  ];
+  // cities ya no es necesario como array estático, se usa filteredCities
 
   // ========== VALIDADORES PERSONALIZADOS ==========
 
   static phoneValidator(control: AbstractControl): ValidationErrors | null {
     const phone = control.value?.toString() || '';
     const digits = phone.replace(/[^0-9]/g, '');
-    // Validación flexible: 7-10 dígitos para Venezuela
     if (digits.length < 7 || digits.length > 10) {
       return { invalidPhone: true };
     }
@@ -77,13 +77,22 @@ export class CompleteProfile implements OnInit, OnDestroy  {
     return null;
   }
 
+  static zipCodeValidator(control: AbstractControl): ValidationErrors | null {
+    const zip = control.value?.toString() || '';
+    // Ajusta según el formato de tus zip codes (ej: 5 dígitos para US)
+    if (zip && !/^\d{5}(-\d{4})?$/.test(zip)) {
+      return { invalidZip: true };
+    }
+    return null;
+  }
+
   // ========== INICIALIZACIÓN ==========
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.loadOAuthData();
     this.initForms();
+    await this.loadZipCodesForAutocomplete(); // ← NUEVO: Cargar datos al iniciar
     
-    // Si no hay datos OAuth, redirigir al login
     if (!this.oauthUserId) {
       this.showWarning('Sesión no válida. Por favor inicia sesión nuevamente.');
       setTimeout(() => this.router.navigate(['/login']), 1500);
@@ -91,7 +100,7 @@ export class CompleteProfile implements OnInit, OnDestroy  {
   }
 
   ngOnDestroy(): void {
-    // Limpiar sessionStorage después de completar (se hace en onSubmit)
+    // Limpieza si es necesaria
   }
 
   private loadOAuthData(): void {
@@ -117,14 +126,12 @@ export class CompleteProfile implements OnInit, OnDestroy  {
       ]],
     });
 
-    // 🔵 FORMULARIO PROFESSIONAL: Perfil completo
+    // 🔵 FORMULARIO PROFESSIONAL: Perfil completo con zip_code
     this.professionalForm = this.fb.group({
-      // Datos básicos (phone va en users)
       phone: ['', [
         Validators.required,
         CompleteProfile.phoneValidator
       ]],
-      // Datos del perfil profesional
       full_name: ['', [Validators.required, Validators.minLength(3)]],
       experience_years: [null, [
         Validators.required,
@@ -132,8 +139,110 @@ export class CompleteProfile implements OnInit, OnDestroy  {
       ]],
       bio: ['', [Validators.required, Validators.minLength(20), Validators.maxLength(500)]],
       city: ['', Validators.required],
-      wallpaper_types: [[], [Validators.required, Validators.minLength(1)]], // Multi-select
+      zip_code: ['', [Validators.required, CompleteProfile.zipCodeValidator]], // ← NUEVO
+      wallpaper_types: [[], [Validators.required, Validators.minLength(1)]],
     });
+  }
+
+  // ========== NUEVO: Cargar zip codes desde PocketBase ==========
+  async loadZipCodesForAutocomplete(): Promise<void> {
+    try {
+      // Obtener zip codes activos (ajusta el filtro según tu colección)
+      const records = await this.pb.getInstance()
+        .collection('zipcodes')
+        .getList(1, 2000, {
+          filter: 'active = true', // Puedes agregar && state = "NC" si aplica
+          sort: 'city,code'
+        });
+
+      this.zipCodesList = records.items;
+      
+      // Extraer ciudades únicas para el datalist
+      const cities = [...new Set(
+        this.zipCodesList.map((z: any) => z.city)
+      )].sort();
+      
+      this.filteredCities = cities;
+      
+    } catch (error) {
+      console.error('Error cargando zip codes:', error);
+      // Fallback para que no falle la UI
+      this.filteredCities = ['Caracas', 'Maracaibo', 'Valencia', 'Barquisimeto', 'Maracay'];
+    }
+  }
+
+  // ========== NUEVO: Filtrar ciudades mientras escribe ==========
+  onCityInput(event: Event): void {
+    const input = (event.target as HTMLInputElement).value.toLowerCase();
+    
+    if (input.length >= 2) {
+      this.filteredCities = [...new Set(
+        this.zipCodesList
+          .filter((z: any) => z.city?.toLowerCase().includes(input))
+          .map((z: any) => z.city)
+      )].sort().slice(0, 10);
+    } else {
+      const cities = [...new Set(
+        this.zipCodesList.map((z: any) => z.city)
+      )].sort();
+      this.filteredCities = cities;
+    }
+  }
+
+  // ========== NUEVO: Cuando selecciona ciudad, filtrar zip codes ==========
+  onCityChange(event: Event): void {
+    const city = (event.target as HTMLInputElement).value;
+    this.selectedCity = city;
+    
+    const zips = this.zipCodesList
+      .filter((z: any) => z.city === city)
+      .map((z: any) => z.code)
+      .sort();
+    
+    this.filteredZips = zips;
+    this.professionalForm.patchValue({ zip_code: '' });
+  }
+
+  // ========== NUEVO: Filtrar zip codes mientras escribe ==========
+  onZipInput(event: Event): void {
+    const input = (event.target as HTMLInputElement).value;
+    
+    if (this.selectedCity && input.length >= 1) {
+      this.filteredZips = this.zipCodesList
+        .filter((z: any) => 
+          z.city === this.selectedCity && 
+          z.code?.startsWith(input)
+        )
+        .map((z: any) => z.code)
+        .sort()
+        .slice(0, 10);
+    } else if (!this.selectedCity && input.length >= 2) {
+      this.filteredZips = this.zipCodesList
+        .filter((z: any) => z.code?.startsWith(input))
+        .map((z: any) => z.code)
+        .sort()
+        .slice(0, 10);
+    } else {
+      if (this.selectedCity) {
+        this.filteredZips = this.zipCodesList
+          .filter((z: any) => z.city === this.selectedCity)
+          .map((z: any) => z.code)
+          .sort();
+      }
+    }
+  }
+
+  // ========== NUEVO: Cuando selecciona zip, auto-completar ciudad ==========
+  onZipChange(event: Event): void {
+    const zipCode = (event.target as HTMLInputElement).value;
+    const zipRecord = this.zipCodesList.find((z: any) => z.code === zipCode);
+    
+    if (zipRecord) {
+      this.professionalForm.patchValue({
+        city: zipRecord.city
+      });
+      this.selectedCity = zipRecord.city;
+    }
   }
 
   // ========== GETTERS PARA EL TEMPLATE ==========
@@ -143,6 +252,10 @@ export class CompleteProfile implements OnInit, OnDestroy  {
 
   get clientFormControls() { return this.clientForm.controls; }
   get professionalFormControls() { return this.professionalForm.controls; }
+
+  // Helpers para el autocomplete en el template
+  get filteredCitiesList(): string[] { return this.filteredCities; }
+  get filteredZipsList(): string[] { return this.filteredZips; }
 
   // ========== MANEJO DE UI ==========
 
@@ -188,7 +301,6 @@ export class CompleteProfile implements OnInit, OnDestroy  {
         throw new Error('Tipo de usuario no válido');
       }
 
-      // ✅ Éxito: limpiar sessionStorage y redirigir
       this.clearOAuthSession();
       
       const redirectPath = this.getRedirectPath();
@@ -228,7 +340,6 @@ export class CompleteProfile implements OnInit, OnDestroy  {
 
     const { phone } = this.clientForm.value;
     
-    // Actualizar solo el phone en la colección users
     await this.pb.getInstance().collection('users').update(this.oauthUserId!, {
       phone: phone,
     });
@@ -253,15 +364,16 @@ export class CompleteProfile implements OnInit, OnDestroy  {
       phone: formValue.phone,
     });
 
-    // 2️⃣ Crear registro en professional_profiles
+    // 2️⃣ Crear registro en professional_profiles CON zip_code
     const profilePayload = {
       userId: this.oauthUserId!,
       full_name: formValue.full_name,
       experience_years: Number(formValue.experience_years),
       bio: formValue.bio,
       city: formValue.city,
-      wallpaper_types: formValue.wallpaper_types, // Array: ['vinilo', 'wallpaper']
-      is_verified: false, // Pendiente de revisión admin
+      zip_code: formValue.zip_code, // ← NUEVO: incluir zip_code
+      wallpaper_types: formValue.wallpaper_types,
+      is_verified: false,
       created_at: new Date().toISOString(),
     };
 
@@ -315,5 +427,11 @@ export class CompleteProfile implements OnInit, OnDestroy  {
     if (ctrl?.hasError('min')) return 'No puede ser negativo';
     if (ctrl?.hasError('max')) return 'Valor máximo: 50 años';
     return null;
+  }
+
+  // Helper para obtener ciudad desde zip (útil para mostrar en UI)
+  getCityForZip(zipCode: string): string {
+    const zipRecord = this.zipCodesList.find(z => z.code === zipCode);
+    return zipRecord ? zipRecord.city : '';
   }
 }

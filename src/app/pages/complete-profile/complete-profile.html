@@ -1,15 +1,15 @@
 <section class="section-lg-t-space section-b-space">
   <div class="custom-container">
-    
+
     <!-- ========== HEADER ========== -->
     <div class="auth-head text-center mb-4">
       <h4 class="fw-medium title-color text-uppercase">
-        {{ isClient ? 'Completa tu Perfil' : 'Registro de Profesional' }}
+        {{ isClient ? 'Complete your profile' : 'Professional registration' }}
       </h4>
       <p class="text-muted mb-0">
-        {{ isClient 
-          ? 'Solo necesitamos tu teléfono para continuar' 
-          : 'Cuéntanos sobre tu experiencia para conectar con clientes' 
+        {{ isClient
+        ? 'We only need your phone number to continue'
+        : 'Tell us about your experience to connect with clients'
         }}
       </p>
     </div>
@@ -19,7 +19,7 @@
       {{ errorMsg() }}
       <button type="button" class="btn-close" (click)="errorMsg.set(null)"></button>
     </div>
-    
+
     <div *ngIf="successMsg()" class="alert alert-success alert-dismissible fade show" role="alert">
       {{ successMsg() }}
       <button type="button" class="btn-close" (click)="successMsg.set(null)"></button>
@@ -27,28 +27,24 @@
 
     <!-- ========== FORMULARIO CLIENT ========== -->
     <form *ngIf="isClient" [formGroup]="clientForm" (ngSubmit)="onSubmit()" class="auth-form pt-0">
-      
+
       <!-- Teléfono -->
       <div class="form-group">
-        <label class="form-label mb-2">Teléfono <span class="text-danger">*</span></label>
+        <label class="form-label mb-2">Phone <span class="text-danger">*</span></label>
         <div class="form-input">
-          <input 
-            type="tel" 
-            class="form-control" 
-            formControlName="phone" 
-            placeholder="+58 4XX XXX-XXXX"
+          <input type="tel" class="form-control" formControlName="phone" placeholder="+58 4XX XXX-XXXX"
             (input)="clientForm.get('phone')?.markAsTouched()">
           <i class="phone"></i>
         </div>
-        
+
         <!-- Validaciones -->
-        <div *ngIf="clientForm.get('phone')?.invalid && clientForm.get('phone')?.touched" 
-             class="text-danger small mt-1">
+        <div *ngIf="clientForm.get('phone')?.invalid && clientForm.get('phone')?.touched"
+          class="text-danger small mt-1">
           <div *ngIf="clientForm.get('phone')?.hasError('required')">
-            El teléfono es requerido
+            Phone is required
           </div>
           <div *ngIf="clientForm.get('phone')?.hasError('invalidPhone')">
-            Ingresa un teléfono válido (7-10 dígitos)
+            Invalid phone number
           </div>
         </div>
       </div>
@@ -56,138 +52,151 @@
       <!-- Info adicional -->
       <div class="alert alert-info small">
         <i class="info-circle me-1"></i>
-        Como cliente, solo necesitas registrar tu teléfono para recibir notificaciones y coordinar servicios.
+        As a client, you only need to register your phone number to receive notifications and coordinate services.
       </div>
 
       <!-- Botón Submit -->
       <div class="fixed-btn mt-4">
         <button type="submit" class="btn theme-btn w-100" [disabled]="clientForm.invalid || isLoading()">
-          {{ isLoading() ? 'Guardando...' : 'Completar y Continuar' }}
+          {{ isLoading() ? 'Saving...' : 'Complete and Continue' }}
         </button>
       </div>
     </form>
 
     <!-- ========== FORMULARIO PROFESSIONAL ========== -->
     <form *ngIf="isProfessional" [formGroup]="professionalForm" (ngSubmit)="onSubmit()" class="auth-form pt-0">
-      
+
       <!-- Teléfono -->
       <div class="form-group">
-        <label class="form-label mb-2">Teléfono <span class="text-danger">*</span></label>
+        <label class="form-label mb-2">Phone <span class="text-danger">*</span></label>
         <div class="form-input">
-          <input 
-            type="tel" 
-            class="form-control" 
-            formControlName="phone" 
-            placeholder="+58 4XX XXX-XXXX">
+          <input type="tel" class="form-control" formControlName="phone" placeholder="+58 4XX XXX-XXXX">
           <i class="phone"></i>
         </div>
-        <div *ngIf="professionalForm.get('phone')?.invalid && professionalForm.get('phone')?.touched" 
-             class="text-danger small mt-1">
-          <div *ngIf="professionalForm.get('phone')?.hasError('required')">El teléfono es requerido</div>
-          <div *ngIf="professionalForm.get('phone')?.hasError('invalidPhone')">Teléfono inválido (7-10 dígitos)</div>
+        <div *ngIf="professionalForm.get('phone')?.invalid && professionalForm.get('phone')?.touched"
+          class="text-danger small mt-1">
+          <div *ngIf="professionalForm.get('phone')?.hasError('required')">Phone is required</div>
+          <div *ngIf="professionalForm.get('phone')?.hasError('invalidPhone')">Invalid phone number</div>
         </div>
       </div>
 
       <!-- Nombre Completo -->
       <div class="form-group">
-        <label class="form-label mb-2">Nombre Completo <span class="text-danger">*</span></label>
+        <label class="form-label mb-2">Full Name <span class="text-danger">*</span></label>
         <div class="form-input">
-          <input 
-            type="text" 
-            class="form-control" 
-            formControlName="full_name" 
-            placeholder="Ej: María González">
+          <input type="text" class="form-control" formControlName="full_name" placeholder="Ej: María González">
           <i class="user"></i>
         </div>
-        <div *ngIf="professionalForm.get('full_name')?.invalid && professionalForm.get('full_name')?.touched" 
-             class="text-danger small mt-1">
-          <div *ngIf="professionalForm.get('full_name')?.hasError('required')">El nombre es requerido</div>
-          <div *ngIf="professionalForm.get('full_name')?.hasError('minlength')">Mínimo 3 caracteres</div>
+        <div *ngIf="professionalForm.get('full_name')?.invalid && professionalForm.get('full_name')?.touched"
+          class="text-danger small mt-1">
+          <div *ngIf="professionalForm.get('full_name')?.hasError('required')">Full name is required</div>
+          <div *ngIf="professionalForm.get('full_name')?.hasError('minlength')">Minimum 3 characters</div>
         </div>
       </div>
 
       <!-- Años de Experiencia -->
       <div class="form-group">
-        <label class="form-label mb-2">Años de Experiencia <span class="text-danger">*</span></label>
+        <label class="form-label mb-2">Years of Experience <span class="text-danger">*</span></label>
         <div class="form-input">
-          <input 
-            type="number" 
-            class="form-control" 
-            formControlName="experience_years" 
-            placeholder="Ej: 5"
-            min="0" max="50">
+          <input type="number" class="form-control" formControlName="experience_years" placeholder="Ej: 5" min="0"
+            max="50">
           <i class="calendar"></i>
         </div>
-        <div *ngIf="professionalForm.get('experience_years')?.touched && getExperienceError()" 
-             class="text-danger small mt-1">
+        <div *ngIf="professionalForm.get('experience_years')?.touched && getExperienceError()"
+          class="text-danger small mt-1">
           {{ getExperienceError() }}
         </div>
       </div>
 
       <!-- Biografía -->
       <div class="form-group">
-        <label class="form-label mb-2">Biografía Profesional <span class="text-danger">*</span></label>
+        <label class="form-label mb-2">Professional Biography <span class="text-danger">*</span></label>
         <div class="form-input">
-          <textarea 
-            class="form-control" 
-            formControlName="bio" 
-            placeholder="Describe tu experiencia, especialidades y enfoque de trabajo..."
-            rows="4"></textarea>
+          <textarea class="form-control" formControlName="bio"
+            placeholder="Describe your experience, specialties and approach to work..." rows="4"></textarea>
           <i class="edit"></i>
         </div>
         <div class="d-flex justify-content-between small text-muted mt-1">
-          <span *ngIf="professionalForm.get('bio')?.invalid && professionalForm.get('bio')?.touched" class="text-danger">
-            Mínimo 20 caracteres
+          <span *ngIf="professionalForm.get('bio')?.invalid && professionalForm.get('bio')?.touched"
+            class="text-danger">
+            Minimum 20 characters
           </span>
           <span>{{ professionalForm.get('bio')?.value?.length || 0 }}/500</span>
         </div>
       </div>
 
       <!-- Ciudad -->
-      <div class="form-group">
-        <label class="form-label mb-2">Ciudad de Servicio <span class="text-danger">*</span></label>
-        <div class="form-input">
-          <select class="form-control" formControlName="city">
-            <option value="">Selecciona tu ciudad</option>
-            <option *ngFor="let city of cities" [value]="city.value">{{ city.label }}</option>
-          </select>
-          <i class="location"></i>
-        </div>
-        <div *ngIf="professionalForm.get('city')?.invalid && professionalForm.get('city')?.touched" 
-             class="text-danger small mt-1">
-          La ciudad es requerida
-        </div>
-      </div>
 
+      <!-- Campo Ciudad con autocomplete -->
+<div class="form-group">
+  <label for="city" class="form-label mb-2">City *</label>
+  <input 
+    type="text" 
+    id="city" 
+    formControlName="city"
+    (input)="onCityInput($event)"
+    (change)="onCityChange($event)"
+    list="cities-list"
+    class="form-control"
+    [class.is-invalid]="professionalFormControls['city'].invalid && professionalFormControls['city'].touched"
+    placeholder="Type to search city..."
+  >
+  <datalist id="cities-list">
+    <option *ngFor="let city of filteredCitiesList" [value]="city"></option>
+  </datalist>
+  <div *ngIf="professionalFormControls['city'].invalid && professionalFormControls['city'].touched" class="invalid-feedback">
+    City is required
+  </div>
+</div>
+
+<!-- Campo Zip Code con autocomplete -->
+<div class="form-group">
+  <label for="zip_code" class="form-label mb-2">Zip Code *</label>
+  <input 
+    type="text" 
+    id="zip_code" 
+    formControlName="zip_code"
+    (input)="onZipInput($event)"
+    (change)="onZipChange($event)"
+    list="zips-list"
+    class="form-control"
+    [class.is-invalid]="professionalFormControls['zip_code'].invalid && professionalFormControls['zip_code'].touched"
+    placeholder="type to search..."
+  >
+  <datalist id="zips-list">
+    <option *ngFor="let zip of filteredZipsList" [value]="zip"></option>
+  </datalist>
+  <div *ngIf="professionalFormControls['zip_code'].invalid && professionalFormControls['zip_code'].touched" class="invalid-feedback">
+    <span *ngIf="professionalFormControls['zip_code'].hasError('required')">Zip code is required</span>
+    <span *ngIf="professionalFormControls['zip_code'].hasError('invalidZip')">Invalid zip code format</span>
+  </div>
+</div>
       <!-- Tipos de Wallpaper (Multi-select) -->
       <div class="form-group">
-        <label class="form-label mb-2">Tipos de Trabajo <span class="text-danger">*</span></label>
-        <p class="small text-muted mb-2">Selecciona los tipos de instalación que realizas</p>
-        
+        <label class="form-label mb-2">Types of Work <span class="text-danger">*</span></label>
+        <p class="small text-muted mb-2">Select the types of installation you perform</p>
+
         <div class="d-flex flex-wrap gap-2">
-          <label *ngFor="let type of wallpaperTypes" 
-                 class="form-check form-check-inline border rounded p-2 px-3 cursor-pointer"
-                 [class.active]="isWallpaperTypeSelected(type.value)">
-            <input 
-              type="checkbox" 
-              class="form-check-input me-1" 
-              [value]="type.value"
-              [checked]="isWallpaperTypeSelected(type.value)"
-              (change)="onWallpaperTypeChange(type.value, $event)">
+          <label *ngFor="let type of wallpaperTypes"
+            class="form-check form-check-inline border rounded p-2 px-3 cursor-pointer"
+            [class.active]="isWallpaperTypeSelected(type.value)">
+            <input type="checkbox" class="form-check-input me-1" [value]="type.value"
+              [checked]="isWallpaperTypeSelected(type.value)" (change)="onWallpaperTypeChange(type.value, $event)">
             <span class="form-check-label">{{ type.label }}</span>
           </label>
         </div>
-        
-        <div *ngIf="professionalForm.get('wallpaper_types')?.invalid && professionalForm.get('wallpaper_types')?.touched" 
-             class="text-danger small mt-1">
-          Selecciona al menos un tipo de trabajo
+
+        <div
+          *ngIf="professionalForm.get('wallpaper_types')?.invalid && professionalForm.get('wallpaper_types')?.touched"
+          class="text-danger small mt-1">
+          Select at least one type of work
         </div>
       </div>
 
       <!-- Info de revisión -->
       <div class="alert alert-warning small">
         <i class="shield-check me-1"></i>
-        Tu perfil será revisado por nuestro equipo antes de activarse. Recibirás una notificación cuando esté aprobado.
+        Your profile will be reviewed by our team before activation. You will receive a notification when approved.
       </div>
 
       <!-- Botón Submit -->
@@ -201,7 +210,7 @@
     <!-- ========== CANCELAR / VOLVER ========== -->
     <div class="text-center mt-3">
       <a routerLink="/login" class="text-muted small">
-        <i class="arrow-left me-1"></i> Volver al inicio
+        <i class="arrow-left me-1"></i> Back to home
       </a>
     </div>
 
