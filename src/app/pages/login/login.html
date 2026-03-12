@@ -10,7 +10,7 @@
       </div>
   
       <!-- Botón Google -->
-      <div class="text-center">
+      <!-- <div class="text-center">
         <button 
           type="button"
           class="btn btn-outline" 
@@ -20,8 +20,27 @@
           <span *ngIf="!loading()">Continue with Google</span>
           <span *ngIf="loading()">Logging in…</span>
         </button>
-      </div>
-  
+      </div> -->
+       <ul class="login-list">
+            <li class="login-box">
+                <button 
+                  type="button"
+                  class="btn btn-outline" 
+                  (click)="loginWithGoogle()"
+                  [disabled]="loading()">
+                  <img class="img-fluid login-icon" src="./assets/images/icon/svg/google.svg" alt="google">
+               
+                </button>
+                
+            </li>
+            <li class="login-box">
+                <a href="https://www.apple.com/" target="_blank">
+                    <img class="img-fluid login-icon apple-img" src="./assets/images/icon/svg/apple.svg" alt="apple">
+                </a>
+            </li>
+            
+        </ul>
+  <div class="text-center">  <span *ngIf="loading()">Logging in…</span></div>
       <h5 class="content-color fw-medium mt-3 text-center">
         Don't have an account ?
         <a routerLink="/register" class="theme-color fw-semibold">Register</a>
