@@ -464,7 +464,7 @@ private async submitProfessionalProfile(): Promise<void> {
 
   private getRedirectPath(): string {
     switch (this.userType) {
-      case 'professional': return '/professional-home';
+      case 'professional': return '/home';
       case 'client': return '/home';
       default: return '/home';
     }

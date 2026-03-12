@@ -47,53 +47,6 @@ export class AuthPocketbaseService {
     return this.pb.files.getUrl(record, fileName, thumb ? { thumb } : undefined);
   }
 
- /* async registerMinimal(payload: RegisterMinimalPayload): Promise<RecordModel> {
-    const password = this.randomPassword();
-
-    const rolwMap: Record<UserType, 'client' | 'provider'> = {
-      cliente: 'client',
-      proveedor: 'provider',
-    };
-    const rolwValue = rolwMap[payload.type];
-    const isActive = payload.type === 'cliente';
-
-    const data: Record<string, any> = {
-      email: payload.email,
-      emailVisibility: true,
-      password,
-      passwordConfirm: password,
-      username: payload.username,
-      name: payload.username,
-      phone: payload.phone,
-      dni: payload.dni ?? '',
-      type: payload.type,
-      rolw: rolwValue,
-      status: isActive,
-    };
-
-    if (payload.avatar instanceof Blob) data['avatar'] = payload.avatar;
-
-    const record = await this.pb.collection('users').create(data);
-
-    if (isActive) {
-      await this.pb.collection('users').authWithPassword(payload.email, password);
-    }
-
-    try {
-      const userId = this.pb.authStore.model?.id ?? record.id;
-      if (userId) {
-        if (payload.type === 'proveedor') {
-          await this.pb.collection('proveedores').create({ user: userId, estado: 'incompleto' });
-        } else {
-          await this.pb.collection('clientes').create({ user: userId });
-        }
-      }
-    } catch (e) {
-      console.warn('Perfil post-registro no creado:', e);
-    }
-
-    return record;
-  } */
   async registerMinimal(payload: RegisterMinimalPayload): Promise<RecordModel> {
   const password = (payload.password ?? '').trim();
   const passwordConfirm = (payload.passwordConfirm ?? '').trim();
@@ -123,12 +76,9 @@ export class AuthPocketbaseService {
     status: isActive, // cliente activo, proveedor en revisión (si así lo quieres)
   };
   if (payload.avatar instanceof Blob) data['avatar'] = payload.avatar;
-
   const record = await this.pb.collection('users').create(data);
-
   // Puedes loguear automáticamente si quieres:
   await this.pb.collection('users').authWithPassword(data.email, password);
-
   // crear perfiles auxiliares...
   return record;
 }
@@ -156,11 +106,9 @@ export class AuthPocketbaseService {
     this.pb.authStore.save(this.pb.authStore.token, rec as any);
     return rec;
   }
-
   async updateMyLocation(lat: number, long: number): Promise<RecordModel> {
     return this.updateMyFields({ lat, long });
   }
-
 private ensureLoggedIn() {
   if (!this.pb.authStore.isValid || !this.pb.authStore.model) {
     throw new Error('No user is logged in');
@@ -179,93 +127,29 @@ private toFormData(data: Record<string, any>): FormData {
 
 async updateProfile(data: any): Promise<RecordModel> {
   this.ensureLoggedIn();
-
   const id = this.pb.authStore.model!.id;
   const body = (data instanceof FormData) ? data : this.toFormData(data);
-
   // Opcional: refresca sesión antes, por si el token está viejo
   try { await this.pb.collection('users').authRefresh(); } catch {}
-
   const updated = await this.pb.collection('users').update(id, body);
-
   // ¡Clave! Mantén el token actual y solo reemplaza el modelo:
   this.pb.authStore.save(this.pb.authStore.token, updated);
-
   return updated;
 }
 
-
-/* async updateProfile(data: any): Promise<any> {
-  try {
-    const user = this.pb.authStore.model;
-    if (!user) {
-      throw new Error('No user is logged in');
-    }
-    
-    const record = await this.pb.collection('users').update(user.id, data);
-    this.pb.authStore.save(record['token'], record['record']);
-    return record;
-  } catch (error) {
-    console.error('Error updating profile:', error);
-    throw error;
-  }
-} */
-
-/* async updateAvatar(file: File): Promise<RecordModel> {
-  if (!this.pb.authStore.model) {
-    throw new Error('No user is logged in');
-  }
-
-  const formData = new FormData();
-  formData.append('avatar', file);
-
-  try {
-    const record = await this.pb.collection('users').update(
-      this.pb.authStore.model.id,
-      formData
-    );
-    
-    // Update the auth store with the new user data
-    this.pb.authStore.save(this.pb.authStore.token, record);
-    return record;
-  } catch (error) {
-    console.error('Error updating avatar:', error);
-    throw error;
-  }
-} */
 async updateAvatar(file: File): Promise<RecordModel> {
   this.ensureLoggedIn();
-
   const fd = new FormData();
   fd.append('avatar', file);
-
   const updated = await this.pb.collection('users').update(this.pb.authStore.model!.id, fd);
-
   this.pb.authStore.save(this.pb.authStore.token, updated);
   return updated;
 }
-
 async fetchCurrentUser() {
     const id = this.pb.authStore.model?.id;
     if (!id) return null;
     return await this.pb.collection('users').getOne(id); // fuerza lectura desde servidor
   }
-
- 
-
- /*  async refreshAuth() {
-    try {
-      // Refresca el auth model para asegurar que authStore.model tenga los últimos campos
-      await this.pb.collection('users').authRefresh();
-    } catch {
-      // Si falla (p.ej. reglas), al menos fuerza una lectura
-      const id = this.pb.authStore.model?.id;
-      if (id) {
-        const record = await this.pb.collection('users').getOne(id);
-        this.pb.authStore.save(record['token'], record['record']);
-      }
-    }
-  } */
   async refreshAuth() {
   try {
     await this.pb.collection('users').authRefresh();

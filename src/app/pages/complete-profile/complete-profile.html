@@ -124,6 +124,27 @@
           <span>{{ professionalForm.get('bio')?.value?.length || 0 }}/500</span>
         </div>
       </div>
+       <!-- Tipos de Wallpaper (Multi-select) -->
+      <div class="form-group">
+        <label class="form-label mb-2">Types of Work <span class="text-danger">*</span></label>
+        <p class="small text-muted mb-2">Select the types of installation you perform</p>
+
+        <div class="d-flex flex-wrap gap-2">
+          <label *ngFor="let type of wallpaperTypes"
+            class="form-check form-check-inline border rounded p-2 px-3 cursor-pointer"
+            [class.active]="isWallpaperTypeSelected(type.value)">
+            <input type="checkbox" class="form-check-input me-1" [value]="type.value"
+              [checked]="isWallpaperTypeSelected(type.value)" (change)="onWallpaperTypeChange(type.value, $event)">
+            <span class="form-check-label">{{ type.label }}</span>
+          </label>
+        </div>
+
+        <div
+          *ngIf="professionalForm.get('wallpaper_types')?.invalid && professionalForm.get('wallpaper_types')?.touched"
+          class="text-danger small mt-1">
+          Select at least one type of work
+        </div>
+      </div>
 
 <!-- Ciudad -->
 <div class="form-group">
@@ -166,7 +187,7 @@
         {{ getSelectAllText() }}
       </span>
     </label>
-    <span class="badge bg-primary">
+    <span class="badge bg-primary" style="color:white;">
       {{ (professionalForm.get('service_zips')?.value || []).length }} / {{ getFilteredZipCodes().length }} selected
     </span>
   </div>
@@ -219,27 +240,7 @@
   <i class="info-circle me-1"></i>
   Please select a city first to see available zip codes
 </div>
-      <!-- Tipos de Wallpaper (Multi-select) -->
-      <div class="form-group">
-        <label class="form-label mb-2">Types of Work <span class="text-danger">*</span></label>
-        <p class="small text-muted mb-2">Select the types of installation you perform</p>
-
-        <div class="d-flex flex-wrap gap-2">
-          <label *ngFor="let type of wallpaperTypes"
-            class="form-check form-check-inline border rounded p-2 px-3 cursor-pointer"
-            [class.active]="isWallpaperTypeSelected(type.value)">
-            <input type="checkbox" class="form-check-input me-1" [value]="type.value"
-              [checked]="isWallpaperTypeSelected(type.value)" (change)="onWallpaperTypeChange(type.value, $event)">
-            <span class="form-check-label">{{ type.label }}</span>
-          </label>
-        </div>
-
-        <div
-          *ngIf="professionalForm.get('wallpaper_types')?.invalid && professionalForm.get('wallpaper_types')?.touched"
-          class="text-danger small mt-1">
-          Select at least one type of work
-        </div>
-      </div>
+     
 
       <!-- Info de revisión -->
       <div class="alert alert-warning small">
