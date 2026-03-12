@@ -4,7 +4,8 @@
         <ul class="setting-listing">
   
           <li class="w-100">
-<a [routerLink]="['/profile', { outlets: { panel: ['client-biografy'] } }]" class="setting-box">              <div class="setting-icon">
+<a [routerLink]="['/profile', { outlets: { panel: ['client-biografy'] } }]" class="setting-box">             
+   <div class="setting-icon">
                 <span class="material-symbols-rounded msr">account_circle</span>
               </div>
               <div class="setting-content">
@@ -30,7 +31,9 @@
           <li class="w-100">
             <a [routerLink]="['/profile', { outlets: { panel: ['client-reviews'] } }]" class="setting-box">
               <div class="setting-icon">
-                <span class="material-symbols-rounded msr">reviews</span>
+                <span class="material-symbols-rounded msr"></span>
+                <i class="fa fa-star-half-o" aria-hidden="true"></i>
+
               </div>
               <div class="setting-content">
                 <h5>Mis reseñas</h5>

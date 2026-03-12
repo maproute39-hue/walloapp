@@ -44,7 +44,11 @@
             <li>
                 <a href="" class="setting-box">
                     <div class="setting-icon">
-                        <i class="icon-document-text-1 main-icon"></i>
+                        <!-- <i class="icon-document-text-1 main-icon"></i> -->
+                        <!-- <i class="fas fa-file-contract"></i> -->
+                        <i class="fa fa-gavel" aria-hidden="true"></i>
+
+                        
                     </div>
                     <div class="setting-content">
                         <h5>Terms and Conditions</h5>
@@ -52,7 +56,7 @@
                     </div>
                 </a>
             </li>
-            <li>
+            <!-- <li>
                 <div class="setting-box">
                     <div class="setting-icon">
                         <i class="icon-brush-3 main-icon"> </i>
@@ -64,11 +68,12 @@
                         </div>
                     </div>
                 </div>
-            </li>
+            </li> -->
         </ul>
         <div class="bottom-sidebar" [hidden]="!isLogged()">
             <a (click)="logout()" class="pages">
-                <i class="icon-logout-2 sidebar-icon"> </i>
+               <i class="fa fa-sign-out" aria-hidden="true"></i>
+
                 <h3>Logout</h3>
             </a>
         </div>

@@ -125,9 +125,7 @@
         </div>
       </div>
 
-      <!-- Ciudad -->
-
-      <!-- Campo Ciudad con autocomplete -->
+<!-- Ciudad -->
 <div class="form-group">
   <label for="city" class="form-label mb-2">City *</label>
   <input 
@@ -148,28 +146,78 @@
     City is required
   </div>
 </div>
+<div class="form-group" *ngIf="professionalForm.get('city')?.value">
+  <label class="form-label mb-2">Service Areas (Zip Codes) *</label>
+  <p class="small text-muted mb-2">
+    Select all zip codes where you provide service in {{ professionalForm.get('city')?.value }}
+  </p>
 
-<!-- Campo Zip Code con autocomplete -->
-<div class="form-group">
-  <label for="zip_code" class="form-label mb-2">Zip Code *</label>
-  <input 
-    type="text" 
-    id="zip_code" 
-    formControlName="zip_code"
-    (input)="onZipInput($event)"
-    (change)="onZipChange($event)"
-    list="zips-list"
-    class="form-control"
-    [class.is-invalid]="professionalFormControls['zip_code'].invalid && professionalFormControls['zip_code'].touched"
-    placeholder="type to search..."
-  >
-  <datalist id="zips-list">
-    <option *ngFor="let zip of filteredZipsList" [value]="zip"></option>
-  </datalist>
-  <div *ngIf="professionalFormControls['zip_code'].invalid && professionalFormControls['zip_code'].touched" class="invalid-feedback">
-    <span *ngIf="professionalFormControls['zip_code'].hasError('required')">Zip code is required</span>
-    <span *ngIf="professionalFormControls['zip_code'].hasError('invalidZip')">Invalid zip code format</span>
+  <!-- Header con Select All -->
+  <div class="d-flex justify-content-between align-items-center mb-2" *ngIf="getFilteredZipCodes().length > 0">
+    <label class="form-check d-flex align-items-center cursor-pointer">
+      <input 
+        type="checkbox" 
+        class="form-check-input me-2"
+        [checked]="areAllZipCodesSelected()"
+        [indeterminate]="areSomeZipCodesSelected()"
+        (change)="toggleAllZipCodes($event)"
+      >
+      <span class="form-check-label fw-medium">
+        {{ getSelectAllText() }}
+      </span>
+    </label>
+    <span class="badge bg-primary">
+      {{ (professionalForm.get('service_zips')?.value || []).length }} / {{ getFilteredZipCodes().length }} selected
+    </span>
   </div>
+
+  <!-- Lista de Zip Codes -->
+  <div class="border rounded p-3 bg-light" *ngIf="getFilteredZipCodes().length > 0">
+    <div class="row">
+      <div class="col-md-6 col-lg-4" *ngFor="let zip of getFilteredZipCodes()">
+        <label class="form-check d-flex align-items-start mb-2 cursor-pointer p-2 rounded hover-bg-light">
+          <input 
+            type="checkbox" 
+            class="form-check-input me-2 mt-1" 
+            [value]="zip.id"
+            [checked]="isZipCodeSelected(zip.id)"
+            (change)="onZipCodeToggle(zip.id, $event)"
+          >
+          <span class="form-check-label">
+            <strong>{{ zip.code }}</strong>
+            <span class="text-muted small d-block">
+              {{ zip.neighborhood || zip.city }}
+            </span>
+          </span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estado vacío -->
+  <div *ngIf="getFilteredZipCodes().length === 0" class="alert alert-info small">
+    <i class="info-circle me-1"></i>
+    No zip codes found for this city. Please select a different city.
+  </div>
+
+  <!-- Validación -->
+  <div *ngIf="professionalForm.get('service_zips')?.invalid && professionalForm.get('service_zips')?.touched" 
+       class="text-danger small mt-2">
+    <i class="alert-circle me-1"></i>
+    Select at least one zip code for service area
+  </div>
+
+  <!-- Resumen seleccionado -->
+  <div class="alert alert-success small mt-2" *ngIf="(professionalForm.get('service_zips')?.value || []).length > 0">
+    <i class="check-circle me-1"></i>
+    <strong>{{ (professionalForm.get('service_zips')?.value || []).length }}</strong> zip code(s) selected for service
+  </div>
+</div>
+
+<!-- Mensaje si no ha seleccionado ciudad -->
+<div class="alert alert-warning small" *ngIf="!professionalForm.get('city')?.value">
+  <i class="info-circle me-1"></i>
+  Please select a city first to see available zip codes
 </div>
       <!-- Tipos de Wallpaper (Multi-select) -->
       <div class="form-group">

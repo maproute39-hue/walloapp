@@ -1,0 +1,1 @@
+import{Nb as d,_a as t,vb as n,wb as a}from"./chunk-TCLFNE2H.js";var o=class s{static \u0275fac=function(e){return new(e||s)};static \u0275cmp=t({type:s,selectors:[["app-address"]],decls:2,vars:0,template:function(e,i){e&1&&(n(0,"p"),d(1,"address works!"),a())},encapsulation:2})};export{o as Address};

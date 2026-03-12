@@ -139,10 +139,41 @@ export class CompleteProfile implements OnInit, OnDestroy {
       ]],
       bio: ['', [Validators.required, Validators.minLength(20), Validators.maxLength(500)]],
       city: ['', Validators.required],
-      zip_code: ['', [Validators.required, CompleteProfile.zipCodeValidator]], // ← NUEVO
+  service_zips: [[], [Validators.required, Validators.minLength(1)]], // ← CAMBIADO: array en lugar de string
       wallpaper_types: [[], [Validators.required, Validators.minLength(1)]],
     });
   }
+
+// ========== NUEVO: Método para toggle de zip codes ==========
+onZipCodeToggle(zipId: string, event: Event): void {
+  const checkbox = event.target as HTMLInputElement;
+  const current = this.professionalForm.get('service_zips')?.value || [];
+  
+  if (checkbox.checked) {
+    this.professionalForm.patchValue({
+      service_zips: [...current, zipId]
+    });
+  } else {
+    this.professionalForm.patchValue({
+      service_zips: current.filter((id: string) => id !== zipId)
+    });
+  }
+}
+
+// ========== NUEVO: Helper para verificar si está seleccionado ==========
+isZipCodeSelected(zipId: string): boolean {
+  const selected = this.professionalForm.get('service_zips')?.value || [];
+  return selected.includes(zipId);
+}
+
+// ========== NUEVO: Obtener zip codes filtrados por ciudad ==========
+getFilteredZipCodes(): any[] {
+  const city = this.professionalForm.get('city')?.value;
+  
+  if (!city) return [];
+  
+  return this.zipCodesList.filter((z: any) => z.city === city);
+}
 
   // ========== NUEVO: Cargar zip codes desde PocketBase ==========
   async loadZipCodesForAutocomplete(): Promise<void> {
@@ -348,39 +379,86 @@ export class CompleteProfile implements OnInit, OnDestroy {
   }
 
   // ========== LÓGICA PROFESSIONAL ==========
-
-  private async submitProfessionalProfile(): Promise<void> {
-    if (this.professionalForm.invalid) {
-      this.professionalForm.markAllAsTouched();
-      this.showError('Por favor completa todos los campos requeridos');
-      return;
-    }
-
-    const pb = this.pb.getInstance();
-    const formValue = this.professionalForm.value;
-
-    // 1️⃣ Actualizar phone en la colección users
-    await pb.collection('users').update(this.oauthUserId!, {
-      phone: formValue.phone,
+// ========== NUEVO: Método para seleccionar/deseleccionar todos los zip codes ==========
+toggleAllZipCodes(event: Event): void {
+  const checkbox = event.target as HTMLInputElement;
+  const zipCodesForCity = this.getFilteredZipCodes();
+  
+  if (checkbox.checked) {
+    // Seleccionar todos los zip codes de la ciudad
+    const allZipIds = zipCodesForCity.map((z: any) => z.id);
+    this.professionalForm.patchValue({
+      service_zips: allZipIds
     });
-
-    // 2️⃣ Crear registro en professional_profiles CON zip_code
-    const profilePayload = {
-      userId: this.oauthUserId!,
-      full_name: formValue.full_name,
-      experience_years: Number(formValue.experience_years),
-      bio: formValue.bio,
-      city: formValue.city,
-      zip_code: formValue.zip_code, // ← NUEVO: incluir zip_code
-      wallpaper_types: formValue.wallpaper_types,
-      is_verified: false,
-      created_at: new Date().toISOString(),
-    };
-
-    await pb.collection('professional_profiles').create(profilePayload);
-
-    console.log('✅ Professional profile created:', profilePayload);
+  } else {
+    // Deseleccionar todos
+    this.professionalForm.patchValue({
+      service_zips: []
+    });
   }
+}
+
+// ========== NUEVO: Verificar si todos están seleccionados ==========
+areAllZipCodesSelected(): boolean {
+  const zipCodesForCity = this.getFilteredZipCodes();
+  const selectedZips = this.professionalForm.get('service_zips')?.value || [];
+  
+  if (zipCodesForCity.length === 0) return false;
+  
+  return zipCodesForCity.every((z: any) => selectedZips.includes(z.id));
+}
+
+// ========== NUEVO: Verificar si algunos están seleccionados (indeterminate) ==========
+areSomeZipCodesSelected(): boolean {
+  const selectedZips = this.professionalForm.get('service_zips')?.value || [];
+  return selectedZips.length > 0 && !this.areAllZipCodesSelected();
+}
+
+// ========== NUEVO: Obtener texto del botón Select All ==========
+getSelectAllText(): string {
+  const zipCodesForCity = this.getFilteredZipCodes();
+  const selectedCount = (this.professionalForm.get('service_zips')?.value || []).length;
+  
+  if (selectedCount === 0) {
+    return `Select All (${zipCodesForCity.length})`;
+  } else if (selectedCount === zipCodesForCity.length) {
+    return `Deselect All`;
+  } else {
+    return `Select All (${zipCodesForCity.length})`;
+  }
+}
+private async submitProfessionalProfile(): Promise<void> {
+  if (this.professionalForm.invalid) {
+    this.professionalForm.markAllAsTouched();
+    this.showError('Por favor completa todos los campos requeridos');
+    return;
+  }
+
+  const pb = this.pb.getInstance();
+  const formValue = this.professionalForm.value;
+
+  // 1️⃣ Actualizar phone en la colección users
+  await pb.collection('users').update(this.oauthUserId!, {
+    phone: formValue.phone,
+  });
+
+  // 2️⃣ Crear registro en professional_profiles CON service_zips (array de IDs)
+  const profilePayload = {
+    userId: this.oauthUserId!,
+    full_name: formValue.full_name,
+    experience_years: Number(formValue.experience_years),
+    bio: formValue.bio,
+    city: formValue.city,
+    service_zips: formValue.service_zips, // ← CAMBIADO: array de IDs en lugar de zip_code string
+    wallpaper_types: formValue.wallpaper_types,
+    is_verified: true,
+    created_at: new Date().toISOString(),
+  };
+
+  await pb.collection('professional_profiles').create(profilePayload);
+
+  console.log('✅ Professional profile created:', profilePayload);
+}
 
   // ========== UTILIDADES ==========
 

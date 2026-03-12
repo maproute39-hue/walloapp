@@ -127,7 +127,7 @@
       <button type="submit" 
               class="btn theme-btn w-100 auth-btn mt-4"
               [disabled]="profileForm.invalid || isLoading">
-        <span *ngIf="!isLoading">Guardar cambios</span>
+        <span *ngIf="!isLoading" style="color:white">Guardar cambios</span>
         <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
         <span *ngIf="isLoading" class="ms-2">Guardando...</span>
       </button>
