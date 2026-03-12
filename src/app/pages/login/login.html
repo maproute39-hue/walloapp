@@ -1,7 +1,7 @@
 <section class="section-lg-t-space section-b-space">
     <div class="custom-container">
       <div class="auth-title">
-        <h2>Iniciar Sesión</h2>
+        <h2>Login</h2>
       </div>
   
       <!-- Mensajes de error -->
@@ -17,14 +17,14 @@
           (click)="loginWithGoogle()"
           [disabled]="loading()">
           <img class="img-fluid login-icon" src="./assets/images/icon/svg/google.svg" alt="google">
-          <span *ngIf="!loading()">Continuar con Google</span>
-          <span *ngIf="loading()">Ingresando…</span>
+          <span *ngIf="!loading()">Continue with Google</span>
+          <span *ngIf="loading()">Logging in…</span>
         </button>
       </div>
   
       <h5 class="content-color fw-medium mt-3 text-center">
-        No tienes una cuenta ?
-        <a routerLink="/register" class="theme-color fw-semibold">Registrate</a>
+        Don't have an account ?
+        <a routerLink="/register" class="theme-color fw-semibold">Register</a>
       </h5>
     </div>
   </section>
