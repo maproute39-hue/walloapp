@@ -26,7 +26,7 @@
                             </div>
                         </div>
                         <div class="service-img">
-                            <img class="img-fluid img" src="../../assets/images/vertical-service/6.jpg" alt="service">
+                            <img class="img-fluid img" src="../../assets/images/vertical-service/blocked_images.png" alt="service">
                         </div>
                     </div>
                     <div class="line-box">
@@ -64,15 +64,36 @@
 </section>
 
 <!-- ✅ NUEVA SECCIÓN PARA PROFESIONALES -->
+<!-- ✅ SECCIÓN PARA PROFESIONALES (ACTUALIZADA) -->
 <section class="section-lg-t-space section-b-space" *ngIf="currentUser?.['type'] === 'professional'">
     <div class="custom-container">
-        <div class="title d-flex justify-content-between align-items-center">
-            <h2>Available Requests in Your Area</h2>
-            <span class="badge bg-primary px-3 py-2">
-                <i class="me-1" data-feather="map-pin"></i>
-                {{ professionalZipsCount }} zone(s) covered
-            </span>
+        <!-- Header con saldo de créditos -->
+       <!-- ✅ HEADER RESPONSIVO PARA PROFESIONALES -->
+<div class="title professional-header mb-4">
+    <!-- Título en fila superior -->
+    <h2 class="mb-3 mb-md-0">Available Requests in Your Area</h2>
+    
+    <!-- Badges en fila inferior (mobile) o alineados (desktop) -->
+    <div class="professional-badges d-flex flex-wrap align-items-center gap-2 gap-md-3">
+        <!-- Badge de zonas -->
+        <span class="badge bg-primary px-3 py-2 d-inline-flex align-items-center gap-1">
+            <i data-feather="map-pin" style="width: 14px; height: 14px;"></i>
+            <span class="d-none d-sm-inline">{{ professionalZipsCount }} zone(s)</span>
+            <span class="d-sm-none">{{ professionalZipsCount }}z</span>
+        </span>
+        
+        <!-- Badge de créditos -->
+        <div class="credit-balance badge bg-success px-3 py-2 d-inline-flex align-items-center gap-1">
+            <i data-feather="dollar-sign" style="width: 14px; height: 14px;"></i>
+            <span class="fw-medium">{{ professionalCreditBalance | number:'1.0-2' }}</span>
+            <span class="d-none d-sm-inline">credits</span>
+            <a routerLink="/professional/credits" class="text-white ms-1 ms-sm-2 border-start border-white border-opacity-25 ps-1 ps-sm-2">
+                <small class="d-none d-sm-inline"><i data-feather="plus-circle" style="width: 12px;"></i> Buy</small>
+                <small class="d-sm-none"><i data-feather="plus" style="width: 12px;"></i></small>
+            </a>
         </div>
+    </div>
+</div>
 
         <!-- Estado: Cargando -->
         <div *ngIf="loading" class="text-center mt-5">
@@ -94,9 +115,18 @@
 
         <!-- Listado de solicitudes -->
         <ul class="booking-list" *ngIf="!loading && userRequests.length > 0">
-            <li class="booking-box" *ngFor="let request of userRequests">
+          <li class="booking-box" 
+    *ngFor="let request of userRequests"
+    [class.updated]="isRequestUpdated(request.id)">
+    
+    <!-- Badge que muestra quién más ha comprado -->
+    <div *ngIf="request.interested_professionals?.length > 0" 
+         class="alert alert-info mb-2 py-1 px-2 small">
+        <i data-feather="users" style="width: 12px;"></i>
+        {{ request.interested_professionals.length }} professional(s) interested
+    </div>
                 <div class="booking-details">
-                    <!-- Header: ID y badge de "Nueva" si es reciente -->
+                    <!-- Header: ID y badge de "Nueva" -->
                     <div class="d-flex align-items-center justify-content-between mb-2">
                         <h5 class="theme-color fw-medium">#{{ request.id | slice:0:6 }}</h5>
                         <span *ngIf="isNewRequest(request)" class="badge bg-success-subtle text-success">
@@ -121,9 +151,9 @@
                         </div>
                         <div class="service-img">
                             <img class="img-fluid rounded" 
-                                 [src]="request.image_url || '../../assets/images/vertical-service/6.jpg'" 
+                                 [src]="request.image_url || '../../assets/images/vertical-service/blocked_images.png'" 
                                  alt="{{ request.wallpaper_type }}"
-                                 onerror="this.src='../../assets/images/vertical-service/6.jpg'">
+                                 onerror="this.src='../../assets/images/vertical-service/blocked_images.png'">
                         </div>
                     </div>
 
@@ -132,16 +162,16 @@
                         <div class="dot2"></div>
                     </div>
 
-                    <!-- Grid de información: Status, Fecha, Ubicación, Zip, Budget -->
+                    <!-- Grid de información -->
                     <div class="row g-2 mt-2">
                         <div class="col-6 col-md-3">
                             <h6 class="fw-medium content-color small">Status</h6>
                             <h6 class="fw-medium title-color">
                                 <span class="booking-tag" 
                                       [ngClass]="{
-                                        'pending-bg': request.status === 'pending',
-                                        'success-bg': request.status === 'accepted',
-                                        'error-bg': request.status === 'cancelled'
+                                        'pending-bg': request.status === 'sent',
+                                        'warning-bg': request.status === 'reviewing',
+                                        'secondary-bg': request.status === 'full'
                                       }">
                                     {{ request.status }}
                                 </span>
@@ -164,21 +194,98 @@
                         </div>
                     </div>
 
-                    <!-- Budget y acciones -->
+                    <!-- Cupos disponibles (MÁXIMO 3 PROFESIONALES) -->
+                    <div class="available-spots mt-3 p-3 rounded" 
+                         [ngClass]="{
+                           'spots-available': getSpotsLeft(request) > 0,
+                           'spots-full': getSpotsLeft(request) === 0
+                         }">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="fw-medium mb-0">
+                                <i class="me-1" data-feather="users"></i>
+                                Available Spots
+                            </h6>
+                            <span class="fw-bold" 
+                                  [ngClass]="{
+                                    'text-success': getSpotsLeft(request) === 3,
+                                    'text-warning': getSpotsLeft(request) === 2 || getSpotsLeft(request) === 1,
+                                    'text-danger': getSpotsLeft(request) === 0
+                                  }">
+                                {{ getSpotsLeft(request) }} of 3 left
+                            </span>
+                        </div>
+                        <!-- Barra de progreso -->
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar" 
+                                 [ngClass]="{
+                                   'bg-success': getSpotsLeft(request) === 3,
+                                   'bg-warning': getSpotsLeft(request) === 2 || getSpotsLeft(request) === 1,
+                                   'bg-danger': getSpotsLeft(request) === 0
+                                 }"
+                                 [style.width.%]="(getSoldLeads(request) / 3) * 100">
+                            </div>
+                        </div>
+                        <!-- Profesionales ya asignados (opcional, sin mostrar contacto) -->
+                        <div class="assigned-professionals mt-2" *ngIf="request.interested_professionals?.length > 0">
+                            <small class="text-muted">
+                                {{ request.interested_professionals.length }} professional(s) already purchased this lead
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Budget y Precio del Lead -->
                     <div class="d-flex align-items-center justify-content-between mt-3 pt-2 border-top">
                         <div>
                             <h6 class="fw-medium content-color mb-1">Client Budget</h6>
                             <h5 class="fw-bold success-color mb-0">{{ request.budget_range }}</h5>
                         </div>
-                        <div class="d-flex align-items-center gap-2">
+                        <div class="text-end">
+                            <h6 class="fw-medium content-color mb-1">Lead Price</h6>
+                            <h5 class="fw-bold theme-color mb-0">${{ leadPrice | number:'1.2-2' }}</h5>
+                        </div>
+                    </div>
+
+                    <!-- Acciones -->
+                    <div class="d-flex align-items-center gap-3 mt-3">
+                        <!-- Si ya compró este lead -->
+                        <div *ngIf="hasPurchasedLead(request)" class="w-100">
+                            <div class="alert alert-success mb-2">
+                                <i class="me-1" data-feather="check-circle"></i>
+                                Contact unlocked! Check request details.
+                            </div>
                             <a [routerLink]="['/professional/request', request.id]" 
-                               class="btn btn-sm outline-btn">
-                                View Details
+                               class="btn btn-sm theme-btn w-100">
+                                <i class="me-1" data-feather="eye"></i>
+                                View Client Contact
                             </a>
-                            <a [routerLink]="['/professional/submit-proposal', request.id]" 
-                               class="btn btn-sm theme-btn">
-                                Submit Proposal
-                            </a>
+                        </div>
+                        
+                        <!-- Si no ha comprado y hay cupo -->
+                        <div *ngIf="!hasPurchasedLead(request) && getSpotsLeft(request) > 0" class="w-100">
+                            <div class="d-flex gap-2">
+                                <a [routerLink]="['/professional/request', request.id]" 
+                                   class="btn btn-sm outline-btn flex-grow-1">
+                                    View Details
+                                </a>
+                                <button (click)="purchaseLead(request)" 
+                                        class="btn btn-sm theme-btn flex-grow-1"
+                                        [disabled]="professionalCreditBalance < leadPrice">
+                                    <i class="me-1" data-feather="lock"></i>
+                                    Buy Lead (${{ leadPrice }})
+                                </button>
+                            </div>
+                            <small *ngIf="professionalCreditBalance < leadPrice" class="text-danger">
+                                <i data-feather="alert-circle" style="width: 12px;"></i>
+                                Insufficient credits
+                            </small>
+                        </div>
+                        
+                        <!-- Si no hay cupo -->
+                        <div *ngIf="getSpotsLeft(request) === 0" class="w-100">
+                            <button disabled class="btn btn-sm secondary-btn w-100">
+                                <i class="me-1" data-feather="x-circle"></i>
+                                No Spots Available
+                            </button>
                         </div>
                     </div>
                 </div>

@@ -643,3 +643,219 @@ html {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--secondary-color);
 }
+
+
+
+
+.credit-balance {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+.available-spots {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  
+  &.spots-available {
+    border-left: 4px solid #28a745;
+  }
+  
+  &.spots-full {
+    border-left: 4px solid #dc3545;
+    background: #fff5f5;
+  }
+}
+
+.booking-tag {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  
+  &.pending-bg { background: #e3f2fd; color: #1976d2; }
+  &.warning-bg { background: #fff3cd; color: #856404; }
+  &.secondary-bg { background: #e2e3e5; color: #383d41; }
+  &.success-bg { background: #d4edda; color: #155724; }
+  &.error-bg { background: #f8d7da; color: #721c24; }
+}
+
+.secondary-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+.professional-header {
+  display: flex;
+  flex-direction: column;
+  
+  @media (min-width: 768px) {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.professional-badges {
+  // En mobile: badges en columna o wrap
+  @media (max-width: 575px) {
+    width: 100%;
+    justify-content: space-between;
+    
+    .badge {
+      flex: 1;
+      justify-content: center;
+      font-size: 0.8rem;
+    }
+  }
+  
+  // En desktop: alineados horizontalmente
+  @media (min-width: 576px) {
+    justify-content: flex-end;
+  }
+}
+
+.credit-balance {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  a {
+    text-decoration: none;
+    opacity: 0.9;
+    
+    &:hover {
+      opacity: 1;
+    }
+  }
+  
+  &:hover {
+    opacity: 0.95;
+    transform: translateY(-1px);
+  }
+}
+
+// Ajustes para pantallas muy pequeñas
+@media (max-width: 360px) {
+  .professional-badges .badge {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.75rem;
+    
+    i {
+      width: 12px !important;
+      height: 12px !important;
+    }
+  }
+  
+  .credit-balance a {
+    margin-left: 0.25rem !important;
+    padding-left: 0.5rem !important;
+  }
+}
+@keyframes slideIn {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+}
+
+// Highlight visual cuando se actualiza
+.booking-box {
+  transition: all 0.3s ease;
+  
+  &.updated {
+    animation: highlightUpdate 1s ease;
+  }
+}
+
+@keyframes highlightUpdate {
+  0%, 100% { background: white; }
+  50% { background: #fff3cd; }
+}
+.booking-box {
+  transition: all 0.3s ease;
+  
+  &.updated {
+    animation: highlightUpdate 1s ease;
+  }
+}
+
+@keyframes highlightUpdate {
+  0%, 100% { 
+    background: white; 
+    transform: scale(1);
+  }
+  50% { 
+    background: #fff3cd; 
+    transform: scale(1.02);
+  }
+}
+// Personalización de SweetAlert2 para que combine con tu tema
+.swal2-popup {
+  font-family: inherit !important;
+  border-radius: 12px !important;
+  
+  .swal2-title {
+    font-size: 1.25rem !important;
+    font-weight: 600 !important;
+    color: #212529 !important;
+  }
+  
+  .swal2-html-container {
+    font-size: 0.95rem !important;
+    color: #495057 !important;
+  }
+  
+  .swal2-confirm {
+    background-color: #0d6efd !important;
+    border: none !important;
+    font-weight: 500 !important;
+  }
+  
+  .swal2-cancel {
+    background-color: #6c757d !important;
+    border: none !important;
+    font-weight: 500 !important;
+  }
+}
+
+// Toast personalizado
+.swal2-toast-custom {
+  .swal2-title {
+    font-size: 0.9rem !important;
+  }
+  
+  .swal2-html-container {
+    font-size: 0.8rem !important;
+  }
+}
+
+// Para mobile: ajustar ancho de modales
+@media (max-width: 576px) {
+  .swal2-popup {
+    width: 95% !important;
+    margin: 10px !important;
+  }
+}

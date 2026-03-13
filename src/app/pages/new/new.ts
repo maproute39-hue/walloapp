@@ -454,32 +454,62 @@ async loginWithGoogle() {
     this.isLoading = false;
   }
 }
-  private async submitRequestToBackend(userId: string): Promise<void> {
-    try {
-      const payload: CreateRequestDTO = {
-        client_id: userId,
-        city: this.projectForm.value.city,
-        zip_code: this.projectForm.value.zip_code,
-        space_type: this.projectForm.value.space_type,
-        size_sqm: this.projectForm.value.size_sqm!,
-        height_m: this.projectForm.value.height_m || undefined,
-        wallpaper_type: this.projectForm.value.wallpaper_type,
-        desired_date: this.projectForm.value.desired_date || undefined,
-        budget_range: this.projectForm.value.budget_range || undefined,
-        intention_level: this.projectForm.value.intention_level as 'low' | 'medium' | 'high',
-        photos: this.photos
-      };
-
-      console.log('📦 Sending request:', payload);
-      await this.requestService.createRequest(payload);
-      console.log('✅ Request created successfully');
+// new.ts - Método submitRequestToBackend
+private async submitRequestToBackend(userId: string): Promise<void> {
+  try {
+    const pb = this.pbService.getInstance();
+    
+    // 1. Crear request SIN fotos
+    const requestData: any = {
+      client_id: userId,
+      city: this.projectForm.value.city,
+      zip_code: this.projectForm.value.zip_code,
+      space_type: this.projectForm.value.space_type,
+      size_sqm: this.projectForm.value.size_sqm!,
+      height_m: this.projectForm.value.height_m || undefined,
+      wallpaper_type: this.projectForm.value.wallpaper_type,
+      desired_date: this.projectForm.value.desired_date || undefined,
+      budget_range: this.projectForm.value.budget_range || undefined,
+      intention_level: this.projectForm.value.intention_level,
+      status: 'sent',
+      sold_leads: 0,
+      max_leads: 3
+    };
+    
+    const request = await pb.collection('requests').create(requestData);
+    console.log('✅ Request creado:', request.id);
+    
+    // 2. Subir fotos si existen
+    if (this.photos.length > 0) {
+      const photoIds: string[] = [];
       
-    } catch (error) {
-      console.error('Error creating request:', error);
-      throw error;
+      for (let i = 0; i < this.photos.length; i++) {
+        const photo = this.photos[i];
+        
+        const formData = new FormData();
+        formData.append('request_id', request.id);
+        formData.append('file', photo);
+        formData.append('sort_order', i.toString());
+        formData.append('is_primary', (i === 0).toString());
+        
+        const photoRecord = await pb.collection('request_photos').create(formData);
+        photoIds.push(photoRecord.id);
+        console.log(`📸 Foto ${i + 1} subida:`, photoRecord.id);
+      }
+      
+      // 3. Actualizar request con relación de fotos
+      await pb.collection('requests').update(request.id, {
+        photos: photoIds
+      });
+      
+      console.log('✅ Fotos relacionadas:', photoIds);
     }
+    
+  } catch (error) {
+    console.error('❌ Error creating request:', error);
+    throw error;
   }
-
+}
   // ========== MANEJO DE ARCHIVOS ==========
 
   onFileSelected(event: Event): void {
