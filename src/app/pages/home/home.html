@@ -1,106 +1,188 @@
-<!-- <header class="main-header">
-    <div class="custom-container">
-        <div class="head-content header-panel d-flex">
-            <img class="img-fluid logo" style="height: 35px !important;" src="assets/images/logo/logo.png" alt="logo">
-            <div class="d-flex align-items-center gap-2">
-                <span class="title-color">Mis Solicitudes</span>
-            </div>
-        </div>
-    </div>
-</header> -->
-
-<section class="section-lg-t-space section-b-space" >
+<!-- ✅ SECCIÓN PARA CLIENTES (ya existente) -->
+<section class="section-lg-t-space section-b-space" *ngIf="currentUser?.['type'] === 'client'">
     <div class="custom-container">
         <div class="title">
             <h2>My Service Requests</h2>
         </div>
         <div *ngIf="userRequests.length === 0" class="text-center mt-4">
             <p class="content-color">No active requests.</p>
-            <a routerLink="/new" class="btn theme-btn">Create New Request
-</a>
+            <a routerLink="/new" class="btn theme-btn">Create New Request</a>
         </div>
-
-          <ul class="booking-list">
-              
-
-                <li class="booking-box" *ngFor="let request of userRequests">
-                    <div class="booking-details">
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="service-content">
-                                <div class="d-flex align-items-center gap-2 mb-1">
-                                    <h5 class="theme-color fw-medium">#58964</h5>
-                                </div>
-                                <a href="pending-booking-details.html">
-                                    <h4 class="title-color fw-medium">{{ request.wallpaper_type }}</h4>
-                                </a>
-                                <div class="d-flex align-items-center gap-2 mt-1">
-                                    <h3 class="title-color fw-bold ">{{ request.space_type }}</h3>
-                                    <h6 class="error-color fw-medium">({{ request.size_sqm }} m² x {{ request.height_m }} m) </h6>
-                                </div>
+        <ul class="booking-list">
+            <li class="booking-box" *ngFor="let request of userRequests">
+                <!-- ... tu contenido actual para clientes ... -->
+                <div class="booking-details">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="service-content">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <h5 class="theme-color fw-medium">#{{ request.id | slice:0:5 }}</h5>
                             </div>
-                            <div class="service-img">
-                                <img class="img-fluid img" src="../../assets/images/vertical-service/6.jpg" alt="1">
+                            <a [routerLink]="['/request-details', request.id]">
+                                <h4 class="title-color fw-medium">{{ request.wallpaper_type }}</h4>
+                            </a>
+                            <div class="d-flex align-items-center gap-2 mt-1">
+                                <h3 class="title-color fw-bold">{{ request.space_type }}</h3>
+                                <h6 class="error-color fw-medium">({{ request.size_sqm }} m² x {{ request.height_m }} m)</h6>
                             </div>
                         </div>
-                        <div class="line-box">
-                            <div class="dot1"></div>
-                            <div class="dot2"></div>
-                        </div>
-                        <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h6 class="fw-medium content-color">Status</h6>
-                            <h6 class="booking-tag pending-bg">{{ request.status }}</h6>
-                        </div>
-
-                        <div class="d-flex align-items-center justify-content-between mt-2">
-                            <h6 class="fw-medium content-color">Date & Time</h6>
-                            <h6 class="fw-medium title-color">{{ request.created | date:'short' }}</h6>
-                        </div>
-
-                        <div class="d-flex align-items-center Pending   justify-content-between mt-2">
-                            <h6 class="fw-medium content-color">Location</h6>
-                            <h6 class="fw-medium title-color">{{ request.city }}</h6>
-                        </div>
-
-                        <div class="d-flex align-items-center justify-content-between mt-2">
-                            <h6 class="fw-medium content-color">Receivable Amount</h6>
-                            <h6 class="fw-medium success-color">{{ request.budget_range }}</h6>
-                        </div>
-
-                        <!-- <ul class="booking-provider-list">
-                            <li class="booking-provider-box">
-                                <div class="provider-image">
-                                    <img class="img-fluid provider-pic" src="../../assets/images/profile/p9.png"
-                                        alt="p17">
-                                </div>
-                                <div class="provider-content">
-                                    <div>
-                                        <h6 class="content-color fw-medium">Customer</h6>
-                                        <h5 class="name fw-medium title-color">{{ request.user.name }}</h5>
-                                    </div>
-
-                                </div>
-                            </li>
-                        </ul> -->
-                        <div class="d-flex align-items-center gap-3 mt-3">
-                            <a href="home.html#!" class="btn btn-sm outline-btn w-50">Refuse</a>
-                            <a href="booking.html" class="btn btn-sm theme-btn w-50">Accept</a>
+                        <div class="service-img">
+                            <img class="img-fluid img" src="../../assets/images/vertical-service/6.jpg" alt="service">
                         </div>
                     </div>
-                </li>
-            </ul>
+                    <div class="line-box">
+                        <div class="dot1"></div>
+                        <div class="dot2"></div>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between mt-1">
+                        <h6 class="fw-medium content-color">Status</h6>
+                        <h6 class="booking-tag pending-bg">{{ request.status }}</h6>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between mt-2">
+                        <h6 class="fw-medium content-color">Date & Time</h6>
+                        <h6 class="fw-medium title-color">{{ request.created | date:'short' }}</h6>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between mt-2">
+                        <h6 class="fw-medium content-color">Location</h6>
+                        <h6 class="fw-medium title-color">{{ request.city }}</h6>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between mt-2">
+                        <h6 class="fw-medium content-color">Budget</h6>
+                        <h6 class="fw-medium success-color">{{ request.budget_range }}</h6>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between mt-2">
+                        <h6 class="fw-medium content-color">Zip Code</h6>
+                        <h6 class="fw-medium success-color">{{ request.zip_code }}</h6>
+                    </div>
+                    <div class="d-flex align-items-center gap-3 mt-3">
+                        <a href="home.html#!" class="btn btn-sm outline-btn w-50">Refuse</a>
+                        <a [routerLink]="['/booking', request.id]" class="btn btn-sm theme-btn w-50">Accept</a>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</section>
 
+<!-- ✅ NUEVA SECCIÓN PARA PROFESIONALES -->
+<section class="section-lg-t-space section-b-space" *ngIf="currentUser?.['type'] === 'professional'">
+    <div class="custom-container">
+        <div class="title d-flex justify-content-between align-items-center">
+            <h2>Available Requests in Your Area</h2>
+            <span class="badge bg-primary px-3 py-2">
+                <i class="me-1" data-feather="map-pin"></i>
+                {{ professionalZipsCount }} zone(s) covered
+            </span>
+        </div>
 
-        <!-- <div *ngFor="let request of userRequests" class="card mb-3">
-            <div class="card-body">
-                <h5 class="card-title">{{ request.space_type }} - {{ request.city }}</h5>
-                <p class="card-text">
-                    <strong>Estado:</strong> {{ request.status }}<br>
-                    <strong>Tamaño:</strong> {{ request.size_sqm }} m²<br>
-                    <strong>Tipo de Wallpaper:</strong> {{ request.wallpaper_type }}<br>
-                    <strong>Nivel de Intención:</strong> {{ request.intention_level }}<br>
-                    <small class="text-muted">Creado: {{ request.created | date:'short' }}</small>
-                </p>
+        <!-- Estado: Cargando -->
+        <div *ngIf="loading" class="text-center mt-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
             </div>
-        </div> -->
+            <p class="mt-3 content-color">Finding requests in your service areas...</p>
+        </div>
+
+        <!-- Estado: Sin solicitudes -->
+        <div *ngIf="!loading && userRequests.length === 0" class="text-center mt-4">
+            <i data-feather="inbox" class="text-muted" style="width: 48px; height: 48px;"></i>
+            <p class="content-color mt-3">No new requests match your service zones yet.</p>
+            <p class="small text-muted">
+                When a client creates a request in one of your covered zip codes, it will appear here in real-time.
+            </p>
+            <a routerLink="/professional/profile" class="btn theme-btn">Manage Service Zones</a>
+        </div>
+
+        <!-- Listado de solicitudes -->
+        <ul class="booking-list" *ngIf="!loading && userRequests.length > 0">
+            <li class="booking-box" *ngFor="let request of userRequests">
+                <div class="booking-details">
+                    <!-- Header: ID y badge de "Nueva" si es reciente -->
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h5 class="theme-color fw-medium">#{{ request.id | slice:0:6 }}</h5>
+                        <span *ngIf="isNewRequest(request)" class="badge bg-success-subtle text-success">
+                            <i class="me-1" data-feather="zap" style="width: 12px;"></i>
+                            New
+                        </span>
+                    </div>
+
+                    <!-- Contenido principal del servicio -->
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="service-content flex-grow-1">
+                            <a [routerLink]="['/professional/request', request.id]">
+                                <h4 class="title-color fw-medium mb-1">{{ request.wallpaper_type }}</h4>
+                            </a>
+                            <div class="d-flex flex-wrap align-items-center gap-2 mt-1">
+                                <h6 class="title-color fw-bold">{{ request.space_type }}</h6>
+                                <span class="text-muted">•</span>
+                                <h6 class="content-color">{{ request.size_sqm }} m²</h6>
+                                <span class="text-muted">•</span>
+                                <h6 class="content-color">{{ request.height_m }} m height</h6>
+                            </div>
+                        </div>
+                        <div class="service-img">
+                            <img class="img-fluid rounded" 
+                                 [src]="request.image_url || '../../assets/images/vertical-service/6.jpg'" 
+                                 alt="{{ request.wallpaper_type }}"
+                                 onerror="this.src='../../assets/images/vertical-service/6.jpg'">
+                        </div>
+                    </div>
+
+                    <div class="line-box my-3">
+                        <div class="dot1"></div>
+                        <div class="dot2"></div>
+                    </div>
+
+                    <!-- Grid de información: Status, Fecha, Ubicación, Zip, Budget -->
+                    <div class="row g-2 mt-2">
+                        <div class="col-6 col-md-3">
+                            <h6 class="fw-medium content-color small">Status</h6>
+                            <h6 class="fw-medium title-color">
+                                <span class="booking-tag" 
+                                      [ngClass]="{
+                                        'pending-bg': request.status === 'pending',
+                                        'success-bg': request.status === 'accepted',
+                                        'error-bg': request.status === 'cancelled'
+                                      }">
+                                    {{ request.status }}
+                                </span>
+                            </h6>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <h6 class="fw-medium content-color small">Posted</h6>
+                            <h6 class="fw-medium title-color">{{ request.created | date:'MMM d, h:mm a' }}</h6>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <h6 class="fw-medium content-color small">Location</h6>
+                            <h6 class="fw-medium title-color">{{ request.city }}</h6>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <h6 class="fw-medium content-color small">Zip Code</h6>
+                            <h6 class="fw-medium title-color">
+                                <i class="me-1 text-muted" data-feather="map-pin" style="width: 14px;"></i>
+                                {{ request.zip_code }}
+                            </h6>
+                        </div>
+                    </div>
+
+                    <!-- Budget y acciones -->
+                    <div class="d-flex align-items-center justify-content-between mt-3 pt-2 border-top">
+                        <div>
+                            <h6 class="fw-medium content-color mb-1">Client Budget</h6>
+                            <h5 class="fw-bold success-color mb-0">{{ request.budget_range }}</h5>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <a [routerLink]="['/professional/request', request.id]" 
+                               class="btn btn-sm outline-btn">
+                                View Details
+                            </a>
+                            <a [routerLink]="['/professional/submit-proposal', request.id]" 
+                               class="btn btn-sm theme-btn">
+                                Submit Proposal
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </li>
+        </ul>
     </div>
 </section>
