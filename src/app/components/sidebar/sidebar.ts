@@ -45,12 +45,12 @@ export class Sidebar implements AfterViewInit, OnDestroy {
 
   async logout() {
     const result = await Swal.fire({
-      title: '¿Cerrar sesión?',
-      text: 'Vas a salir de Wallo.',
+      title: 'Log out?',
+      text: 'You are about to log out of Wallizo.',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Sí, salir',
-      cancelButtonText: 'Cancelar',
+      confirmButtonText: 'Yes, log out',
+      cancelButtonText: 'Cancel',
       reverseButtons: true,
       focusCancel: true,
       customClass: {
@@ -69,15 +69,15 @@ export class Sidebar implements AfterViewInit, OnDestroy {
 
       await Swal.fire({
         icon: 'success',
-        title: 'Sesión cerrada',
+        title: 'Session closed',
         showConfirmButton: false,
         timer: 1200,
       });
     } catch (e: any) {
       await Swal.fire({
         icon: 'error',
-        title: 'No se pudo cerrar sesión',
-        text: e?.message ?? 'Intenta de nuevo.',
+        title: 'Could not log out',
+        text: e?.message ?? 'Try again.',
       });
     }
   }

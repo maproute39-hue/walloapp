@@ -293,12 +293,12 @@ async loginWithApple() {
       this.showSuccess('¡Solicitud creada con éxito!');
       setTimeout(() => this.router.navigate(['/home']), 2000);
     } else {
-      this.showSuccess('¡Bienvenido! ' + (user['name'] || user['email']));
+      this.showSuccess('¡Welcome! ' + (user['name'] || user['email']));
     }
 
   } catch (error: any) {
     console.error('❌ Error Apple:', error);
-    this.showError('Error con Apple. Intenta con Google o teléfono.');
+    this.showError('Error with Apple. Try with Google or phone.');
   } finally {
     this.isLoading = false;
   }
@@ -319,7 +319,7 @@ async loginWithApple() {
 
   private validateProjectForm(): boolean {
     if (this.projectForm.invalid) {
-      this.showError('Por favor completa todos los campos obligatorios');
+      this.showError('Please complete all required fields.');
       this.projectForm.markAllAsTouched();
       return false;
     }
@@ -381,14 +381,14 @@ async loginWithApple() {
         
         // Mostrar paso de éxito
         this.step = 4;
-        this.showSuccess('¡Solicitud creada con éxito! Redirigiendo...');
+        this.showSuccess('¡Request created successfully! Redirecting...');
         
         // Redirigir después de 2 segundos
         setTimeout(() => {
           this.router.navigate(['/home']);
         }, 2000);
       } else {
-        throw new Error('Código inválido. Debe ser un número de 6 dígitos');
+        throw new Error('Invalid code. Must be a 6-digit number.');
       }
       
     } catch (error: any) {
@@ -431,24 +431,24 @@ async loginWithGoogle() {
     if (this.step === 2 && this.projectForm.valid) {
       await this.submitRequestToBackend(user.id);
       this.step = 4;
-      this.showSuccess('¡Solicitud creada con éxito! Redirigiendo...');
+      this.showSuccess('¡Request created successfully! Redirecting...');
       
       setTimeout(() => {
         this.router.navigate(['/home']);
       }, 2000);
     } else {
-      this.showSuccess('¡Bienvenido! ' + (user['name'] || user['email']));
+      this.showSuccess('Welcome! ' + (user['name'] || user['email']));
     }
 
   } catch (error: any) {
     console.error('❌ Error en login Google:', error);
     
     if (error?.message?.includes('popup')) {
-      this.showError('El popup fue bloqueado. Permite ventanas emergentes para continuar.');
+      this.showError('The popup was blocked. Allow pop-ups to continue.');
     } else if (error?.message?.includes('cancelled')) {
-      this.showError('Login cancelado por el usuario');
+      this.showError('Login cancelled by user');
     } else {
-      this.showError('Error al iniciar sesión con Google. Intenta nuevamente.');
+      this.showError('Error signing in with Google. Try again.');
     }
   } finally {
     this.isLoading = false;
@@ -470,12 +470,12 @@ async loginWithGoogle() {
         photos: this.photos
       };
 
-      console.log('📦 Enviando solicitud:', payload);
+      console.log('📦 Sending request:', payload);
       await this.requestService.createRequest(payload);
-      console.log('✅ Solicitud creada exitosamente');
+      console.log('✅ Request created successfully');
       
     } catch (error) {
-      console.error('Error al crear solicitud:', error);
+      console.error('Error creating request:', error);
       throw error;
     }
   }
@@ -492,23 +492,23 @@ async loginWithGoogle() {
       );
       
       if (files.length > 5) {
-        this.showError('Máximo 5 fotos permitidas');
+        this.showError('Maximum 5 photos allowed');
         return;
       }
       
       if (files.length === 0) {
-        this.showError('Solo se permiten imágenes (máx. 5MB)');
+        this.showError('Only images are allowed (máx. 5MB)');
         return;
       }
       
       this.photos = files;
-      this.showSuccess(`${files.length} foto(s) seleccionada(s)`);
+      this.showSuccess(`${files.length} photo(s) selected`);
     }
   }
 
   removePhoto(index: number): void {
     this.photos.splice(index, 1);
-    this.showSuccess('Foto eliminada');
+    this.showSuccess('Photo deleted');
   }
 
   // ========== UTILIDADES DE UI ==========
@@ -555,6 +555,6 @@ async loginWithGoogle() {
    * Obtener mensaje de ayuda para el OTP según el modo
    */
   getOtpHelperText(): string {
-    return 'Introduce cualquier código de 6 dígitos (modo simulación)';
+    return 'Enter any 6-digit code (simulation mode)';
   }
 }

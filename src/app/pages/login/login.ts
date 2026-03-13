@@ -141,8 +141,8 @@ export class Login {
         sessionStorage.setItem('oauth_user_name', user['name'] || user['username'] || '');
 
         Swal.fire({
-          title: '¡Bienvenido!',
-          text: 'Completa tu perfil para continuar.',
+          title: '¡Welcome!',
+          text: 'Complete your profile to continue.',
           icon: 'info',
           timer: 2000,
           showConfirmButton: false
@@ -154,7 +154,7 @@ export class Login {
         const userName = user['name'] || user['username'] || user['email'] || 'Usuario';
 
         Swal.fire({
-          title: '¡Bienvenido!',
+          title: '¡Welcome!',
           text: userName,
           icon: 'success',
           timer: 1500,
@@ -167,18 +167,18 @@ export class Login {
       console.error('❌ Error Google:', error);
 
       if (error?.message?.includes('popup')) {
-        this.errorMsg.set('Permite las ventanas emergentes para continuar con Google.');
+        this.errorMsg.set('Allow pop-ups to continue with Google.');
       } else if (error?.message?.includes('cancelled')) {
-        this.errorMsg.set('Inicio con Google cancelado.');
+        this.errorMsg.set('Google sign-in cancelled.');
       } else {
-        this.errorMsg.set('Error con Google. Intenta más tarde.');
+        this.errorMsg.set('Error with Google. Try again later.');
       }
 
       Swal.fire({
         title: 'Error',
-        text: this.errorMsg() || 'Error desconocido',
+        text: this.errorMsg() || 'Unknown error',
         icon: 'error',
-        confirmButtonText: 'Reintentar'
+        confirmButtonText: 'Retry'
       });
     } finally {
       this.loading.set(false);
@@ -206,7 +206,7 @@ export class Login {
       // 1️⃣ Verificar phone en users
       const hasPhone = user['phone'] && user['phone'].toString().trim() !== '';
       if (!hasPhone) {
-        console.log('📱 Professional sin phone: necesita completar');
+        console.log('📱 Professional without phone: needs to complete profile');
         return true;
       }
 
@@ -227,13 +227,13 @@ export class Login {
 
       } catch (error: any) {
         // 🚨 Manejo seguro: si falla la consulta, asumir que necesita completar
-        console.warn('⚠️ Error verificando professional_profiles:', error?.message || error);
+        console.warn('⚠️ Error verifying professional profiles:', error?.message || error);
         return true;
       }
     }
 
     // 🔴 Tipo desconocido: forzar completado por seguridad
-    console.warn('⚠️ Tipo de usuario desconocido:', type);
+    console.warn('⚠️ Unknown user type:', type);
     return true;
   }
   private getRedirectPath(type: string): string {
@@ -249,10 +249,10 @@ export class Login {
     const msg = raw?.message ?? raw?.data?.message ?? e?.message ?? 'No se pudo iniciar sesión.';
     // Errores típicos:
     if (msg.toLowerCase().includes('failed to authenticate') || msg.toLowerCase().includes('invalid')) {
-      return 'Email o contraseña incorrectos.';
+      return 'Incorrect email or password.';
     }
     if (msg.toLowerCase().includes('too many requests')) {
-      return 'Demasiados intentos. Intenta en unos minutos.';
+      return 'Too many attempts. Try again in a few minutes.';
     }
     return msg;
   }

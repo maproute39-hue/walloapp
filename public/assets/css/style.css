@@ -110,7 +110,7 @@ section,
   padding-top: 80px; }
   @media (max-width: 600px) {
     .section-lg-t-space {
-      padding-top: calc(70px + (80 - 70) * ((100vw - 320px) / (600 - 320))); } }
+      padding-top: calc(102px + (80 - 70) * ((100vw - 320px) / (600 - 320))); } }
 
 .section-lg-b-space {
   padding-bottom: 80px; }

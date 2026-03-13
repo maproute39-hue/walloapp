@@ -93,7 +93,7 @@ export class GalleryComponent implements OnInit {
       text: `¿Eliminar "${g.title}" solo de tu perfil? `,
       showCancelButton: true,
       confirmButtonText: 'Eliminar',
-      cancelButtonText: 'Cancelar'
+      cancelButtonText: 'Cancel'
     });
   
     if (!ok.isConfirmed) return;

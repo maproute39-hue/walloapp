@@ -9,14 +9,15 @@
     </div>
 </header> -->
 
-<section class="section-lg-t-space section-b-space" style="padding-top: 100px;">
+<section class="section-lg-t-space section-b-space" >
     <div class="custom-container">
         <div class="title">
-            <h2>Mis Solicitudes de Servicio</h2>
+            <h2>My Service Requests</h2>
         </div>
         <div *ngIf="userRequests.length === 0" class="text-center mt-4">
-            <p class="content-color">No tienes solicitudes activas.</p>
-            <a routerLink="/new" class="btn theme-btn">Crear Nueva Solicitud</a>
+            <p class="content-color">No active requests.</p>
+            <a routerLink="/new" class="btn theme-btn">Create New Request
+</a>
         </div>
 
           <ul class="booking-list">

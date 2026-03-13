@@ -41,10 +41,10 @@ export class Requests implements OnInit {
 
   filters: Filter[] = [
     { label: 'Todas', value: 'all' },
-    { label: 'Pendientes', value: 'pending' },
-    { label: 'En Progreso', value: 'in-progress' },
-    { label: 'Completadas', value: 'completed' },
-    { label: 'Canceladas', value: 'cancelled' }
+    { label: 'Pendings', value: 'pending' },
+    { label: 'In progress', value: 'in-progress' },
+    { label: 'Completeds', value: 'completed' },
+    { label: 'Cancelleds', value: 'cancelled' }
   ];
 
   private mockRequests: Request[] = [
@@ -175,10 +175,10 @@ export class Requests implements OnInit {
 
   getStatusLabel(status: string): string {
     const labels: { [key: string]: string } = {
-      'pending': 'Pendiente',
-      'in-progress': 'En Progreso',
-      'completed': 'Completada',
-      'cancelled': 'Cancelada'
+      'pending': 'Pending',
+      'in-progress': 'In progress',
+      'completed': 'Completed',
+      'cancelled': 'Cancelled'
     };
     return labels[status] || status;
   }
@@ -188,12 +188,12 @@ export class Requests implements OnInit {
       return `Completado: ${this.formatDate(request.completedDate)}`;
     }
     if (request.status === 'cancelled') {
-      return 'Cancelada';
+      return 'Cancelled';
     }
     if (request.scheduledDate) {
       return this.formatDate(request.scheduledDate);
     }
-    return 'Buscando profesional...';
+    return 'Looking for Professionals...';
   }
 
   formatDate(date: Date): string {
@@ -205,16 +205,17 @@ export class Requests implements OnInit {
   }
 
   openNewRequest(): void {
-    console.log('Crear nueva solicitud');
+    console.log('Create request');
   }
 
   cancelRequest(request: Request): void {
-    if (confirm(`¿Estás seguro de cancelar la solicitud ${request.id}?`)) {
+    if (confirm(`Are you sure you want to cancel the request
+ ${request.id}?`)) {
       this.loadRequests();
     }
   }
 
   openRatingModal(request: Request): void {
-    console.log('Calificar:', request.id);
+    console.log('Rate:', request.id);
   }
 }

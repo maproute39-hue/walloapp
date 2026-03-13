@@ -257,7 +257,7 @@ export class PaymentComponent {
       text: `¿Eliminar "${this.labelOf(p)}" solo de tu perfil?`,
       showCancelButton: true,
       confirmButtonText: 'Eliminar',
-      cancelButtonText: 'Cancelar'
+      cancelButtonText: 'Cancel'
     });
     if (!ok.isConfirmed) return;
 

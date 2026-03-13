@@ -209,7 +209,7 @@ async removeExistingImage(img: GalleryImage, idx: number) {
     icon: 'warning',
     showCancelButton: true,
     confirmButtonText: 'Sí, eliminar',
-    cancelButtonText: 'Cancelar'
+    cancelButtonText: 'Cancel'
   });
 
   if (confirm.isConfirmed) {
@@ -227,7 +227,7 @@ async removeNewImage(index: number) {
     icon: 'warning',
     showCancelButton: true,
     confirmButtonText: 'Sí, eliminar',
-    cancelButtonText: 'Cancelar'
+    cancelButtonText: 'Cancel'
   });
 
   if (confirm.isConfirmed) {

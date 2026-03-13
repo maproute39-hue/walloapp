@@ -3,7 +3,7 @@
     <div *ngIf="shouldShowMenu()" class="expert-menu">
 
     <div class="profile-list">
-        <h5 class="inner-sub-title theme-color text-capitalize mb-2">Perfil profesional</h5>
+        <h5 class="inner-sub-title theme-color text-capitalize mb-2">Professional Profile</h5>
         <ul class="setting-listing">
           <li class="w-100"> 
             <a [routerLink]="['/profile', { outlets: { panel: ['biografy'] } }]" class="setting-box">
@@ -13,7 +13,7 @@
                 <span *ngIf="isUserIncomplete()" class="alert-badge">!</span>
               </div>
               <div class="setting-content">
-                <h5>Datos y biografía</h5>
+                <h5>Profile & Biography</h5>
                 <span class="material-symbols-rounded msr arrow">chevron_right</span>
               </div>
             </a>
@@ -37,7 +37,7 @@
                 <span class="material-symbols-rounded msr">photo_library</span>
               </div>
               <div class="setting-content">
-                <h5>Galería de trabajos (vitrina)</h5>
+                <h5>Work Gallery (Showcase)</h5>
                 <span class="material-symbols-rounded msr arrow">chevron_right</span>
               </div>
             </a>
@@ -162,7 +162,7 @@
    -->
       <!-- RESEÑAS -->
       <div class="profile-list">
-        <h5 class="inner-sub-title theme-color text-capitalize mb-2">Valoraciones</h5>
+        <h5 class="inner-sub-title theme-color text-capitalize mb-2">Ratings</h5>
         <ul class="setting-listing">
           <li class="w-100">
             <a [routerLink]="['/profile', { outlets: { panel: ['reviews'] } }]" class="setting-box">
@@ -170,7 +170,7 @@
                 <span class="material-symbols-rounded msr">reviews</span>
               </div>
               <div class="setting-content">
-                <h5>Reseñas de clientes</h5>
+                <h5>Customer Reviews</h5>
                 <span class="material-symbols-rounded msr arrow">chevron_right</span>
               </div>
             </a>
@@ -180,7 +180,7 @@
        
       <!-- AJUSTES -->
       <div class="profile-list">
-        <h5 class="inner-sub-title theme-color text-capitalize mb-2">Ajustes</h5>
+        <h5 class="inner-sub-title theme-color text-capitalize mb-2">Settings </h5>
         <ul class="setting-listing">
           <!-- <li class="w-100">
             <a href="provider-notifications.html" class="setting-box">
@@ -200,7 +200,7 @@
                 <span class="material-symbols-rounded msr">lock</span>
               </div>
               <div class="setting-content">
-                <h5>Seguridad (contraseña y 2FA)</h5>
+                <h5>Security (password )</h5>
                 <span class="material-symbols-rounded msr arrow">chevron_right</span>
               </div>
             </a>
@@ -210,7 +210,7 @@
   
       <!-- ALERTAS -->
       <div class="profile-list">
-        <h5 class="inner-sub-title error-color text-capitalize mb-2">Zona de alerta</h5>
+        <h5 class="inner-sub-title error-color text-capitalize mb-2">Alert zone</h5>
         <ul class="setting-listing alert-list">
           <!-- <li class="w-100">
             <a href="provider-profile.html#deactivate" class="setting-box" data-bs-toggle="modal">
@@ -240,7 +240,7 @@
                 <span class="material-symbols-rounded msr">logout</span>
               </div>
               <div class="setting-content">
-                <h5 class="error-color">Salir</h5>
+                <h5 class="error-color">Logout</h5>
               </div>
             </a>
           </li>
