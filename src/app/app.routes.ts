@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 import { HomeComponent } from '@app/pages/home/home';
 import { NewRequestComponent } from '@app/pages/new/new';
 import { AuthGuard } from './guards/auth.guard';
+import { provideRouter, withViewTransitions } from '@angular/router';
 
 import { Landing } from '@app/pages/landing/landing';
 export const routes: Routes = [

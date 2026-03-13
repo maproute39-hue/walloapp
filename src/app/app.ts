@@ -1,11 +1,13 @@
-import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component } from '@angular/core';
+import { CommonModule, } from '@angular/common';
+import { AfterViewInit, Component,inject } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { BottomNavbar } from './components/bottom-navbar/bottom-navbar';
 import { Header } from './components/header/header';
 import { Sidebar } from './components/sidebar/sidebar';
 import { filter } from 'rxjs/operators';
 import { NavigationEnd } from '@angular/router';
+import { ViewportScroller } from '@angular/common'; // ← ✅ Importar
+
 import { ConfigMobileService } from './core/config-mobile.service';
 import { ScriptLoaderService } from './services/script-loader.service';
 declare const iconsax: any;
@@ -29,7 +31,8 @@ declare global {
 })
 export class App implements AfterViewInit {
   hideHeader = false;
-  
+    private viewportScroller = inject(ViewportScroller); // ← ✅ Inyectar
+
   constructor(
     public scriptLoaderService: ScriptLoaderService,
     public router: Router
@@ -39,6 +42,8 @@ export class App implements AfterViewInit {
     this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
       .subscribe(() => {
+        this.viewportScroller.scrollToPosition([0, 0]);
+
         // usa microtask o setTimeout(0) para esperar al render
         queueMicrotask(() => window.iconsax?.());
       });
