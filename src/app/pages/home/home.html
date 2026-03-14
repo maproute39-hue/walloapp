@@ -1,184 +1,171 @@
-    <!-- ✅ SECCIÓN PARA CLIENTES (ya existente) -->
-    <section class="section-lg-t-space section-b-space" *ngIf="currentUser?.['type'] === 'client'">
-        <div class="custom-container">
-            <div class="title">
-                <h2>My Service Requests</h2>
-            </div>
-            <div *ngIf="userRequests.length === 0" class="text-center mt-4">
-                <p class="content-color">No active requests.</p>
-                <a routerLink="/new" class="btn theme-btn">Create New Request</a>
-            </div>
-            <ul class="booking-list">
-                <li class="booking-box" *ngFor="let request of userRequests">
-                    <!-- ... tu contenido actual para clientes ... -->
-                    <div class="booking-details">
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="service-content">
-                                <div class="d-flex align-items-center gap-2 mb-1">
-                                    <h5 class="theme-color fw-medium">#{{ request.id | slice:0:5 }}</h5>
-                                </div>
-                                <a [routerLink]="['/request-details', request.id]">
-                                    <h4 class="title-color fw-medium">{{ request.wallpaper_type }}</h4>
-                                </a>
-                                <div class="d-flex align-items-center gap-2 mt-1">
-                                    <h3 class="title-color fw-bold">{{ request.space_type }}</h3>
-                                    <h6 class="error-color fw-medium">({{ request.size_sqm }} m² x {{ request.height_m }} m)</h6>
+<!-- ✅ SECCIÓN PARA CLIENTES (ya existente) -->
+<section class="section-lg-t-space section-b-space" *ngIf="currentUser?.['type'] === 'client'">
+    <div class="custom-container">
+        <div class="title">
+            <h2>My Service Requests</h2>
+        </div>
+        <div *ngIf="userRequests.length === 0" class="text-center mt-4">
+            <p class="content-color">No active requests.</p>
+            <a routerLink="/new" class="btn theme-btn">Create New Request</a>
+        </div>
+        <ul class="booking-list">
+            <li class="booking-box" *ngFor="let request of userRequests">
+                <!-- ... tu contenido actual para clientes ... -->
+                <div class="booking-details">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="service-content">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <h5 class="theme-color fw-medium">#{{ request.id | slice:0:5 }}</h5>
+                            </div>
+                            <a [routerLink]="['/request-details', request.id]">
+                                <h4 class="title-color fw-medium">{{ request.wallpaper_type }}</h4>
+                            </a>
+                            <div class="d-flex align-items-center gap-2 mt-1">
+                                <h3 class="title-color fw-bold">{{ request.space_type }}</h3>
+                                <h6 class="error-color fw-medium">({{ request.size_sqm }} m² x {{ request.height_m }} m)
+                                </h6>
+                            </div>
+                        </div>
+                        <div class="service-img">
+                            <!-- ✅ Fotos visibles SOLO si compró el lead -->
+                            <div *ngIf="hasPurchasedLead(request) && request.expand?.photos?.length > 0"
+                                class="photo-carousel position-relative">
+                                <div id="carousel-{{request.id}}" class="carousel slide" data-bs-ride="carousel">
+                                    <div class="carousel-indicators">
+                                        <button *ngFor="let photo of request.expand.photos; let i = index" type="button"
+                                            [attr.data-bs-target]="'#carousel-' + request.id"
+                                            [attr.data-bs-slide-to]="i" [class.active]="i === 0">
+                                        </button>
+                                    </div>
+                                    <div class="carousel-inner rounded">
+                                        <div *ngFor="let photo of request.expand.photos; let i = index"
+                                            class="carousel-item" [class.active]="i === 0">
+                                            <img [src]="getPhotoUrl(photo)" class="d-block w-100"
+                                                alt="Project photo {{i + 1}}" style="height: 200px; object-fit: cover;">
+                                        </div>
+                                    </div>
+                                    <button class="carousel-control-prev" type="button"
+                                        [attr.data-bs-target]="'#carousel-' + request.id" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button"
+                                        [attr.data-bs-target]="'#carousel-' + request.id" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    </button>
                                 </div>
                             </div>
-                           <div class="service-img">
-    <!-- ✅ Fotos visibles SOLO si compró el lead -->
-    <div *ngIf="hasPurchasedLead(request) && request.expand?.photos?.length > 0" 
-         class="photo-carousel position-relative">
-        <div id="carousel-{{request.id}}" 
-             class="carousel slide" 
-             data-bs-ride="carousel">
-            <div class="carousel-indicators">
-                <button *ngFor="let photo of request.expand.photos; let i = index"
-                        type="button"
-                        [attr.data-bs-target]="'#carousel-' + request.id"
-                        [attr.data-bs-slide-to]="i"
-                        [class.active]="i === 0">
-                </button>
-            </div>
-            <div class="carousel-inner rounded">
-                <div *ngFor="let photo of request.expand.photos; let i = index"
-                     class="carousel-item"
-                     [class.active]="i === 0">
-                    <img [src]="getPhotoUrl(photo)" 
-                         class="d-block w-100" 
-                         alt="Project photo {{i + 1}}"
-                         style="height: 200px; object-fit: cover;">
-                </div>
-            </div>
-            <button class="carousel-control-prev" 
-                    type="button" 
-                    [attr.data-bs-target]="'#carousel-' + request.id" 
-                    data-bs-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            </button>
-            <button class="carousel-control-next" 
-                    type="button" 
-                    [attr.data-bs-target]="'#carousel-' + request.id" 
-                    data-bs-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            </button>
-        </div>
-    </div>
 
-    <!-- Imagen bloqueada si NO compró -->
-    <img *ngIf="!hasPurchasedLead(request)" 
-         class="img-fluid rounded" 
-         src="../../assets/images/vertical-service/blocked_images.png" 
-         alt="Contact locked">
-</div>
-                        </div>
-                        <div class="line-box">
-                            <div class="dot1"></div>
-                            <div class="dot2"></div>
-                        </div>
-                        <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h6 class="fw-medium content-color">Status</h6>
-                            <h6 class="booking-tag pending-bg">{{ request.status }}</h6>
-                        </div>
-                        <div class="d-flex align-items-center justify-content-between mt-2">
-                            <h6 class="fw-medium content-color">Date & Time</h6>
-                            <h6 class="fw-medium title-color">{{ request.created | date:'short' }}</h6>
-                        </div>
-                        <div class="d-flex align-items-center justify-content-between mt-2">
-                            <h6 class="fw-medium content-color">Location</h6>
-                            <h6 class="fw-medium title-color">{{ request.city }}</h6>
-                        </div>
-                        <div class="d-flex align-items-center justify-content-between mt-2">
-                            <h6 class="fw-medium content-color">Budget</h6>
-                            <h6 class="fw-medium success-color">{{ request.budget_range }}</h6>
-                        </div>
-                        <div class="d-flex align-items-center justify-content-between mt-2">
-                            <h6 class="fw-medium content-color">Zip Code</h6>
-                            <h6 class="fw-medium success-color">{{ request.zip_code }}</h6>
-                        </div>
-                        <div class="d-flex align-items-center gap-3 mt-3">
-                            <a href="home.html#!" class="btn btn-sm outline-btn w-50">Refuse</a>
-                            <a [routerLink]="['/booking', request.id]" class="btn btn-sm theme-btn w-50">Accept</a>
+                            <!-- Imagen bloqueada si NO compró -->
+                            <img *ngIf="!hasPurchasedLead(request)" class="img-fluid rounded"
+                                src="../../assets/images/vertical-service/blocked_images.png" alt="Contact locked">
                         </div>
                     </div>
-                </li>
-            </ul>
-        </div>
-    </section>
-
-    <!-- ✅ NUEVA SECCIÓN PARA PROFESIONALES -->
-    <!-- ✅ SECCIÓN PARA PROFESIONALES (ACTUALIZADA) -->
-    <section class="section-lg-t-space section-b-space" *ngIf="currentUser?.['type'] === 'professional'">
-        <div class="custom-container">
-            <!-- Header con saldo de créditos -->
-        <!-- ✅ HEADER RESPONSIVO PARA PROFESIONALES -->
-    <div class="title professional-header mb-4">
-        <!-- Título en fila superior -->
-        <h2 class="mb-3 mb-md-0">Available Requests in Your Area</h2>
-        
-        <!-- Badges en fila inferior (mobile) o alineados (desktop) -->
-        <div class="professional-badges d-flex flex-wrap align-items-center gap-2 gap-md-3">
-            <!-- Badge de zonas -->
-            <span class="badge bg-primary px-3 py-2 d-inline-flex align-items-center gap-1">
-                <i data-feather="map-pin" style="width: 14px; height: 14px;"></i>
-                <span class="d-none d-sm-inline">{{ professionalZipsCount }} zone(s)</span>
-                <span class="d-sm-none">{{ professionalZipsCount }}z</span>
-            </span>
-            
-            <!-- Badge de créditos -->
-            <div class="credit-balance badge bg-success px-3 py-2 d-inline-flex align-items-center gap-1">
-                <i data-feather="dollar-sign" style="width: 14px; height: 14px;"></i>
-                <span class="fw-medium">{{ professionalCreditBalance | number:'1.0-2' }}</span>
-                <span class="d-none d-sm-inline">credits</span>
-                <a routerLink="/professional/credits" class="text-white ms-1 ms-sm-2 border-start border-white border-opacity-25 ps-1 ps-sm-2">
-                    <small class="d-none d-sm-inline"><i data-feather="plus-circle" style="width: 12px;"></i> Buy</small>
-                    <small class="d-sm-none"><i data-feather="plus" style="width: 12px;"></i></small>
-                </a>
-            </div>
-        </div>
-    </div>
-
-            <!-- Estado: Cargando -->
-            <div *ngIf="loading" class="text-center mt-5">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
+                    <div class="line-box">
+                        <div class="dot1"></div>
+                        <div class="dot2"></div>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between mt-1">
+                        <h6 class="fw-medium content-color">Status</h6>
+                        <h6 class="booking-tag pending-bg">{{ request.status }}</h6>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between mt-2">
+                        <h6 class="fw-medium content-color">Date & Time</h6>
+                        <h6 class="fw-medium title-color">{{ request.created | date:'short' }}</h6>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between mt-2">
+                        <h6 class="fw-medium content-color">Location</h6>
+                        <h6 class="fw-medium title-color">{{ request.city }}</h6>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between mt-2">
+                        <h6 class="fw-medium content-color">Budget</h6>
+                        <h6 class="fw-medium success-color">{{ request.budget_range }}</h6>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between mt-2">
+                        <h6 class="fw-medium content-color">Zip Code</h6>
+                        <h6 class="fw-medium success-color">{{ request.zip_code }}</h6>
+                    </div>
+                    <div class="d-flex align-items-center gap-3 mt-3">
+                        <a href="home.html#!" class="btn btn-sm outline-btn w-50">Refuse</a>
+                        <a [routerLink]="['/booking', request.id]" class="btn btn-sm theme-btn w-50">Accept</a>
+                    </div>
                 </div>
-                <p class="mt-3 content-color">Finding requests in your service areas...</p>
-            </div>
+            </li>
+        </ul>
+    </div>
+</section>
 
-            <!-- Estado: Sin solicitudes -->
-            <div *ngIf="!loading && userRequests.length === 0" class="text-center mt-4">
-                <i data-feather="inbox" class="text-muted" style="width: 48px; height: 48px;"></i>
-                <p class="content-color mt-3">No new requests match your service zones yet.</p>
-                <p class="small text-muted">
-                    When a client creates a request in one of your covered zip codes, it will appear here in real-time.
-                </p>
-                <a routerLink="/professional/profile" class="btn theme-btn">Manage Service Zones</a>
+<!-- ✅ NUEVA SECCIÓN PARA PROFESIONALES -->
+<!-- ✅ SECCIÓN PARA PROFESIONALES (ACTUALIZADA) -->
+<section class="section-lg-t-space section-b-space" *ngIf="currentUser?.['type'] === 'professional'">
+    <div class="custom-container">
+        <!-- Header con saldo de créditos -->
+        <!-- ✅ HEADER RESPONSIVO PARA PROFESIONALES -->
+        <div class="title professional-header mb-4">
+            <!-- Título en fila superior -->
+            <h2 class="mb-3 mb-md-0">Available Requests in Your Area</h2>
+
+            <!-- Badges en fila inferior (mobile) o alineados (desktop) -->
+            <div class="professional-badges d-flex flex-wrap align-items-center gap-2 gap-md-3">
+                <!-- Badge de zonas -->
+                <span class="badge bg-primary px-3 py-2 d-inline-flex align-items-center gap-1">
+                    <i data-feather="map-pin" style="width: 14px; height: 14px;"></i>
+                    <span class="d-none d-sm-inline">{{ professionalZipsCount }} zone(s)</span>
+                    <span class="d-sm-none">{{ professionalZipsCount }}z</span>
+                </span>
+
+                <!-- Badge de créditos -->
+                <div class="credit-balance badge bg-success px-3 py-2 d-inline-flex align-items-center gap-1">
+                    <i data-feather="dollar-sign" style="width: 14px; height: 14px;"></i>
+                    <span class="fw-medium">{{ professionalCreditBalance | number:'1.0-2' }}</span>
+                    <span class="d-none d-sm-inline">credits</span>
+                    <a routerLink="/professional/credits"
+                        class="text-white ms-1 ms-sm-2 border-start border-white border-opacity-25 ps-1 ps-sm-2">
+                        <small class="d-none d-sm-inline"><i data-feather="plus-circle" style="width: 12px;"></i>
+                            Buy</small>
+                        <small class="d-sm-none"><i data-feather="plus" style="width: 12px;"></i></small>
+                    </a>
+                </div>
             </div>
+        </div>
+
+        <!-- Estado: Cargando -->
+        <div *ngIf="loading" class="text-center mt-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3 content-color">Finding requests in your service areas...</p>
+        </div>
+
+        <!-- Estado: Sin solicitudes -->
+        <div *ngIf="!loading && userRequests.length === 0" class="text-center mt-4">
+            <i data-feather="inbox" class="text-muted" style="width: 48px; height: 48px;"></i>
+            <p class="content-color mt-3">No new requests match your service zones yet.</p>
+            <p class="small text-muted">
+                When a client creates a request in one of your covered zip codes, it will appear here in real-time.
+            </p>
+            <a routerLink="/professional/profile" class="btn theme-btn">Manage Service Zones</a>
+        </div>
 
         <!-- Listado de solicitudes -->
-    <ul class="booking-list" *ngIf="!loading && userRequests.length > 0">
-    <li class="booking-box" 
-        *ngFor="let request of userRequests"
-        [class.updated]="isRequestUpdated(request.id)">
-    
-        <!-- Badge que muestra quién más ha comprado -->
-        <div *ngIf="request.interested_professionals?.length > 0" 
-            class="alert alert-info mb-2 py-1 px-2 small">
-            <i data-feather="users" style="width: 12px;"></i>
-            {{ request.interested_professionals.length }} professional(s) interested
-        </div>
+        <ul class="booking-list" *ngIf="!loading && userRequests.length > 0">
+            <li class="booking-box" *ngFor="let request of userRequests" [class.updated]="isRequestUpdated(request.id)">
 
-        <div class="booking-details">
-            <!-- Header: ID y badge de "Nueva" -->
-            <div class="d-flex align-items-center justify-content-between mb-2">
-                <h5 class="theme-color fw-medium">#{{ request.id | slice:0:6 }}</h5>
-                <span *ngIf="isNewRequest(request)" class="badge bg-success-subtle text-success">
-                    <i class="me-1" data-feather="zap" style="width: 12px;"></i>
-                    New
-                </span>
-            </div>
-<!-- Debug: Ver qué está pasando
+                <!-- Badge que muestra quién más ha comprado -->
+                <div *ngIf="request.interested_professionals?.length > 0" class="alert alert-info mb-2 py-1 px-2 small">
+                    <i data-feather="users" style="width: 12px;"></i>
+                    {{ request.interested_professionals.length }} professional(s) interested
+                </div>
+
+                <div class="booking-details">
+                    <!-- Header: ID y badge de "Nueva" -->
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h5 class="theme-color fw-medium">#{{ request.id | slice:0:6 }}</h5>
+                        <span *ngIf="isNewRequest(request)" class="badge bg-success-subtle text-success">
+                            <i class="me-1" data-feather="zap" style="width: 12px;"></i>
+                            New
+                        </span>
+                    </div>
+                    <!-- Debug: Ver qué está pasando
 <div *ngIf="hasPurchasedLead(request)" class="alert alert-info mt-2">
   <small>
     <strong>Debug:</strong><br>
@@ -189,233 +176,213 @@
     Interested Prof IDs: {{ request.interested_professionals | json }}<br>
   </small>
 </div> -->
-            <!-- Contenido principal del servicio -->
-            <div class="d-flex align-items-center gap-3">
-                <div class="service-content flex-grow-1">
-                    <h4 class="title-color fw-medium mb-1">{{ request.wallpaper_type }}</h4>
-                    <div class="d-flex flex-wrap align-items-center gap-2 mt-1">
-                        <h6 class="title-color fw-bold">{{ request.space_type }}</h6>
-                        <span class="text-muted">•</span>
-                        <h6 class="content-color">{{ request.size_sqm }} m²</h6>
-                        <span class="text-muted">•</span>
-                        <h6 class="content-color">{{ request.height_m }} m height</h6>
-                    </div>
-                </div>
-                <div class="service-img">
-                    <!-- ✅ CAROUSEL DE FOTOS (solo si compró el lead) -->
-                    <div *ngIf="hasPurchasedLead(request) && request.expand?.photos?.length > 0" 
-                        class="photo-carousel position-relative">
-                        <div id="carousel-{{request.id}}" 
-                            class="carousel slide" 
-                            data-bs-ride="carousel">
-                            <div class="carousel-indicators">
-                                <button *ngFor="let photo of request.expand.photos; let i = index"
-                                        type="button"
-                                        [attr.data-bs-target]="'#carousel-' + request.id"
-                                        [attr.data-bs-slide-to]="i"
-                                        [class.active]="i === 0"
-                                        [attr.aria-label]="'Slide ' + (i + 1)">
-                                </button>
+                    <!-- Contenido principal del servicio -->
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="service-content flex-grow-1">
+                            <h4 class="title-color fw-medium mb-1">{{ request.wallpaper_type }}</h4>
+                            <div class="d-flex flex-wrap align-items-center gap-2 mt-1">
+                                <h6 class="title-color fw-bold">{{ request.space_type }}</h6>
+                                <span class="text-muted">•</span>
+                                <h6 class="content-color">{{ request.size_sqm }} m²</h6>
+                                <span class="text-muted">•</span>
+                                <h6 class="content-color">{{ request.height_m }} m height</h6>
                             </div>
-                            <div class="carousel-inner rounded">
-                                <div *ngFor="let photo of request.expand.photos; let i = index"
-                                    class="carousel-item"
-                                    [class.active]="i === 0">
-                                    <img [src]="getPhotoUrl(photo)" 
-                                        class="d-block w-100" 
-                                        alt="Project photo {{i + 1}}"
-                                        style="height: 200px; object-fit: cover;">
+                        </div>
+                        <div class="service-img">
+                            <!-- ✅ CAROUSEL DE FOTOS (solo si compró el lead) -->
+                            <div *ngIf="hasPurchasedLead(request) && request.expand?.photos?.length > 0"
+                                class="photo-carousel position-relative">
+                                <div id="carousel-{{request.id}}" class="carousel slide" data-bs-ride="carousel">
+                                    <div class="carousel-indicators">
+                                        <button *ngFor="let photo of request.expand.photos; let i = index" type="button"
+                                            [attr.data-bs-target]="'#carousel-' + request.id"
+                                            [attr.data-bs-slide-to]="i" [class.active]="i === 0"
+                                            [attr.aria-label]="'Slide ' + (i + 1)">
+                                        </button>
+                                    </div>
+                                    <div class="carousel-inner rounded">
+                                        <div *ngFor="let photo of request.expand.photos; let i = index"
+                                            class="carousel-item" [class.active]="i === 0">
+                                            <img [src]="getPhotoUrl(photo)" class="d-block w-100"
+                                                alt="Project photo {{i + 1}}" style="height: 200px; object-fit: cover;">
+                                        </div>
+                                    </div>
+                                    <button class="carousel-control-prev" type="button"
+                                        [attr.data-bs-target]="'#carousel-' + request.id" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Previous</span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button"
+                                        [attr.data-bs-target]="'#carousel-' + request.id" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Next</span>
+                                    </button>
                                 </div>
                             </div>
-                            <button class="carousel-control-prev" 
-                                    type="button" 
-                                    [attr.data-bs-target]="'#carousel-' + request.id" 
-                                    data-bs-slide="prev">
-                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Previous</span>
-                            </button>
-                            <button class="carousel-control-next" 
-                                    type="button" 
-                                    [attr.data-bs-target]="'#carousel-' + request.id" 
-                                    data-bs-slide="next">
-                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Next</span>
-                            </button>
+
+                            <!-- Imagen bloqueada (si NO compró) -->
+                            <img *ngIf="!hasPurchasedLead(request)" class="img-fluid rounded"
+                                src="../../assets/images/vertical-service/blocked_images.png" alt="Blocked">
                         </div>
                     </div>
 
-                    <!-- Imagen bloqueada (si NO compró) -->
-                    <img *ngIf="!hasPurchasedLead(request)" 
-                        class="img-fluid rounded" 
-                        src="../../assets/images/vertical-service/blocked_images.png" 
-                        alt="Blocked">
-                </div>
-            </div>
+                    <!-- ✅ INFORMACIÓN DESBLOQUEADA DEL CLIENTE -->
+                    <!-- ✅ INFORMACIÓN DESBLOQUEADA (visible directamente en la tarjeta) -->
+                    <div *ngIf="hasPurchasedLead(request)" class="client-contact-info mt-3 p-3 bg-light rounded border">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <i class="text-success" data-feather="unlock" style="width: 16px;"></i>
+                            <h6 class="fw-bold mb-0 text-success">Client Contact</h6>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-12">
+                                <small class="text-muted">Name</small>
+                                <p class="fw-medium mb-1">{{ request.client_name || 'N/A' }}</p>
+                            </div>
+                            <div class="col-12">
+                                <small class="text-muted">Phone</small>
+                                <p class="fw-medium mb-0">
+                                    {{ request.client_phone || 'N/A' }}
+                                </p>
+                            </div>
+                        </div>
+                        <small class="text-muted d-block mt-2">
+                            <i data-feather="info" style="width: 12px;"></i>
+                            Communication happens outside WALLO
+                        </small>
+                    </div>
 
-            <!-- ✅ INFORMACIÓN DESBLOQUEADA DEL CLIENTE -->
-        <!-- ✅ INFORMACIÓN DESBLOQUEADA (visible directamente en la tarjeta) -->
-<div *ngIf="hasPurchasedLead(request)" 
-     class="client-contact-info mt-3 p-3 bg-light rounded border">
-    <div class="d-flex align-items-center gap-2 mb-2">
-        <i class="text-success" data-feather="unlock" style="width: 16px;"></i>
-        <h6 class="fw-bold mb-0 text-success">Client Contact</h6>
-    </div>
-    <div class="row g-2">
-        <div class="col-12">
-            <small class="text-muted">Name</small>
-            <p class="fw-medium mb-1">{{ request.client_name || 'N/A' }}</p>
-        </div>
-        <div class="col-12">
-            <small class="text-muted">Phone</small>
-            <p class="fw-medium mb-0">
-                {{ request.client_phone || 'N/A' }}
-            </p>
-        </div>
-    </div>
-    <small class="text-muted d-block mt-2">
-        <i data-feather="info" style="width: 12px;"></i>
-        Communication happens outside WALLO
-    </small>
-</div>
+                    <div class="line-box my-3">
+                        <div class="dot1"></div>
+                        <div class="dot2"></div>
+                    </div>
 
-            <div class="line-box my-3">
-                <div class="dot1"></div>
-                <div class="dot2"></div>
-            </div>
-
-            <!-- Grid de información -->
-            <div class="row g-2 mt-2">
-                <div class="col-6 col-md-3">
-                    <h6 class="fw-medium content-color small">Status</h6>
-                    <h6 class="fw-medium title-color">
-                        <span class="booking-tag" 
-                            [ngClass]="{
+                    <!-- Grid de información -->
+                    <div class="row g-2 mt-2">
+                        <div class="col-6 col-md-3">
+                            <h6 class="fw-medium content-color small">Status</h6>
+                            <h6 class="fw-medium title-color">
+                                <span class="booking-tag" [ngClass]="{
                                 'pending-bg': request.status === 'sent',
                                 'warning-bg': request.status === 'reviewing',
                                 'secondary-bg': request.status === 'full'
                             }">
-                            {{ request.status }}
-                        </span>
-                    </h6>
-                </div>
-                <div class="col-6 col-md-3">
-                    <h6 class="fw-medium content-color small">Posted</h6>
-                    <h6 class="fw-medium title-color">{{ request.created | date:'MMM d, h:mm a' }}</h6>
-                </div>
-                <div class="col-6 col-md-3">
-                    <h6 class="fw-medium content-color small">Location</h6>
-                    <h6 class="fw-medium title-color">{{ request.city }}</h6>
-                </div>
-                <div class="col-6 col-md-3">
-                    <h6 class="fw-medium content-color small">Zip Code</h6>
-                    <h6 class="fw-medium title-color">
-                        <i class="me-1 text-muted" data-feather="map-pin" style="width: 14px;"></i>
-                        {{ request.zip_code }}
-                    </h6>
-                </div>
-            </div>
+                                    {{ request.status }}
+                                </span>
+                            </h6>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <h6 class="fw-medium content-color small">Posted</h6>
+                            <h6 class="fw-medium title-color">{{ request.created | date:'MMM d, h:mm a' }}</h6>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <h6 class="fw-medium content-color small">Location</h6>
+                            <h6 class="fw-medium title-color">{{ request.city }}</h6>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <h6 class="fw-medium content-color small">Zip Code</h6>
+                            <h6 class="fw-medium title-color">
+                                <i class="me-1 text-muted" data-feather="map-pin" style="width: 14px;"></i>
+                                {{ request.zip_code }}
+                            </h6>
+                        </div>
+                    </div>
 
-            <!-- Cupos disponibles (MÁXIMO 3 PROFESIONALES) -->
-            <div class="available-spots mt-3 p-3 rounded" 
-                [ngClass]="{
+                    <!-- Cupos disponibles (MÁXIMO 3 PROFESIONALES) -->
+                    <div class="available-spots mt-3 p-3 rounded" [ngClass]="{
                 'spots-available': getSpotsLeft(request) > 0,
                 'spots-full': getSpotsLeft(request) === 0
                 }">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h6 class="fw-medium mb-0">
-                        <i class="me-1" data-feather="users"></i>
-                        Available Spots
-                    </h6>
-                    <span class="fw-bold" 
-                        [ngClass]="{
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="fw-medium mb-0">
+                                <i class="me-1" data-feather="users"></i>
+                                Available Spots
+                            </h6>
+                            <span class="fw-bold" [ngClass]="{
                             'text-success': getSpotsLeft(request) === 3,
                             'text-warning': getSpotsLeft(request) === 2 || getSpotsLeft(request) === 1,
                             'text-danger': getSpotsLeft(request) === 0
                         }">
-                        {{ getSpotsLeft(request) }} of 3 left
-                    </span>
-                </div>
-                <!-- Barra de progreso -->
-                <div class="progress" style="height: 8px;">
-                    <div class="progress-bar" 
-                        [ngClass]="{
+                                {{ getSpotsLeft(request) }} of 3 left
+                            </span>
+                        </div>
+                        <!-- Barra de progreso -->
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar" [ngClass]="{
                         'bg-success': getSpotsLeft(request) === 3,
                         'bg-warning': getSpotsLeft(request) === 2 || getSpotsLeft(request) === 1,
                         'bg-danger': getSpotsLeft(request) === 0
-                        }"
-                        [style.width.%]="(getSoldLeads(request) / 3) * 100">
+                        }" [style.width.%]="(getSoldLeads(request) / 3) * 100">
+                            </div>
+                        </div>
+                        <div class="assigned-professionals mt-2" *ngIf="request.interested_professionals?.length > 0">
+                            <small class="text-muted">
+                                {{ request.interested_professionals.length }} professional(s) already purchased this
+                                lead
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Budget y Precio del Lead -->
+                    <div class="d-flex align-items-center justify-content-between mt-3 pt-2 border-top">
+                        <div>
+                            <h6 class="fw-medium content-color mb-1">Client Budget</h6>
+                            <h5 class="fw-bold success-color mb-0">{{ request.budget_range }}</h5>
+                        </div>
+                        <div class="text-end">
+                            <h6 class="fw-medium content-color mb-1">Lead Price</h6>
+                            <h5 class="fw-bold theme-color mb-0">${{ leadPrice | number:'1.2-2' }}</h5>
+                        </div>
+                    </div>
+
+                    <!-- Acciones -->
+                    <!-- Acciones -->
+                    <div class="d-flex align-items-center gap-3 mt-3">
+
+                        <!-- ✅ Si YA compró este lead: muestra contacto directo -->
+                        <div *ngIf="hasPurchasedLead(request)" class="w-100">
+                            <div class="alert alert-success mb-2 py-1 px-2 small">
+                                <i class="me-1" data-feather="check-circle" style="width: 14px;"></i>
+                                Contact unlocked - Reach out directly
+                            </div>
+
+                            <!-- Teléfono con link para llamar -->
+                            <a [href]="'tel:' + (request.client_phone || '')" class="btn btn-sm outline-btn w-100 mb-2">
+                                <i class="me-1" data-feather="phone" style="width: 14px;"></i>
+                                Call: {{ request.client_phone || 'N/A' }}
+                            </a>
+
+                            <!-- WhatsApp para contacto directo -->
+                            <a [href]="'https://wa.me/' + formatPhoneNumber(request.client_phone)" target="_blank"
+                                class="btn btn-sm btn-success w-100">
+                                <i class="me-1" data-feather="message-circle" style="width: 14px;"></i>
+                                Contact via WhatsApp
+                            </a>
+                        </div>
+
+                        <!-- ✅ Si NO ha comprado y hay cupo: muestra opción de compra -->
+                        <div *ngIf="!hasPurchasedLead(request) && getSpotsLeft(request) > 0" class="w-100">
+                            <button (click)="purchaseLead(request)" class="btn btn-sm theme-btn w-100"
+                                [disabled]="professionalCreditBalance < leadPrice">
+                                <i class="me-1" data-feather="lock"></i>
+                                Unlock Contact (${{ leadPrice }})
+                            </button>
+                            <small *ngIf="professionalCreditBalance < leadPrice"
+                                class="text-danger d-block mt-1 text-center">
+                                <i data-feather="alert-circle" style="width: 12px;"></i>
+                                Insufficient credits
+                            </small>
+                        </div>
+
+                        <!-- ✅ Si no hay cupo: muestra mensaje de cerrado -->
+                        <div *ngIf="getSpotsLeft(request) === 0" class="w-100">
+                            <button disabled class="btn btn-sm secondary-btn w-100">
+                                <i class="me-1" data-feather="x-circle"></i>
+                                Lead Closed (3/3)
+                            </button>
+                        </div>
                     </div>
                 </div>
-                <div class="assigned-professionals mt-2" *ngIf="request.interested_professionals?.length > 0">
-                    <small class="text-muted">
-                        {{ request.interested_professionals.length }} professional(s) already purchased this lead
-                    </small>
-                </div>
-            </div>
-
-            <!-- Budget y Precio del Lead -->
-            <div class="d-flex align-items-center justify-content-between mt-3 pt-2 border-top">
-                <div>
-                    <h6 class="fw-medium content-color mb-1">Client Budget</h6>
-                    <h5 class="fw-bold success-color mb-0">{{ request.budget_range }}</h5>
-                </div>
-                <div class="text-end">
-                    <h6 class="fw-medium content-color mb-1">Lead Price</h6>
-                    <h5 class="fw-bold theme-color mb-0">${{ leadPrice | number:'1.2-2' }}</h5>
-                </div>
-            </div>
-
-            <!-- Acciones -->
- <!-- Acciones -->
-<div class="d-flex align-items-center gap-3 mt-3">
-    
-    <!-- ✅ Si YA compró este lead: muestra contacto directo -->
-    <div *ngIf="hasPurchasedLead(request)" class="w-100">
-        <div class="alert alert-success mb-2 py-1 px-2 small">
-            <i class="me-1" data-feather="check-circle" style="width: 14px;"></i>
-            Contact unlocked - Reach out directly
-        </div>
-        
-    <!-- Teléfono con link para llamar -->
-<a [href]="'tel:' + (request.client_phone || '')" 
-   class="btn btn-sm outline-btn w-100 mb-2">
-    <i class="me-1" data-feather="phone" style="width: 14px;"></i>
-    Call: {{ request.client_phone || 'N/A' }}
-</a>
-
-<!-- WhatsApp para contacto directo -->
-<a [href]="'https://wa.me/' + formatPhoneNumber(request.client_phone)" 
-   target="_blank"
-   class="btn btn-sm btn-success w-100">
-    <i class="me-1" data-feather="message-circle" style="width: 14px;"></i>
-    Contact via WhatsApp
-</a>
+            </li>
+        </ul>
     </div>
-    
-    <!-- ✅ Si NO ha comprado y hay cupo: muestra opción de compra -->
-    <div *ngIf="!hasPurchasedLead(request) && getSpotsLeft(request) > 0" class="w-100">
-        <button (click)="purchaseLead(request)" 
-                class="btn btn-sm theme-btn w-100"
-                [disabled]="professionalCreditBalance < leadPrice">
-            <i class="me-1" data-feather="lock"></i>
-            Unlock Contact (${{ leadPrice }})
-        </button>
-        <small *ngIf="professionalCreditBalance < leadPrice" class="text-danger d-block mt-1 text-center">
-            <i data-feather="alert-circle" style="width: 12px;"></i>
-            Insufficient credits
-        </small>
-    </div>
-    
-    <!-- ✅ Si no hay cupo: muestra mensaje de cerrado -->
-    <div *ngIf="getSpotsLeft(request) === 0" class="w-100">
-        <button disabled class="btn btn-sm secondary-btn w-100">
-            <i class="me-1" data-feather="x-circle"></i>
-            Lead Closed (3/3)
-        </button>
-    </div>
-</div>
-        </div>
-    </li>
-    </ul>
-        </div>
-    </section>
+</section>
