@@ -15,6 +15,8 @@ type Role = 'client' | 'professional';
 })
 
 export class HomeComponent implements OnInit, OnDestroy {
+    professionalProfileId: string = '';  // ← AGREGAR ESTA
+
   loading: boolean = false;
   professionalZipsCount: number = 0;
   private newRequestIds: Set<string> = new Set(); // Para marcar requests nuevas en tiempo real
@@ -32,17 +34,52 @@ export class HomeComponent implements OnInit, OnDestroy {
     private pbService: PbService) { }
 
   async ngOnInit(): Promise<void> {
-    this.currentUser = this.pocketbaseService.getCurrentUser();
+   this.currentUser = this.pocketbaseService.getCurrentUser();
 
-    if (this.currentUser?.['type'] === 'professional') {
-      await this.loadProfessionalCreditBalance();
-      await this.loadProfessionalRequests();
-      await this.subscribeToProfessionalRequests();
-    } else if (this.currentUser?.['type'] === 'client') {
-      await this.loadClientRequests();
-      await this.subscribeToClientRequests();
-    }
+  if (this.currentUser?.['type'] === 'professional') {
+    // ✅ Obtener y guardar el ID del professional_profile
+    const profile = await this.pbService.pb.collection('professional_profiles').getFirstListItem(
+      `userId="${this.currentUser.id}"`
+    );
+    this.professionalProfileId = profile.id;  // ← GUARDAR ESTE ID
+    
+    await this.loadProfessionalCreditBalance();
+    await this.loadProfessionalRequests();
+    await this.subscribeToProfessionalRequests();
+  } else if (this.currentUser?.['type'] === 'client') {
+    await this.loadClientRequests();
+    await this.subscribeToClientRequests();
   }
+  }
+  // Obtener URL de la foto desde request_photos
+// Método CORREGIDO para obtener URL de fotos
+
+getPhotoUrl(photo: any): string {
+  if (!photo?.file) {
+    return '../../assets/images/vertical-service/blocked_images.png';
+  }
+  
+  // ✅ Usar this.pbService.pb (no getInstance)
+  const pb = this.pbService.pb;
+  
+  // PocketBase URL format: /api/files/{collection}/{recordId}/{filename}
+  return `${pb.baseUrl}/api/files/request_photos/${photo.id}/${photo.file}`;
+}
+// Formatear número de teléfono para WhatsApp
+formatPhoneNumber(phone: string): string {
+  if (!phone) return '';
+  
+  // Remover caracteres no numéricos
+  const digits = phone.replace(/\D/g, '');
+  
+  // Si ya tiene código de país, retornar tal cual
+  if (digits.startsWith('1')) {
+    return digits;
+  }
+  
+  // Agregar código de país si falta (ajusta según tu región)
+  return '1' + digits;
+}
   // Obtener cupos restantes
   getSpotsLeft(request: any): number {
     const soldLeads = request.interested_professionals?.length || 0;
@@ -55,11 +92,277 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   // Verificar si ya compró este lead
-  hasPurchasedLead(request: any): boolean {
-    return request.interested_professionals?.includes(this.currentUser.id) || false;
-  }
+// Verificar si ya compró este lead
+hasPurchasedLead(request: any): boolean {
+  if (!request.interested_professionals) return false;
+  
+  // ✅ Comparar con el ID del professional_profile, NO del user
+  return request.interested_professionals.includes(this.professionalProfileId);
+}
+// Método para mostrar detalles del lead en modal
+async showLeadDetailsModal(request: any): Promise<void> {
+  try {
+    // Si no tiene expand, hacer fetch completo
+    if (!request.expand?.photos || !request.expand?.client_id) {
+      const fullRequest = await this.pbService.pb.collection('requests').getOne(request.id, {
+        expand: 'photos,client_id'
+      });
+      request = fullRequest;
+    }
 
- async purchaseLead(request: any): Promise<void> {
+    const clientName = request['client_name'] || 'N/A';
+    const clientPhone = request['client_phone'] || 'N/A';
+    const photos = request.expand?.photos || [];
+
+    // Construir HTML del carousel de fotos
+    const photosHtml = photos.length > 0 ? `
+      <div id="leadCarousel-${request.id}" class="carousel slide mb-3" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+          ${photos.map((_: any, i: number) => `
+            <button type="button" data-bs-target="#leadCarousel-${request.id}" data-bs-slide-to="${i}" 
+                    class="${i === 0 ? 'active' : ''}" aria-label="Slide ${i + 1}"></button>
+          `).join('')}
+        </div>
+        <div class="carousel-inner rounded">
+          ${photos.map((photo: any, i: number) => `
+            <div class="carousel-item ${i === 0 ? 'active' : ''}">
+              <img src="${this.getPhotoUrl(photo)}" 
+                   class="d-block w-100" 
+                   alt="Project photo ${i + 1}"
+                   style="height: 250px; object-fit: cover;">
+            </div>
+          `).join('')}
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#leadCarousel-${request.id}" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#leadCarousel-${request.id}" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+      </div>
+    ` : `
+      <div class="text-center py-3 text-muted">
+        <i data-feather="image" class="mb-2"></i>
+        <p class="mb-0">No photos available</p>
+      </div>
+    `;
+
+    // Mostrar modal con SweetAlert2
+    await Swal.fire({
+      title: `<strong>📋 Request #${request.id.slice(0, 6)}</strong>`,
+      html: `
+        <div class="text-start">
+          <!-- Proyecto -->
+          <div class="mb-3 pb-2 border-bottom">
+            <h6 class="fw-bold mb-1">${request.wallpaper_type}</h6>
+            <p class="small text-muted mb-0">
+              ${request.space_type} • ${request.size_sqm} m² • ${request.height_m} m height
+            </p>
+          </div>
+
+          <!-- Fotos (Carousel) -->
+          ${photosHtml}
+
+          <!-- Contacto del cliente -->
+          <div class="alert alert-success mb-3">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <i data-feather="unlock" style="width: 16px;"></i>
+              <strong>Client Contact</strong>
+            </div>
+          <div class="row g-2">
+  <div class="col-12">
+    <small class="text-muted">Name</small>
+    <p class="fw-medium mb-0">${request.client_name || 'N/A'}</p>
+  </div>
+  <div class="col-12">
+    <small class="text-muted">Phone</small>
+    <p class="fw-medium mb-2">
+      <a href="tel:${request.client_phone}" class="text-decoration-none">
+        ${request.client_phone || 'N/A'}
+      </a>
+    </p>
+    <a href="https://wa.me/${this.formatPhoneNumber(request.client_phone)}" 
+       target="_blank"
+       class="btn btn-success btn-sm w-100">
+      <i class="me-1" data-feather="message-circle" style="width: 14px;"></i>
+      Contact via WhatsApp
+    </a>
+  </div>
+</div>
+          </div>
+
+          <!-- Ubicación y presupuesto -->
+          <div class="row g-2 small">
+            <div class="col-6">
+              <span class="text-muted">Location:</span><br>
+              <strong>${request.city}, ${request.zip_code}</strong>
+            </div>
+            <div class="col-6 text-end">
+              <span class="text-muted">Budget:</span><br>
+              <strong class="text-success">${request.budget_range}</strong>
+            </div>
+          </div>
+        </div>
+      `,
+      width: '95%',
+      showConfirmButton: true,
+      confirmButtonText: 'Close',
+      confirmButtonColor: '#0d6efd',
+      didOpen: () => {
+        // Inicializar Feather icons dentro del modal
+        if (typeof window !== 'undefined' && (window as any).feather) {
+          (window as any).feather.replace();
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Error showing lead details:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Could not load lead details. Please try again.',
+      confirmButtonColor: '#0d6efd'
+    });
+  }
+}
+//  async purchaseLead(request: any): Promise<void> {
+//   if (this.professionalCreditBalance < this.leadPrice) {
+//     await Swal.fire({
+//       icon: 'warning',
+//       title: 'Créditos insuficientes',
+//       text: `Necesitas $${this.leadPrice} para comprar este lead.`,
+//       confirmButtonText: 'Comprar créditos',
+//       confirmButtonColor: '#0d6efd',
+//       showCancelButton: true,
+//       cancelButtonText: 'Cancelar'
+//     }).then((result) => {
+//       if (result.isConfirmed) {
+//         // this.router.navigate(['/professional/credits']);
+//         console.log('Navegar a compra de créditos');
+//       }
+//     });
+//     return;
+//   }
+
+//   if (this.getSpotsLeft(request) <= 0) {
+//     await Swal.fire({
+//       icon: 'info',
+//       title: 'Sin cupos disponibles',
+//       text: 'Esta solicitud ya tiene 3 profesionales asignados.',
+//       confirmButtonText: 'Entendido',
+//       confirmButtonColor: '#0d6efd'
+//     });
+//     return;
+//   }
+
+//   // Confirmación de compra
+//   const result = await Swal.fire({
+//     title: '¿Comprar este lead?',
+//     html: `
+//       <div class="text-start">
+//         <p><strong>Precio:</strong> $${this.leadPrice}</p>
+//         <p><strong>Tu saldo actual:</strong> $${this.professionalCreditBalance}</p>
+//         <p><strong>Saldo después:</strong> $${(this.professionalCreditBalance - this.leadPrice).toFixed(2)}</p>
+//         <p class="text-muted small mb-0">Al confirmar, se desbloquearán los datos de contacto del cliente.</p>
+//       </div>
+//     `,
+//     icon: 'question',
+//     showCancelButton: true,
+//     confirmButtonText: 'Sí, comprar lead',
+//     confirmButtonColor: '#198754',
+//     cancelButtonText: 'Cancelar',
+//     cancelButtonColor: '#6c757d',
+//     reverseButtons: true
+//   });
+
+//   if (!result.isConfirmed) return;
+
+//   try {
+//     const profile = await this.pbService.pb.collection('professional_profiles').getFirstListItem(
+//       `userId="${this.currentUser.id}"`
+//     );
+
+//     const professionalProfileId = profile.id;
+
+//     if (profile['credit_balance'] < this.leadPrice) {
+//       Swal.fire({
+//         icon: 'error',
+//         title: 'Error',
+//         text: 'Tu saldo ha cambiado. Verifica tus créditos e intenta nuevamente.',
+//         confirmButtonColor: '#0d6efd'
+//       });
+//       return;
+//     }
+
+//     // Mostrar loading mientras procesa
+//     Swal.fire({
+//       title: 'Procesando...',
+//       text: 'Comprando lead',
+//       allowOutsideClick: false,
+//       didOpen: () => Swal.showLoading()
+//     });
+
+//     // Descontar créditos
+//     await this.pbService.pb.collection('professional_profiles').update(professionalProfileId, {
+//       credit_balance: profile['credit_balance'] - this.leadPrice
+//     });
+
+//     // Actualizar request
+//     const updatedInterested = [...(request.interested_professionals || []), professionalProfileId];
+//     const newStatus = updatedInterested.length >= 3 ? 'full' : 'reviewing';
+
+//     await this.pbService.pb.collection('requests').update(request.id, {
+//       interested_professionals: updatedInterested,
+//       status: newStatus
+//     });
+
+//     // Actualizar variables locales
+//     this.professionalCreditBalance -= this.leadPrice;
+//     request.interested_professionals = updatedInterested;
+//     request.status = newStatus;
+
+//     // Éxito - mostrar datos desbloqueados
+//     await Swal.fire({
+//       icon: 'success',
+//       title: '¡Lead comprado!',
+//       html: `
+//         <div class="text-start">
+//           <p class="mb-2">Los datos de contacto han sido desbloqueados:</p>
+//           <div class="alert alert-light border mb-0">
+//             <strong>Cliente:</strong> ${request.client_name || 'Disponible en detalles'}<br>
+//             <strong>Teléfono:</strong> ${request.client_phone || 'Ver en detalles'}<br>
+//             <strong>Email:</strong> ${request.client_email || 'Ver en detalles'}
+//           </div>
+//         </div>
+//       `,
+//       confirmButtonText: 'Ver detalles completos',
+//       confirmButtonColor: '#0d6efd',
+//       showCancelButton: true,
+//       cancelButtonText: 'Cerrar'
+//     }).then((res) => {
+//       if (res.isConfirmed) {
+//         // this.router.navigate(['/professional/request', request.id]);
+//         console.log('Navegar a detalles');
+//       }
+//     });
+
+//   } catch (error) {
+//     console.error('Error purchasing lead:', error);
+//     Swal.fire({
+//       icon: 'error',
+//       title: 'Error',
+//       text: 'No se pudo completar la compra. Por favor, intenta nuevamente.',
+//       confirmButtonColor: '#0d6efd'
+//     });
+//   }
+// }
+async purchaseLead(request: any): Promise<void> {
+  // =================================================================
+  // 1. VALIDACIÓN: Créditos suficientes
+  // =================================================================
   if (this.professionalCreditBalance < this.leadPrice) {
     await Swal.fire({
       icon: 'warning',
@@ -78,6 +381,9 @@ export class HomeComponent implements OnInit, OnDestroy {
     return;
   }
 
+  // =================================================================
+  // 2. VALIDACIÓN: Cupos disponibles (máximo 3 profesionales)
+  // =================================================================
   if (this.getSpotsLeft(request) <= 0) {
     await Swal.fire({
       icon: 'info',
@@ -89,7 +395,9 @@ export class HomeComponent implements OnInit, OnDestroy {
     return;
   }
 
-  // Confirmación de compra
+  // =================================================================
+  // 3. CONFIRMACIÓN DE COMPRA (SweetAlert2)
+  // =================================================================
   const result = await Swal.fire({
     title: '¿Comprar este lead?',
     html: `
@@ -97,7 +405,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         <p><strong>Precio:</strong> $${this.leadPrice}</p>
         <p><strong>Tu saldo actual:</strong> $${this.professionalCreditBalance}</p>
         <p><strong>Saldo después:</strong> $${(this.professionalCreditBalance - this.leadPrice).toFixed(2)}</p>
-        <p class="text-muted small mb-0">Al confirmar, se desbloquearán los datos de contacto del cliente.</p>
+        <p class="text-muted small mb-0">Al confirmar, se desbloquearán: nombre, teléfono y fotos del cliente.</p>
       </div>
     `,
     icon: 'question',
@@ -111,13 +419,18 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   if (!result.isConfirmed) return;
 
+  // =================================================================
+  // 4. PROCESO DE COMPRA
+  // =================================================================
   try {
+    // 4.1 Obtener perfil del profesional (para obtener su ID en professional_profiles)
     const profile = await this.pbService.pb.collection('professional_profiles').getFirstListItem(
       `userId="${this.currentUser.id}"`
     );
 
     const professionalProfileId = profile.id;
 
+    // 4.2 Verificar saldo nuevamente (por seguridad - posible race condition)
     if (profile['credit_balance'] < this.leadPrice) {
       Swal.fire({
         icon: 'error',
@@ -128,7 +441,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Mostrar loading mientras procesa
+    // 4.3 Mostrar loading mientras procesa
     Swal.fire({
       title: 'Procesando...',
       text: 'Comprando lead',
@@ -136,12 +449,12 @@ export class HomeComponent implements OnInit, OnDestroy {
       didOpen: () => Swal.showLoading()
     });
 
-    // Descontar créditos
+    // 4.4 Descontar créditos del profesional
     await this.pbService.pb.collection('professional_profiles').update(professionalProfileId, {
       credit_balance: profile['credit_balance'] - this.leadPrice
     });
 
-    // Actualizar request
+    // 4.5 Actualizar request: agregar profesional interesado y cambiar status
     const updatedInterested = [...(request.interested_professionals || []), professionalProfileId];
     const newStatus = updatedInterested.length >= 3 ? 'full' : 'reviewing';
 
@@ -150,38 +463,71 @@ export class HomeComponent implements OnInit, OnDestroy {
       status: newStatus
     });
 
-    // Actualizar variables locales
-    this.professionalCreditBalance -= this.leadPrice;
-    request.interested_professionals = updatedInterested;
-    request.status = newStatus;
+    // =================================================================
+    // 5. ⭐ CRÍTICO: Fetch COMPLETO con expand para obtener datos desbloqueados
+    //    Según documento §5.5: al pagar se desbloquea nombre, teléfono y fotos
+    // =================================================================
+    const unlockedRequest = await this.pbService.pb.collection('requests').getOne(request.id, {
+      expand: 'photos'  // ← Esto desbloquea los datos protegidos por API Rules
+    });
 
-    // Éxito - mostrar datos desbloqueados
+    // Debug opcional (remover en producción)
+    console.log('✅ Request desbloqueada:', {
+      id: unlockedRequest.id,
+      photos: unlockedRequest.expand?.['photos']?.length,
+     client_name: unlockedRequest['client_name'],  // ← Directo desde request
+  client_phone: unlockedRequest['client_phone']  // ← Directo desde request
+
+    });
+
+    // =================================================================
+    // 6. Actualizar el array local (forzar cambio en Angular)
+    // =================================================================
+    const index = this.userRequests.findIndex(r => r.id === request.id);
+    if (index !== -1) {
+      // Reemplazar el request con la versión desbloqueada
+      this.userRequests[index] = unlockedRequest;
+      // Forzar detección de cambios en Angular (inmutabilidad)
+      this.userRequests = [...this.userRequests];
+    }
+
+    // =================================================================
+    // 7. Actualizar variable local de créditos
+    // =================================================================
+    this.professionalCreditBalance -= this.leadPrice;
+
+    // =================================================================
+    // 8. Mostrar toast de éxito (NO modal con navegación - no existe vista detalles)
+    //    Según documento §8: NO se debe construir vista de detalles separada
+    // =================================================================
     await Swal.fire({
       icon: 'success',
-      title: '¡Lead comprado!',
-      html: `
-        <div class="text-start">
-          <p class="mb-2">Los datos de contacto han sido desbloqueados:</p>
-          <div class="alert alert-light border mb-0">
-            <strong>Cliente:</strong> ${request.client_name || 'Disponible en detalles'}<br>
-            <strong>Teléfono:</strong> ${request.client_phone || 'Ver en detalles'}<br>
-            <strong>Email:</strong> ${request.client_email || 'Ver en detalles'}
-          </div>
-        </div>
-      `,
-      confirmButtonText: 'Ver detalles completos',
-      confirmButtonColor: '#0d6efd',
-      showCancelButton: true,
-      cancelButtonText: 'Cerrar'
-    }).then((res) => {
-      if (res.isConfirmed) {
-        // this.router.navigate(['/professional/request', request.id]);
-        console.log('Navegar a detalles');
+      title: '¡Lead desbloqueado!',
+      text: 'Ahora puedes ver el contacto y las fotos del cliente en esta misma vista.',
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 2500,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer);
+        toast.addEventListener('mouseleave', Swal.resumeTimer);
       }
     });
 
+    // =================================================================
+    // 9. Inicializar Bootstrap Carousel DESPUÉS de que Angular renderice
+    // =================================================================
+    setTimeout(() => {
+      this.initCarousel(request.id);
+    }, 200);
+
   } catch (error) {
-    console.error('Error purchasing lead:', error);
+    console.error('❌ Error purchasing lead:', error);
+    
+    // Cerrar loading si está abierto
+    Swal.close();
+    
     Swal.fire({
       icon: 'error',
       title: 'Error',
@@ -191,6 +537,46 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 }
 
+// =================================================================
+// MÉTODO HELPER: Inicializar Bootstrap Carousel
+// =================================================================
+private initCarousel(requestId: string): void {
+  // Verificar que estamos en navegador y que Bootstrap está disponible
+  if (typeof window !== 'undefined' && (window as any).bootstrap?.Carousel) {
+    const carouselEl = document.querySelector(`#carousel-${requestId}`);
+    
+    if (carouselEl) {
+      // Verificar si ya está inicializado para evitar duplicados
+      if (!(carouselEl as any).bootstrap) {
+        new (window as any).bootstrap.Carousel(carouselEl);
+        console.log('🎠 Carousel inicializado para request:', requestId);
+      }
+    } else {
+      console.warn('⚠️ No se encontró el carousel #carousel-' + requestId);
+    }
+  } else {
+    console.warn('⚠️ Bootstrap Carousel no está disponible');
+  }
+}
+private initAllCarousels(): void {
+  if (typeof window !== 'undefined' && (window as any).bootstrap?.Carousel) {
+    document.querySelectorAll('.carousel').forEach(carouselEl => {
+      if (!(carouselEl as any).bootstrap) {
+        new (window as any).bootstrap.Carousel(carouselEl);
+      }
+    });
+  }
+}
+
+// // ✅ Método helper para inicializar Bootstrap Carousel
+// private initCarousel(requestId: string): void {
+//   if (typeof window !== 'undefined' && (window as any).bootstrap?.Carousel) {
+//     const carouselEl = document.querySelector(`#carousel-${requestId}`);
+//     if (carouselEl && !(carouselEl as any).bootstrap) {
+//       new (window as any).bootstrap.Carousel(carouselEl);
+//     }
+//   }
+// }
   // Método para cargar el saldo inicial (al iniciar)
   private async loadProfessionalCreditBalance(): Promise<void> {
     try {

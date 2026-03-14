@@ -458,10 +458,12 @@ async loginWithGoogle() {
 private async submitRequestToBackend(userId: string): Promise<void> {
   try {
     const pb = this.pbService.getInstance();
-    
+    const user = await pb.collection('users').getOne(userId);
     // 1. Crear request SIN fotos
     const requestData: any = {
       client_id: userId,
+        client_name: user['name'] || '',        // ← AGREGAR ESTO
+      client_phone: user['phone'] || '',      // ← AGREGAR ESTO
       city: this.projectForm.value.city,
       zip_code: this.projectForm.value.zip_code,
       space_type: this.projectForm.value.space_type,
