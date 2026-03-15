@@ -9,18 +9,38 @@
 
       <h3>Mi Portfolio</h3>
 
-      <a (click)="router.navigate(['/complete-profile'])" class="back-link" style="color: #f9680f;">
-        <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="12" y1="5" x2="12" y2="19"></line>
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-        </svg>
-      </a>
+      <div class="header-actions">
+        <!-- Botón para subir fotos -->
+        <!-- <button class="btn-upload-header" (click)="fileInput.click()" 
+                [disabled]="isUploading()"
+                title="Agregar fotos">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" 
+               fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <span>Agregar</span>
+        </button> -->
+
+        <a (click)="fileInput.click()" class="back-link" style="color: #f9680f;">
+          <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </a>
+      </div>
     </div>
   </div>
 </header>
 
-<section>
+<!-- Input file oculto -->
+<input #fileInput type="file" multiple accept="image/*" 
+       (change)="onFilesSelected($event)" 
+       style="display: none;">
+
+<section class="section-lg-t-space section-b-space">
   <div class="custom-container">
     <!-- Loading -->
     <div *ngIf="isLoading()" class="text-center py-4">
@@ -31,12 +51,50 @@
     <div *ngIf="!isLoading() && photos.length === 0" class="text-center py-5">
       <h5 class="title-color">Aún no tienes fotos en tu portfolio.</h5>
       <p class="content-color">Sube fotos de tus trabajos para mostrar tu experiencia.</p>
-      <button class="btn theme-btn mt-3" (click)="router.navigate(['/complete-profile'])">
+      <button class="btn theme-btn mt-3" (click)="fileInput.click()">
         Subir Fotos
       </button>
     </div>
 
-    <!-- Grid de fotos -->
+    <!-- Área de upload cuando hay fotos seleccionadas -->
+    <div *ngIf="selectedFiles.length > 0" class="upload-preview-area">
+      <div class="upload-header">
+        <h4>{{ selectedFiles.length }} foto(s) seleccionada(s)</h4>
+        <div class="upload-actions">
+          <button class="btn-cancel" (click)="cancelUpload()">Cancelar</button>
+          <button class="btn-save" (click)="uploadPhotos()" [disabled]="isUploading()">
+            {{ isUploading() ? 'Subiendo...' : 'Guardar Fotos' }}
+          </button>
+        </div>
+      </div>
+      
+      <div class="selected-files-grid">
+        <div *ngFor="let file of selectedFiles; let i = index" class="selected-file-item">
+          <img [src]="getFilePreview(i)" [alt]="file.name">
+          <button class="btn-remove-file" (click)="removeSelectedFile(i)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" 
+                 stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+          <div class="file-info">
+            <span class="file-name">{{ file.name }}</span>
+            <span class="file-size">{{ getFileSize(file) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress bar -->
+      <div *ngIf="isUploading()" class="upload-progress">
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="uploadProgress()"></div>
+        </div>
+        <span>{{ uploadProgress() | number:'1.0-0' }}%</span>
+      </div>
+    </div>
+
+    <!-- Grid de fotos existentes -->
     <div *ngIf="!isLoading() && photos.length > 0" class="portfolio-grid">
       <div *ngFor="let photo of photos; let i = index" class="portfolio-item">
         <img [src]="photo.url" [alt]="photo.filename" 
@@ -63,6 +121,7 @@
 
     <div *ngIf="!isLoading() && photos.length > 0" class="text-center mt-4">
       <p class="content-color">{{ photos.length }} foto(s) en tu portfolio</p>
+      <p class="content-color small">Máximo 10 fotos permitidas</p>
     </div>
   </div>
 </section>
