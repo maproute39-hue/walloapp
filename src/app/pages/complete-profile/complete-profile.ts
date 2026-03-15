@@ -26,6 +26,10 @@ export class CompleteProfile implements OnInit, OnDestroy {
   private router = inject(Router);
   private pb = inject(PocketbaseService);
   private auth = inject(AuthPocketbaseService);
+  selectedFiles: File[] = [];
+  isUploading = signal(false);
+  uploadProgress = signal(0);
+  existingPhotos: string[] = []; // Para editar si ya tiene fotos
 
   // Estados reactivos
   isLoading = signal(false);
@@ -60,6 +64,41 @@ export class CompleteProfile implements OnInit, OnDestroy {
 
   // ========== VALIDADORES PERSONALIZADOS ==========
 
+  onFilesSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const files = input.files;
+    
+    if (!files || files.length === 0) return;
+
+    // Validar archivos
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      
+      if (!file.type.startsWith('image/')) {
+        Swal.fire('Error', 'Solo se permiten imágenes', 'error');
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        Swal.fire('Error', `La imagen "${file.name}" supera los 5MB`, 'error');
+        return;
+      }
+    }
+
+    // Agregar a la lista
+    this.selectedFiles = [...this.selectedFiles, ...Array.from(files)];
+    
+    // Limitar a 10 fotos
+    if (this.selectedFiles.length > 10) {
+      this.selectedFiles = this.selectedFiles.slice(0, 10);
+      Swal.fire('Límite alcanzado', 'Solo se permiten máximo 10 fotos', 'warning');
+    }
+  }
+
+  removeFile(index: number): void {
+    this.selectedFiles.splice(index, 1);
+    this.selectedFiles = [...this.selectedFiles];
+  }
   static phoneValidator(control: AbstractControl): ValidationErrors | null {
     const phone = control.value?.toString() || '';
     const digits = phone.replace(/[^0-9]/g, '');
@@ -427,38 +466,84 @@ getSelectAllText(): string {
     return `Select All (${zipCodesForCity.length})`;
   }
 }
-private async submitProfessionalProfile(): Promise<void> {
-  if (this.professionalForm.invalid) {
-    this.professionalForm.markAllAsTouched();
-    this.showError('Por favor completa todos los campos requeridos');
-    return;
+  async submitProfessionalProfile(): Promise<void> {
+    if (this.professionalForm.invalid) {
+      this.professionalForm.markAllAsTouched();
+      this.showError('Por favor completa todos los campos requeridos');
+      return;
+    }
+
+    this.isUploading.set(true);
+    const pb = this.pb.getInstance();
+    const formValue = this.professionalForm.value;
+
+    try {
+      // 1️⃣ Actualizar phone en users
+      await pb.collection('users').update(this.oauthUserId!, {
+        phone: formValue.phone,
+      });
+
+      // 2️⃣ Preparar datos para professional_profiles
+      const profileData: any = {
+        userId: this.oauthUserId!,
+        full_name: formValue.full_name,
+        experience_years: Number(formValue.experience_years),
+        bio: formValue.bio,
+        city: formValue.city,
+        service_zips: formValue.service_zips,
+        wallpaper_types: formValue.wallpaper_types,
+        is_verified: false, // Requiere aprobación
+      };
+
+      // 3️⃣ Si hay fotos seleccionadas, crear con FormData
+      if (this.selectedFiles.length > 0) {
+        const formData = new FormData();
+        
+        // Agregar todos los campos
+        Object.keys(profileData).forEach(key => {
+          const value = profileData[key];
+          if (Array.isArray(value)) {
+            formData.append(key, JSON.stringify(value));
+          } else {
+            formData.append(key, value.toString());
+          }
+        });
+
+        // Agregar las fotos (PocketBase las guarda en el campo file)
+        this.selectedFiles.forEach((file, index) => {
+          formData.append('portfolio_photos', file);
+        });
+
+        // Crear perfil con las fotos
+        await pb.collection('professional_profiles').create(formData);
+      } else {
+        // Crear sin fotos
+        await pb.collection('professional_profiles').create(profileData);
+      }
+
+      console.log('✅ Professional profile created');
+      
+    } catch (error) {
+      throw error;
+    } finally {
+      this.isUploading.set(false);
+    }
   }
+// En complete-profile.component.ts
 
-  const pb = this.pb.getInstance();
-  const formValue = this.professionalForm.value;
-
-  // 1️⃣ Actualizar phone en la colección users
-  await pb.collection('users').update(this.oauthUserId!, {
-    phone: formValue.phone,
-  });
-
-  // 2️⃣ Crear registro en professional_profiles CON service_zips (array de IDs)
-  const profilePayload = {
-    userId: this.oauthUserId!,
-    full_name: formValue.full_name,
-    experience_years: Number(formValue.experience_years),
-    bio: formValue.bio,
-    city: formValue.city,
-    service_zips: formValue.service_zips, // ← CAMBIADO: array de IDs en lugar de zip_code string
-    wallpaper_types: formValue.wallpaper_types,
-    is_verified: true,
-    created_at: new Date().toISOString(),
-  };
-
-  await pb.collection('professional_profiles').create(profilePayload);
-
-  console.log('✅ Professional profile created:', profilePayload);
+getFilePreview(file: File): string {
+  return URL.createObjectURL(file);
 }
+
+getFileSize(file: File): string {
+  const bytes = file.size;
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+// Limpia las URLs cuando se elimina un archivo
+
 
   // ========== UTILIDADES ==========
 

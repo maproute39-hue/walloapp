@@ -234,7 +234,66 @@
     <strong>{{ (professionalForm.get('service_zips')?.value || []).length }}</strong> zip code(s) selected for service
   </div>
 </div>
+<div *ngIf="isProfessional" class="portfolio-upload-section">
+  <h3>Fotos de Trabajos Realizados</h3>
+  <p class="help-text">Sube hasta 10 fotos de tus proyectos (máx 5MB cada una)</p>
 
+  <!-- Input file -->
+  <div class="file-upload-container">
+    <input 
+      type="file" 
+      #fileInput
+      multiple 
+      accept="image/*"
+      (change)="onFilesSelected($event)"
+      [disabled]="isUploading() || selectedFiles.length >= 10"
+      id="portfolio-photos"
+      hidden>
+    
+    <label for="portfolio-photos" class="upload-button">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="17 8 12 3 7 8"></polyline>
+        <line x1="12" y1="3" x2="12" y2="15"></line>
+      </svg>
+      <span style="color: white  !important;">{{ selectedFiles.length > 0 ? 'Agregar más fotos' : 'Seleccionar fotos' }}</span>
+    </label>
+  </div>
+
+  <!-- Preview de fotos seleccionadas -->
+  <div *ngIf="selectedFiles.length > 0" class="photos-preview">
+    <div *ngFor="let file of selectedFiles; let i = index" class="photo-preview-item">
+      <img [src]="getFilePreview(file)" [alt]="file.name">
+      <button 
+        type="button" 
+        class="remove-photo"
+        (click)="removeFile(i)"
+        [disabled]="isUploading()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <div class="file-info">
+        <span class="file-name">{{ file.name }}</span>
+        <span class="file-size">{{ getFileSize(file) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contador -->
+  <div class="photo-counter">
+    {{ selectedFiles.length }} / 10 fotos
+  </div>
+
+  <!-- Progress bar durante upload -->
+  <div *ngIf="isUploading()" class="upload-progress">
+    <div class="progress-bar">
+      <div class="progress-fill"></div>
+    </div>
+    <span>Subiendo fotos...</span>
+  </div>
+</div>
 <!-- Mensaje si no ha seleccionado ciudad -->
 <div class="alert alert-warning small" *ngIf="!professionalForm.get('city')?.value">
   <i class="info-circle me-1"></i>
