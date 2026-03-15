@@ -1,0 +1,102 @@
+<header class="main-header">
+  <div class="custom-container">
+    <div class="header-panel">
+      <a (click)="router.navigate(['/profile'])" class="back-link" style="color: #f9680f;">
+        <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+        </svg>
+      </a>
+
+      <h3>Mi Portfolio</h3>
+
+      <a (click)="router.navigate(['/complete-profile'])" class="back-link" style="color: #f9680f;">
+        <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+      </a>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="custom-container">
+    <!-- Loading -->
+    <div *ngIf="isLoading()" class="text-center py-4">
+      <p>Cargando portfolio...</p>
+    </div>
+
+    <!-- Sin fotos -->
+    <div *ngIf="!isLoading() && photos.length === 0" class="text-center py-5">
+      <h5 class="title-color">Aún no tienes fotos en tu portfolio.</h5>
+      <p class="content-color">Sube fotos de tus trabajos para mostrar tu experiencia.</p>
+      <button class="btn theme-btn mt-3" (click)="router.navigate(['/complete-profile'])">
+        Subir Fotos
+      </button>
+    </div>
+
+    <!-- Grid de fotos -->
+    <div *ngIf="!isLoading() && photos.length > 0" class="portfolio-grid">
+      <div *ngFor="let photo of photos; let i = index" class="portfolio-item">
+        <img [src]="photo.url" [alt]="photo.filename" 
+             (click)="openLightbox(i)"
+             class="portfolio-img">
+        
+        <div class="portfolio-overlay">
+          <button class="btn-icon btn-delete" 
+                  (click)="onDeletePhoto(i, $event)"
+                  title="Eliminar foto">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" 
+                 stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="portfolio-info">
+          <span class="photo-index">#{{ i + 1 }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="!isLoading() && photos.length > 0" class="text-center mt-4">
+      <p class="content-color">{{ photos.length }} foto(s) en tu portfolio</p>
+    </div>
+  </div>
+</section>
+
+<!-- Lightbox -->
+<div class="lightbox-backdrop" *ngIf="lightboxOpen" (click)="closeLightbox()"></div>
+
+<div class="lightbox-modal" *ngIf="lightboxOpen" (click)="closeLightbox()">
+  <button class="lightbox-close" (click)="closeLightbox()">✕</button>
+  
+  <div class="lightbox-body" (click)="$event.stopPropagation()">
+    <button class="nav-btn prev" (click)="prevImage(); $event.stopPropagation()">
+      <svg width="22" height="22" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+      </svg>
+    </button>
+
+    <img *ngIf="photos[activeIndex]" 
+         [src]="photos[activeIndex].url" 
+         class="lightbox-image"
+         alt="portfolio">
+
+    <button class="nav-btn next" (click)="nextImage(); $event.stopPropagation()">
+      <svg width="22" height="22" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M8.59 16.59 10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="lightbox-thumbs" *ngIf="photos.length > 0">
+    <img *ngFor="let photo of photos; let i = index"
+         [src]="photo.url"
+         [class.active]="i === activeIndex"
+         (click)="selectThumb(i); $event.stopPropagation()"
+         alt="thumb">
+  </div>
+</div>

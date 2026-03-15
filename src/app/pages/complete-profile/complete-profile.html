@@ -264,6 +264,7 @@
   <div *ngIf="selectedFiles.length > 0" class="photos-preview">
     <div *ngFor="let file of selectedFiles; let i = index" class="photo-preview-item">
       <img [src]="getFilePreview(file)" [alt]="file.name">
+      
       <button 
         type="button" 
         class="remove-photo"

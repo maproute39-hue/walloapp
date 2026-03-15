@@ -4,7 +4,7 @@ import { HomeComponent } from '@app/pages/home/home';
 import { NewRequestComponent } from '@app/pages/new/new';
 import { AuthGuard } from './guards/auth.guard';
 import { provideRouter, withViewTransitions } from '@angular/router';
-
+import { PortfolioGalleryComponent } from './pages/profile/sections/expert/portfolio-gallery/portfolio-gallery';
 import { Landing } from '@app/pages/landing/landing';
 export const routes: Routes = [
   {
@@ -30,6 +30,11 @@ export const routes: Routes = [
     path: 'profile',
     loadComponent: () => import('./pages/profile/profile').then(c => c.Profile),
     children: [
+      { 
+      path: 'portfolio', 
+      outlet: 'panel', 
+      loadComponent: () => import('./pages/profile/sections/expert/portfolio-gallery/portfolio-gallery').then(c => c.PortfolioGalleryComponent) 
+    },
       { path: 'biografy',   outlet: 'panel', loadComponent: () => import('./pages/profile/sections/expert/biografy/biografy.component').then(c => c.BiografyComponent) },
       { path: 'services',   outlet: 'panel', loadComponent: () => import('./pages/profile/sections/expert/services/services').then(c => c.Services) },
       { path: 'documents',  outlet: 'panel', loadComponent: () => import('./pages/profile/sections/expert/documents/documents').then(c => c.Documents) },
