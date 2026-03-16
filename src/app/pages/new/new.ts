@@ -43,7 +43,10 @@ export class NewRequestComponent implements OnInit, OnDestroy {
 
   // ========== FORMULARIO DE PROYECTO ==========
   projectForm!: FormGroup;
+  // photos: File[] = [];
+
   photos: File[] = [];
+photoPreviews: string[] = [];
 
   // ========== FORMULARIO DE AUTENTICACIÓN ==========
   phoneForm!: FormGroup;
@@ -95,7 +98,20 @@ export class NewRequestComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     // No hay timers que limpiar porque usamos el sistema nativo
+      this.clearPhotoPreviews();
+
   }
+  private rebuildPhotoPreviews(): void {
+  this.clearPhotoPreviews(false);
+  this.photoPreviews = this.photos.map(file => URL.createObjectURL(file));
+}
+
+private clearPhotoPreviews(clearArray: boolean = true): void {
+  this.photoPreviews.forEach(url => URL.revokeObjectURL(url));
+  if (clearArray) {
+    this.photoPreviews = [];
+  }
+}
   async loadIcons(iconNames: string[]) {
     for (const name of iconNames) {
       try {
@@ -236,6 +252,10 @@ export class NewRequestComponent implements OnInit, OnDestroy {
       city: new FormControl('', Validators.required),
       zip_code: new FormControl('', Validators.required),
       space_type: new FormControl('', Validators.required),
+         client_phone: new FormControl('', [
+      Validators.required,
+      Validators.pattern(/^[0-9+\-\s()]{7,15}$/)
+    ]),
       size_sqm: new FormControl(null, [Validators.required, Validators.min(1)]),
       height_m: new FormControl(null),
       wallpaper_type: new FormControl('', Validators.required),
@@ -399,15 +419,23 @@ async loginWithApple() {
   }
 
   // ========== ENVÍO DE SOLICITUD AL BACKEND ==========
-// ========== LOGIN CON GOOGLE ==========
+private normalizePhone(phone: string): string {
+  return (phone || '').replace(/[^\d+]/g, '').trim();
+}
+
+// private normalizePhone(phone: string): string {
+//   return (phone || '').replace(/\D/g, '');
+// }
 
 // ========== LOGIN CON GOOGLE ==========
+
+
+
 async loginWithGoogle() {
   try {
     this.isLoading = true;
     this.errorMessage = '';
 
-    // ✅ CORRECCIÓN: Usa getInstance() en lugar de .client
     const authData = await this.pbService.getInstance().collection('users').authWithOAuth2({
       provider: 'google',
     });
@@ -415,24 +443,39 @@ async loginWithGoogle() {
     let user = authData.record;
     console.log('✅ Login Google exitoso:', user);
 
-    // 🎯 ASIGNAR ROL 'CLIENT' SI NO TIENE TYPE
+    const clientPhone = this.normalizePhone(this.projectForm.value.client_phone || '');
+
+    // Asignar type si no existe
+    const updatePayload: any = {};
+
     if (!user['type'] || user['type'] === '') {
+      updatePayload.type = 'client';
+    }
+
+    // Guardar teléfono si viene en el formulario
+    if (clientPhone) {
+      updatePayload.phone = clientPhone;
+    }
+
+    // Opcional: si quieres guardar también el nombre si no existe
+    // if (!user['name'] && authData?.meta?.name) {
+    //   updatePayload.name = authData.meta.name;
+    // }
+
+    if (Object.keys(updatePayload).length > 0) {
       try {
-        const updatedUser = await this.pbService.getInstance().collection('users').update(user.id, {
-          type: 'client',
-        });
-        user = updatedUser; // Actualizamos la referencia local
-        console.log('🔄 Type actualizado a "client"');
+        user = await this.pbService.getInstance().collection('users').update(user.id, updatePayload);
+        console.log('🔄 Usuario actualizado:', updatePayload);
       } catch (updateError: any) {
-        console.warn('⚠️ No se pudo actualizar el type:', updateError?.message);
-        // Continuamos igual, no bloqueamos el flujo por esto
+        console.warn('⚠️ No se pudo actualizar el usuario:', updateError?.message);
       }
     }
+
     if (this.step === 2 && this.projectForm.valid) {
       await this.submitRequestToBackend(user.id);
       this.step = 4;
       this.showSuccess('¡Request created successfully! Redirecting...');
-      
+
       setTimeout(() => {
         this.router.navigate(['/home']);
       }, 2000);
@@ -442,7 +485,7 @@ async loginWithGoogle() {
 
   } catch (error: any) {
     console.error('❌ Error en login Google:', error);
-    
+
     if (error?.message?.includes('popup')) {
       this.showError('The popup was blocked. Allow pop-ups to continue.');
     } else if (error?.message?.includes('cancelled')) {
@@ -454,16 +497,26 @@ async loginWithGoogle() {
     this.isLoading = false;
   }
 }
+onClientPhoneInput(event: Event): void {
+  const input = event.target as HTMLInputElement;
+  const cleanValue = input.value.replace(/[^0-9]/g, '');
+  this.projectForm.patchValue(
+    { client_phone: cleanValue },
+    { emitEvent: false }
+  );
+}
 // new.ts - Método submitRequestToBackend
 private async submitRequestToBackend(userId: string): Promise<void> {
   try {
     const pb = this.pbService.getInstance();
     const user = await pb.collection('users').getOne(userId);
-    // 1. Crear request SIN fotos
+
+    const clientPhone = this.normalizePhone(this.projectForm.value.client_phone || '');
+
     const requestData: any = {
       client_id: userId,
-        client_name: user['name'] || '',        // ← AGREGAR ESTO
-      client_phone: user['phone'] || '',      // ← AGREGAR ESTO
+      client_name: user['name'] || user['email'] || '',
+      client_phone: clientPhone,
       city: this.projectForm.value.city,
       zip_code: this.projectForm.value.zip_code,
       space_type: this.projectForm.value.space_type,
@@ -477,36 +530,34 @@ private async submitRequestToBackend(userId: string): Promise<void> {
       sold_leads: 0,
       max_leads: 3
     };
-    
+
     const request = await pb.collection('requests').create(requestData);
     console.log('✅ Request creado:', request.id);
-    
-    // 2. Subir fotos si existen
+
     if (this.photos.length > 0) {
       const photoIds: string[] = [];
-      
+
       for (let i = 0; i < this.photos.length; i++) {
         const photo = this.photos[i];
-        
+
         const formData = new FormData();
         formData.append('request_id', request.id);
         formData.append('file', photo);
         formData.append('sort_order', i.toString());
         formData.append('is_primary', (i === 0).toString());
-        
+
         const photoRecord = await pb.collection('request_photos').create(formData);
         photoIds.push(photoRecord.id);
         console.log(`📸 Foto ${i + 1} subida:`, photoRecord.id);
       }
-      
-      // 3. Actualizar request con relación de fotos
+
       await pb.collection('requests').update(request.id, {
         photos: photoIds
       });
-      
+
       console.log('✅ Fotos relacionadas:', photoIds);
     }
-    
+
   } catch (error) {
     console.error('❌ Error creating request:', error);
     throw error;
@@ -514,34 +565,46 @@ private async submitRequestToBackend(userId: string): Promise<void> {
 }
   // ========== MANEJO DE ARCHIVOS ==========
 
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    
-    if (input.files?.length) {
-      // Limitar a 5 fotos y 5MB cada una
-      const files = Array.from(input.files).filter(file => 
-        file.type.startsWith('image/') && file.size <= 5 * 1024 * 1024
-      );
-      
-      if (files.length > 5) {
-        this.showError('Maximum 5 photos allowed');
-        return;
-      }
-      
-      if (files.length === 0) {
-        this.showError('Only images are allowed (máx. 5MB)');
-        return;
-      }
-      
-      this.photos = files;
-      this.showSuccess(`${files.length} photo(s) selected`);
-    }
+onFileSelected(event: Event): void {
+  const input = event.target as HTMLInputElement;
+
+  if (!input.files?.length) return;
+
+  const selectedFiles = Array.from(input.files).filter(file =>
+    file.type.startsWith('image/') && file.size <= 5 * 1024 * 1024
+  );
+
+  if (selectedFiles.length === 0) {
+    this.showError('Only images are allowed (max. 5MB)');
+    input.value = '';
+    return;
   }
 
-  removePhoto(index: number): void {
-    this.photos.splice(index, 1);
-    this.showSuccess('Photo deleted');
+  // Combinar con las fotos ya seleccionadas
+  const combined = [...this.photos, ...selectedFiles];
+
+  if (combined.length > 5) {
+    this.showError('Maximum 5 photos allowed');
+    input.value = '';
+    return;
   }
+
+  this.photos = combined;
+  this.rebuildPhotoPreviews();
+
+  this.showSuccess(`${this.photos.length} photo(s) selected`);
+
+  // Permite volver a escoger el mismo archivo si el usuario quiere
+  input.value = '';
+}
+removePhoto(index: number): void {
+  if (index < 0 || index >= this.photos.length) return;
+
+  this.photos.splice(index, 1);
+  this.rebuildPhotoPreviews();
+
+  this.showSuccess('Photo deleted');
+}
 
   // ========== UTILIDADES DE UI ==========
 
@@ -574,14 +637,17 @@ private async submitRequestToBackend(userId: string): Promise<void> {
   /**
    * Cancelar y volver al inicio  
    */
-  cancelFlow(): void {
-    this.phoneForm.reset();
-    this.otpForm.reset();
-    this.projectForm.reset();
-    this.photos = [];
-    this.step = 1;
-    this.clearMessages();
-  }
+cancelFlow(): void {
+  this.phoneForm.reset();
+  this.otpForm.reset();
+  this.projectForm.reset();
+
+  this.photos = [];
+  this.clearPhotoPreviews();
+
+  this.step = 1;
+  this.clearMessages();
+}
 
   /**
    * Obtener mensaje de ayuda para el OTP según el modo

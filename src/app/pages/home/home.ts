@@ -33,27 +33,70 @@ export class HomeComponent implements OnInit, OnDestroy {
     private pocketbaseService: PocketbaseService,
     private pbService: PbService) { }
 
-  async ngOnInit(): Promise<void> {
+async ngOnInit(): Promise<void> {
+  try {
     this.currentUser = this.pocketbaseService.getCurrentUser();
 
-    if (this.currentUser?.['type'] === 'professional') {
-      // ✅ Obtener y guardar el ID del professional_profile
+    if (!this.currentUser) return;
+
+    if (this.currentUser['type'] === 'professional') {
       const profile = await this.pbService.pb.collection('professional_profiles').getFirstListItem(
         `userId="${this.currentUser.id}"`
       );
-      this.professionalProfileId = profile.id;  // ← GUARDAR ESTE ID
+
+      this.professionalProfileId = profile.id;
 
       await this.loadProfessionalCreditBalance();
       await this.loadProfessionalRequests();
       await this.subscribeToProfessionalRequests();
-    } else if (this.currentUser?.['type'] === 'client') {
+    } else if (this.currentUser['type'] === 'client') {
       await this.loadClientRequests();
       await this.subscribeToClientRequests();
     }
+  } catch (error) {
+    console.error('Error inicializando HomeComponent:', error);
   }
+}
   // Obtener URL de la foto desde request_photos
   // Método CORREGIDO para obtener URL de fotos
+// getStatusStep(status: string): number {
 
+//   const map: any = {
+//     sent: 1,
+//     reviewing: 2,
+//     contacted: 3,
+//     closed: 4
+//   };
+
+//   return map[status] || 1;
+// }
+canViewPhotos(request: any): boolean {
+  const user = this.pocketbaseService.getInstance().authStore.model;
+
+  console.log('USER:', user);
+  console.log('REQUEST:', request);
+  console.log('REQUEST CLIENT ID:', request?.client_id);
+  console.log('USER ID:', user?.id);
+  console.log('HAS PURCHASED:', this.hasPurchasedLead(request));
+  console.log('PHOTOS:', request?.expand?.photos);
+
+  if (!user) return false;
+
+  if (request?.client_id === user.id) {
+    return true;
+  }
+
+  return this.hasPurchasedLead(request);
+}
+getStatusStep(status: string): number {
+  const map: Record<string, number> = {
+    sent: 1,
+    reviewing: 2,
+    closed: 3
+  };
+
+  return map[status?.toLowerCase()] || 1;
+}
   getPhotoUrl(photo: any): string {
     if (!photo?.file) {
       return '../../assets/images/vertical-service/blocked_images.png';
@@ -720,49 +763,41 @@ export class HomeComponent implements OnInit, OnDestroy {
   //     this.loading = false;
   //   }
   // }
-  private async loadProfessionalRequests(): Promise<void> {
+private async loadProfessionalRequests(): Promise<void> {
   this.loading = true;
+
   try {
-    // 1. Obtener el perfil del profesional EXPANDIENDO service_zips
     const profile = await this.pbService.pb.collection('professional_profiles').getFirstListItem(
       `userId="${this.currentUser.id}"`,
       { expand: 'service_zips' }
     );
 
-    const serviceZipIds = profile.expand?.['service_zips'] || [];
-    this.professionalZipsCount = serviceZipIds.length;
+    const serviceZipRecords = profile.expand?.['service_zips'] || [];
+    this.professionalZipsCount = serviceZipRecords.length;
 
-    if (serviceZipIds.length === 0) {
+    if (!serviceZipRecords.length) {
       this.userRequests = [];
-      console.log('El profesional no tiene service_zips configurados');
       return;
     }
 
-    // 2. Extraer los VALORES de zip_code
-    const professionalZipCodes = serviceZipIds.map((zip: any) => {
-      return zip.code || zip.zip_code || zip.name;
-    });
+    const professionalZipCodes = serviceZipRecords
+      .map((zip: any) => zip.code || zip.zip_code || zip.name)
+      .filter(Boolean);
 
-    console.log('Zip codes del profesional (VALORES):', professionalZipCodes);
+    const zipFilters = professionalZipCodes
+      .map((code: string) => `zip_code="${code}"`)
+      .join(' || ');
 
-    // 3. Construir filtro
-    const zipFilters = professionalZipCodes.map((code: string) => `zip_code="${code}"`).join('||');
-    const filterQuery = `(${zipFilters}) && client_id != "${this.currentUser.id}" && status != "contacted"`;
-    
-    console.log('Filtro:', filterQuery);
+    const filterQuery = `(${zipFilters}) && status != "contacted"`;
 
-    // ✅ 4. CRÍTICO: Agregar expand: 'photos' para cargar las fotos desde el inicio
     const records = await this.pbService.pb.collection('requests').getList(1, 50, {
       filter: filterQuery,
       sort: '-created',
-      expand: 'photos'  // ← AGREGAR ESTO
+      expand: 'photos'
     });
 
     this.userRequests = records.items;
-    console.log('Requests encontradas:', this.userRequests.length);
-    console.log('Total:', records.totalItems);
 
-    // ✅ 5. Inicializar carousels DESPUÉS de cargar los datos
     setTimeout(() => {
       this.initAllCarousels();
     }, 100);
@@ -797,92 +832,125 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   }
 
-  private async subscribeToProfessionalRequests(): Promise<void> {
-    try {
-      const profile = await this.pbService.pb.collection('professional_profiles').getFirstListItem(
-        `userId="${this.currentUser.id}"`,
-        { expand: 'service_zips' }
-      );
+private async subscribeToProfessionalRequests(): Promise<void> {
+  try {
+    const profile = await this.pbService.pb.collection('professional_profiles').getFirstListItem(
+      `userId="${this.currentUser.id}"`,
+      { expand: 'service_zips' }
+    );
 
-      const serviceZipIds = profile.expand?.['service_zips'] || [];
-      if (serviceZipIds.length === 0) return;
+    const serviceZipRecords = profile.expand?.['service_zips'] || [];
 
-      const professionalZipCodes = new Set(
-        serviceZipIds.map((zip: any) => zip.code || zip.zip_code || zip.name)
-      );
+    if (!serviceZipRecords.length) {
+      console.warn('El profesional no tiene zonas configuradas');
+      return;
+    }
 
-      this.unsubscribe = await this.pbService.pb.collection('requests').subscribe('*', (e) => {
-        const requestZipCode = e.record['zip_code'];
+    const professionalZipCodes = new Set(
+      serviceZipRecords.map((zip: any) => zip.code || zip.zip_code || zip.name).filter(Boolean)
+    );
+
+    this.unsubscribe = await this.pbService.pb.collection('requests').subscribe('*', async (e) => {
+      try {
+        const record = e.record;
+        const requestZipCode = record['zip_code'];
         const isMatchingZip = professionalZipCodes.has(requestZipCode);
-        const isNotOwnRequest = e.record['client_id'] !== this.currentUser.id;
+        const isNotOwnRequest = record['client_id'] !== this.currentUser.id;
 
-        if (isMatchingZip && isNotOwnRequest) {
-          const existingIndex = this.userRequests.findIndex(r => r.id === e.record.id);
+        if (!isMatchingZip || !isNotOwnRequest) return;
 
-          if (e.action === 'update') {
-            const oldInterested = this.userRequests[existingIndex]?.interested_professionals || [];
-            const newInterested = e.record['interested_professionals'] || [];
+        const existingIndex = this.userRequests.findIndex(r => r.id === record.id);
 
-            // Si cambió el campo interested_professionals
-            if (JSON.stringify(oldInterested) !== JSON.stringify(newInterested)) {
-              console.log('🔄 Lead actualizado por otro profesional:', e.record.id);
+        // ===== CREATE =====
+        if (e.action === 'create') {
+          if (record['status'] !== 'sent') return;
+          if (existingIndex !== -1) return;
 
-              if (existingIndex !== -1) {
-                // Actualizar la request existente
-                this.userRequests[existingIndex] = {
-                  ...this.userRequests[existingIndex],
-                  interested_professionals: newInterested,
-                  status: e.record['status']
-                };
+          // Traer la request completa con expand
+          const fullRequest = await this.pbService.pb.collection('requests').getOne(record.id, {
+            expand: 'photos'
+          });
 
-                // Forzar detección de cambios en Angular
-                this.userRequests = [...this.userRequests];
+          this.newRequestIds.add(fullRequest.id);
+          this.userRequests = [fullRequest, ...this.userRequests];
 
-                // ← MARCAR como actualizada para highlight visual
-                this.markRequestAsUpdated(e.record.id);
-              }
+          setTimeout(() => {
+            this.newRequestIds.delete(fullRequest.id);
+          }, 30000);
 
-              // Si se llenó (3 profesionales), remover de la lista
-              if (newInterested.length >= 3) {
-                setTimeout(() => {
-                  this.userRequests = this.userRequests.filter(r => r.id !== e.record.id);
-                  this.showNotification(
-                    'Solicitud completada',
-                    'Esta solicitud ya tiene 3 profesionales asignados',
-                    'info'
-                  );
-                }, 2000);
-              } else {
-                const spotsLeft = 3 - newInterested.length;
-                this.showNotification(
-                  'Cupo ocupado',
-                  `Quedan ${spotsLeft} cupo(s) disponible(s)`,
-                  'warning'
-                );
-              }
-            }
-          }
-          else if (e.action === 'create' && e.record['status'] === 'sent') {
-            if (existingIndex === -1) {
-              this.newRequestIds.add(e.record.id);
-              this.userRequests.unshift(e.record);
-              setTimeout(() => this.newRequestIds.delete(e.record.id), 30000);
-            }
-          }
-          else if (e.action === 'delete') {
+          this.showNotification(
+            'Nueva solicitud',
+            'Se ha publicado una nueva solicitud en una de tus zonas.',
+            'success'
+          );
+
+          setTimeout(() => this.initCarousel(fullRequest.id), 150);
+        }
+
+        // ===== UPDATE =====
+        else if (e.action === 'update') {
+          // Traer versión completa actualizada
+          const fullRequest = await this.pbService.pb.collection('requests').getOne(record.id, {
+            expand: 'photos'
+          });
+
+          // Si ya no cumple condiciones, eliminarla
+          const stillValid =
+            professionalZipCodes.has(fullRequest['zip_code']) &&
+            fullRequest['client_id'] !== this.currentUser.id &&
+            fullRequest['status'] !== 'contacted';
+
+          if (!stillValid) {
             if (existingIndex !== -1) {
-              this.userRequests.splice(existingIndex, 1);
-              this.userRequests = [...this.userRequests];
+              this.userRequests = this.userRequests.filter(r => r.id !== fullRequest.id);
             }
+            return;
+          }
+
+          if (existingIndex !== -1) {
+            this.userRequests[existingIndex] = fullRequest;
+            this.userRequests = [...this.userRequests];
+            this.markRequestAsUpdated(fullRequest.id);
+          } else {
+            this.userRequests = [fullRequest, ...this.userRequests];
+          }
+
+          const sold = fullRequest['interested_professionals']?.length || 0;
+
+          if (sold >= 3) {
+            this.showNotification(
+              'Solicitud completada',
+              'Esta solicitud ya alcanzó el máximo de 3 profesionales.',
+              'info'
+            );
+          } else {
+            const spotsLeft = 3 - sold;
+            this.showNotification(
+              'Solicitud actualizada',
+              `Quedan ${spotsLeft} cupo(s) disponibles.`,
+              'warning'
+            );
+          }
+
+          setTimeout(() => this.initCarousel(fullRequest.id), 150);
+        }
+
+        // ===== DELETE =====
+        else if (e.action === 'delete') {
+          if (existingIndex !== -1) {
+            this.userRequests = this.userRequests.filter(r => r.id !== record.id);
           }
         }
-      });
+      } catch (innerError) {
+        console.error('Error procesando evento realtime:', innerError);
+      }
+    });
 
-      console.log('✅ Profesional suscrito a actualizaciones en tiempo real');
-    } catch (error) {
-      console.error('Error subscribing to professional requests:', error);
-    }
+    console.log('✅ Suscripción realtime para profesionales activa');
+  } catch (error) {
+    console.error('Error subscribing to professional requests:', error);
   }
+}
 
   ngOnDestroy(): void {
     if (this.unsubscribe) {

@@ -116,10 +116,10 @@
         <!-- Validación -->
         <div *ngIf="projectForm.get('city')?.invalid && projectForm.get('city')?.touched"
           class="text-danger small mt-1">
- City is required        </div>
+          City is required </div>
         <div *ngIf="projectForm.get('zip_code')?.invalid && projectForm.get('zip_code')?.touched"
           class="text-danger small mt-1">
- Zip code is required
+          Zip code is required
         </div>
 
         <!-- Ayuda contextual -->
@@ -127,7 +127,36 @@
           <i class="icon-info-circle"></i>
           Type your city to see available zip codes
         </small>
-      </div>
+      </div>rm 
+      <div class="form-group">
+  <label class="form-label mb-2">Cell Phone</label>
+  <div class="form-input position-relative">
+   <input
+  type="tel"
+  class="form-control"
+  placeholder="Ej: 3001234567"
+  formControlName="client_phone"
+  inputmode="numeric"
+  maxlength="15"
+  (input)="onClientPhoneInput($event)"
+>
+    <i class="iconsax" data-icon="call"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M17.24 22.0001C16.07 22.0001 14.82 21.7101 13.5 21.1201C10.1 19.6101 6.37999 15.9301 4.87999 12.5001C3.28999 8.88007 3.53999 5.53007 5.56999 3.50007C7.60999 1.45007 10.95 1.21007 14.57 2.80007C17.99 4.30007 21.67 8.02007 23.18 11.4201C24.77 15.0401 24.52 18.3901 22.49 20.4201C21.14 21.7601 19.33 22.0001 17.24 22.0001ZM8.98999 3.70007C7.67999 3.70007 6.57999 4.08007 5.86999 4.79007C4.36999 6.29007 4.21999 8.91007 5.32999 11.4401C6.67999 14.5101 10.13 17.9301 13.22 19.3001C15.75 20.4101 18.37 20.2601 19.87 18.7601C21.37 17.2601 21.52 14.6401 20.41 12.1101C19.04 9.02007 15.62 5.57007 12.55 4.22007C11.29 3.67007 10.09 3.70007 8.98999 3.70007Z"
+          fill="#292D32"></path>
+        <path
+          d="M17.9999 14.75C17.5899 14.75 17.2499 14.41 17.2499 14C17.2499 11.11 14.8999 8.76 11.9999 8.76C11.5899 8.76 11.2499 8.42 11.2499 8.01C11.2499 7.6 11.5899 7.26 11.9999 7.26C15.7299 7.26 18.7499 10.28 18.7499 14.01C18.7499 14.41 18.4099 14.75 17.9999 14.75Z"
+          fill="#292D32"></path>
+      </svg>
+    </i>
+  </div>
+
+  <div *ngIf="projectForm.get('client_phone')?.invalid && projectForm.get('client_phone')?.touched"
+    class="text-danger small mt-1">
+    Enter a valid cell phone number
+  </div>
+</div>
 
 
       <div class="form-group">
@@ -154,7 +183,7 @@
             <div class="form-input">
               <input type="number" class="form-control" placeholder="Size" formControlName="size_sqm">
               <!-- <i class="ruler"></i> -->
-                <span [innerHTML]="icons['ruler']" class="icon"></span>
+              <span [innerHTML]="icons['ruler']" class="icon"></span>
             </div>
             <div *ngIf="projectForm.get('size_sqm')?.invalid && projectForm.get('size_sqm')?.touched"
               class="text-danger small mt-1">
@@ -196,7 +225,7 @@
 
         <div class="col-6">
           <div class="form-group">
-            <label class="form-label mb-2">Desired Date (optional)</label>
+            <label class="form-label mb-2">Desired Date </label>
             <div class="form-input">
               <input type="date" class="form-control" formControlName="desired_date">
               <i class="calendar"></i>
@@ -250,11 +279,14 @@
           </h5>
         </div>
 
-        <div class="photo-previews mt-2 d-flex flex-wrap gap-2" *ngIf="photos.length > 0">
-          <div *ngFor="let photo of photos; let i = index" class="photo-thumbnail position-relative">
-            <img [src]="photo" class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">
-            <button type="button" class="btn-close btn-sm position-absolute top-0 end-0" (click)="removePhoto(i)"
-              aria-label="Remove"></button>
+        <div class="photo-previews mt-2 d-flex flex-wrap gap-2" *ngIf="photoPreviews.length > 0">
+          <div *ngFor="let preview of photoPreviews; let i = index" class="photo-thumbnail position-relative">
+            <img [src]="preview" class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;"
+              alt="Preview image">
+
+            <button type="button" class="btn-close btn-sm position-absolute top-0 end-0"
+              (click)="$event.stopPropagation(); removePhoto(i)" aria-label="Remove">
+            </button>
           </div>
         </div>
       </div>

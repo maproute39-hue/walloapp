@@ -12,6 +12,62 @@
             <li class="booking-box" *ngFor="let request of userRequests">
                 <!-- ... tu contenido actual para clientes ... -->
                 <div class="booking-details">
+                    <!-- REQUEST STATUS TRACKER -->
+                    <!-- <div class="request-tracker mb-3">
+  <div class="tracker-step"
+       [class.active]="getStatusStep(request.status) >= 1">
+    <div class="tracker-circle">1</div>
+    <span>Sent</span>
+  </div>
+
+  <div class="tracker-line"
+       [class.active]="getStatusStep(request.status) >= 2"></div>
+
+  <div class="tracker-step"
+       [class.active]="getStatusStep(request.status) >= 2">
+    <div class="tracker-circle">2</div>
+    <span>Reviewing</span>
+  </div>
+
+  <div class="tracker-line"
+       [class.active]="getStatusStep(request.status) >= 3"></div>
+
+  <div class="tracker-step"
+       [class.active]="getStatusStep(request.status) >= 3">
+    <div class="tracker-circle">3</div>
+    <span>Contacted</span>
+  </div>
+
+  <div class="tracker-line"
+       [class.active]="getStatusStep(request.status) >= 4"></div>
+
+  <div class="tracker-step"
+       [class.active]="getStatusStep(request.status) >= 4">
+    <div class="tracker-circle">4</div>
+    <span>Closed</span>
+  </div>
+</div> -->
+                    <!-- REQUEST STATUS TRACKER -->
+                    <div class="request-tracker mb-3">
+                        <div class="tracker-step" [class.active]="getStatusStep(request.status) >= 1">
+                            <div class="tracker-circle">1</div>
+                            <span>Sent</span>
+                        </div>
+
+                        <div class="tracker-line" [class.active]="getStatusStep(request.status) >= 2"></div>
+
+                        <div class="tracker-step" [class.active]="getStatusStep(request.status) >= 2">
+                            <div class="tracker-circle">2</div>
+                            <span>Reviewing</span>
+                        </div>
+
+                        <div class="tracker-line" [class.active]="getStatusStep(request.status) >= 3"></div>
+
+                        <div class="tracker-step" [class.active]="getStatusStep(request.status) >= 3">
+                            <div class="tracker-circle">3</div>
+                            <span>Closed</span>
+                        </div>
+                    </div>
                     <div class="d-flex align-items-center gap-2">
                         <div class="service-content">
                             <div class="d-flex align-items-center gap-2 mb-1">
@@ -28,46 +84,59 @@
                         </div>
                         <div class="service-img">
                             <!-- ✅ Fotos visibles SOLO si compró el lead -->
-                            <div *ngIf="hasPurchasedLead(request) && request.expand?.photos?.length > 0"
+                            <div *ngIf="canViewPhotos(request) && request.expand?.photos?.length > 0"
                                 class="photo-carousel position-relative">
+
                                 <div id="carousel-{{request.id}}" class="carousel slide" data-bs-ride="carousel">
+
                                     <div class="carousel-indicators">
                                         <button *ngFor="let photo of request.expand.photos; let i = index" type="button"
                                             [attr.data-bs-target]="'#carousel-' + request.id"
                                             [attr.data-bs-slide-to]="i" [class.active]="i === 0">
                                         </button>
                                     </div>
+
                                     <div class="carousel-inner rounded">
                                         <div *ngFor="let photo of request.expand.photos; let i = index"
                                             class="carousel-item" [class.active]="i === 0">
+
                                             <img [src]="getPhotoUrl(photo)" class="d-block w-100"
-                                                alt="Project photo {{i + 1}}" style="height: 200px; object-fit: cover;">
+                                                alt="Project photo {{i + 1}}" style="height:200px;object-fit:cover;">
+
                                         </div>
                                     </div>
+
                                     <button class="carousel-control-prev" type="button"
                                         [attr.data-bs-target]="'#carousel-' + request.id" data-bs-slide="prev">
-                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+
+                                        <span class="carousel-control-prev-icon"></span>
+
                                     </button>
+
                                     <button class="carousel-control-next" type="button"
                                         [attr.data-bs-target]="'#carousel-' + request.id" data-bs-slide="next">
-                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+
+                                        <span class="carousel-control-next-icon"></span>
+
                                     </button>
+
                                 </div>
+
                             </div>
 
                             <!-- Imagen bloqueada si NO compró -->
-                            <img *ngIf="!hasPurchasedLead(request)" class="img-fluid rounded"
-                                src="../../assets/images/vertical-service/blocked_images.png" alt="Contact locked">
+                            <!-- <img *ngIf="!hasPurchasedLead(request)" class="img-fluid rounded"
+                                src="../../assets/images/vertical-service/blocked_images.png" alt="Contact locked"> -->
                         </div>
                     </div>
                     <div class="line-box">
                         <div class="dot1"></div>
                         <div class="dot2"></div>
                     </div>
-                    <div class="d-flex align-items-center justify-content-between mt-1">
+                    <!-- <div class="d-flex align-items-center justify-content-between mt-1">
                         <h6 class="fw-medium content-color">Status</h6>
                         <h6 class="booking-tag pending-bg">{{ request.status }}</h6>
-                    </div>
+                    </div> -->
                     <div class="d-flex align-items-center justify-content-between mt-2">
                         <h6 class="fw-medium content-color">Date & Time</h6>
                         <h6 class="fw-medium title-color">{{ request.created | date:'short' }}</h6>
@@ -85,8 +154,16 @@
                         <h6 class="fw-medium success-color">{{ request.zip_code }}</h6>
                     </div>
                     <div class="d-flex align-items-center gap-3 mt-3">
-                        <a href="home.html#!" class="btn btn-sm outline-btn w-50">Refuse</a>
-                        <a [routerLink]="['/booking', request.id]" class="btn btn-sm theme-btn w-50">Accept</a>
+                        <!-- <a href="home.html#!" class="btn btn-sm outline-btn w-50">Refuse</a> -->
+                        <!-- <a [routerLink]="['/booking', request.id]" class="btn btn-sm theme-btn w-100">Close Request</a> -->
+                        <a *ngIf="request.status !== 'closed'" [routerLink]="['/booking', request.id]"
+                            class="btn btn-sm theme-btn w-100">
+                            Close Request
+                        </a>
+
+                        <span *ngIf="request.status === 'closed'" class="btn btn-sm btn-secondary w-100">
+                            Request Closed
+                        </span>
                     </div>
                 </div>
             </li>
@@ -188,7 +265,7 @@
                                 <h6 class="content-color">{{ request.height_m }} m height</h6>
                             </div>
                         </div>
-                        <div class="service-img">
+                        <div class="">
                             <!-- ✅ CAROUSEL DE FOTOS (solo si compró el lead) -->
                             <div *ngIf="hasPurchasedLead(request) && request.expand?.photos?.length > 0"
                                 class="photo-carousel position-relative">
