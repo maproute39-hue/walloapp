@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-
+import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { 
   FormsModule, 
@@ -27,6 +27,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 })
 export class NewRequestComponent implements OnInit, OnDestroy {
    icons: { [key: string]: SafeHtml } = {};
+   hasActiveRequest: boolean = false;
     // ========== NUEVO: Datos para autocomplete ==========
   zipCodesList: any[] = [];           // Lista completa de zip codes de PocketBase
   filteredCities: string[] = [];      // Ciudades filtradas para datalist
@@ -55,7 +56,7 @@ photoPreviews: string[] = [];
   // ========== DATOS DEL USUARIO ==========
   fullPhone: string = '';
   // Usuario simulado para pruebas
-  mockUserId: string = 'alvekaoo07856t0' ;
+  mockUserId: string = '' ;
 
   // Validadores personalizados
   static phoneValidator(control: AbstractControl): ValidationErrors | null {
@@ -88,12 +89,25 @@ photoPreviews: string[] = [];
     private pbService: PocketbaseService,
     public phoneAuth: PhoneAuthService
   ) {}
+private async checkActiveRequests(userId: string): Promise<boolean> {
+  try {
+    const pb = this.pbService.getInstance();
 
+    const result = await pb.collection('requests').getList(1, 1, {
+      filter: `client_id="${userId}" && (status="sent" || status="reviewing")`
+    });
+
+    return result.totalItems > 0;
+  } catch (error) {
+    console.error('Error checking active requests:', error);
+    throw error;
+  }
+}
   ngOnInit(): void {
     this.initForms();
-    this.loadZipCodesForAutocomplete();  // ← NUEVO: Cargar datos al iniciar
-    this.initializeIcons();
-      // this.loadIcons(['location', 'gps', 'ruler']);
+  this.loadZipCodesForAutocomplete();
+  this.initializeIcons();
+  this.preloadActiveRequestStatus();
   }
 
   ngOnDestroy(): void {
@@ -288,33 +302,85 @@ private clearPhotoPreviews(clearArray: boolean = true): void {
   get isStep3(): boolean { return this.step === 3; }
 
   // ========== NAVEGACIÓN ENTRE PASOS ==========
+private async preloadActiveRequestStatus(): Promise<void> {
+  try {
+    const currentUser = this.pbService.getInstance().authStore.model;
 
-  nextStep(): void {
-    if (this.step === 1) {
-      if (!this.validateProjectForm()) return;
-      this.step = 2;
+    if (!currentUser?.id) {
+      this.hasActiveRequest = false;
+      return;
     }
+
+    this.hasActiveRequest = await this.checkActiveRequests(currentUser.id);
+  } catch (error) {
+    console.error('Error preloading active request status:', error);
+    this.hasActiveRequest = false;
   }
+}
+async nextStep(): Promise<void> {
+  if (this.step === 1) {
+    if (!this.validateProjectForm()) return;
+
+    const currentUser = this.pbService.getCurrentUser?.() || this.pbService.getInstance().authStore.model;
+
+    if (currentUser?.id) {
+      try {
+        const hasActiveRequest = await this.checkActiveRequests(currentUser.id);
+
+        if (hasActiveRequest) {
+          this.showError('You already have an active request with status sent or reviewing. You can create a new one only when it is closed.');
+          return;
+        }
+      } catch (error) {
+        this.showError('Could not validate your current requests. Please try again.');
+        return;
+      }
+    }
+
+    this.step = 2;
+  }
+}
 // ========== LOGIN CON APPLE ==========
 async loginWithApple() {
   try {
     this.isLoading = true;
     this.errorMessage = '';
 
-    const authData = await this.pbService.getInstance().collection('users').authWithOAuth2({
+    const pb = this.pbService.getInstance();
+
+    const authData = await pb.collection('users').authWithOAuth2({
       provider: 'apple',
     });
 
     const user = authData.record;
-    
-    if (this.projectForm.valid) {
-      await this.submitRequestToBackend(user.id);
-      this.step = 4;
-      this.showSuccess('¡Solicitud creada con éxito!');
-      setTimeout(() => this.router.navigate(['/home']), 2000);
-    } else {
-      this.showSuccess('¡Welcome! ' + (user['name'] || user['email']));
+
+    if (!this.projectForm.valid) {
+      this.showError('Please complete the project form first.');
+      return;
     }
+
+    // 🔎 Verificar si el usuario ya tiene solicitudes activas
+    const activeRequests = await pb.collection('requests').getList(1, 1, {
+      filter: `client_id="${user.id}" && (status="sent" || status="reviewing")`
+    });
+
+    if (activeRequests.totalItems > 0) {
+      this.showError(
+        'You already have an active request. You can create a new one only when the current request is closed.'
+      );
+      this.step = 1;
+      return;
+    }
+
+    // ✅ Crear solicitud
+    await this.submitRequestToBackend(user.id);
+
+    this.step = 4;
+    this.showSuccess('Request created successfully!');
+
+    setTimeout(() => {
+      this.router.navigate(['/home']);
+    }, 2000);
 
   } catch (error: any) {
     console.error('❌ Error Apple:', error);
@@ -436,7 +502,9 @@ async loginWithGoogle() {
     this.isLoading = true;
     this.errorMessage = '';
 
-    const authData = await this.pbService.getInstance().collection('users').authWithOAuth2({
+    const pb = this.pbService.getInstance();
+
+    const authData = await pb.collection('users').authWithOAuth2({
       provider: 'google',
     });
 
@@ -445,34 +513,59 @@ async loginWithGoogle() {
 
     const clientPhone = this.normalizePhone(this.projectForm.value.client_phone || '');
 
-    // Asignar type si no existe
+    // Preparar actualización del usuario
     const updatePayload: any = {};
 
     if (!user['type'] || user['type'] === '') {
       updatePayload.type = 'client';
     }
 
-    // Guardar teléfono si viene en el formulario
     if (clientPhone) {
       updatePayload.phone = clientPhone;
     }
 
-    // Opcional: si quieres guardar también el nombre si no existe
-    // if (!user['name'] && authData?.meta?.name) {
-    //   updatePayload.name = authData.meta.name;
-    // }
-
+    // Actualizar usuario si hace falta
     if (Object.keys(updatePayload).length > 0) {
       try {
-        user = await this.pbService.getInstance().collection('users').update(user.id, updatePayload);
+        user = await pb.collection('users').update(user.id, updatePayload);
         console.log('🔄 Usuario actualizado:', updatePayload);
       } catch (updateError: any) {
         console.warn('⚠️ No se pudo actualizar el usuario:', updateError?.message);
       }
     }
 
-    if (this.step === 2 && this.projectForm.valid) {
+    // Solo crear request si viene del flujo de creación
+    if (this.step === 2) {
+      if (!this.projectForm.valid) {
+        this.showError('Please complete the project form first.');
+        this.step = 1;
+        return;
+      }
+
+      // Verificar si ya tiene una request activa
+      const activeRequests = await pb.collection('requests').getList(1, 1, {
+        filter: `client_id="${user.id}" && (status="sent" || status="reviewing")`
+      });
+
+   if (activeRequests.totalItems > 0) {
+  this.hasActiveRequest = true;
+
+  await Swal.fire({
+    icon: 'warning',
+    title: 'Active request found',
+    text: 'You already have an active request. You can create a new one only when the current request is closed.',
+    confirmButtonText: 'OK',
+    confirmButtonColor: '#3085d6'
+  });
+
+  this.step = 1;
+  return;
+}
+
+      // Crear request
       await this.submitRequestToBackend(user.id);
+
+      this.hasActiveRequest = false;
       this.step = 4;
       this.showSuccess('¡Request created successfully! Redirecting...');
 
@@ -509,6 +602,12 @@ onClientPhoneInput(event: Event): void {
 private async submitRequestToBackend(userId: string): Promise<void> {
   try {
     const pb = this.pbService.getInstance();
+
+    const hasActiveRequest = await this.checkActiveRequests(userId);
+    if (hasActiveRequest) {
+      throw new Error('You already have an active request. Close it before creating a new one.');
+    }
+
     const user = await pb.collection('users').getOne(userId);
 
     const clientPhone = this.normalizePhone(this.projectForm.value.client_phone || '');

@@ -493,39 +493,72 @@ getStatusStep(status: string): number {
       console.error('Error loading credit balance:', error);
     }
   }
-  private async loadClientRequests(): Promise<void> {
-    try {
-      const records = await this.pbService.pb.collection('requests').getList(1, 50, {
-        filter: `client_id="${this.currentUser.id}"`,
-        sort: '-created'
-      });
-      this.userRequests = records.items;
-      console.log('Solicitudes del cliente cargadas:', this.userRequests);
-    } catch (error) {
-      console.error('Error loading client requests:', error);
-    }
-  }
-
-  private async subscribeToClientRequests(): Promise<void> {
-    this.unsubscribe = await this.pbService.pb.collection('requests').subscribe('*', (e) => {
-      console.log('Cambio en solicitudes del cliente:', e.action, e.record);
-
-      if (e.record['client_id'] === this.currentUser.id) {
-        if (e.action === 'create') {
-          this.userRequests.unshift(e.record);
-        } else if (e.action === 'update') {
-          const index = this.userRequests.findIndex(r => r.id === e.record.id);
-          if (index !== -1) {
-            this.userRequests[index] = e.record;
-          }
-        } else if (e.action === 'delete') {
-          this.userRequests = this.userRequests.filter(r => r.id !== e.record.id);
-        }
-      }
-    }, {
-      filter: `client_id="${this.currentUser.id}"`
+private async loadClientRequests(): Promise<void> {
+  try {
+    const records = await this.pbService.pb.collection('requests').getList(1, 50, {
+      filter: `client_id="${this.currentUser.id}"`,
+      sort: '-created',
+      expand: 'photos'
     });
+
+    this.userRequests = records.items;
+
+    setTimeout(() => {
+      this.initAllCarousels();
+    }, 100);
+
+    console.log('Solicitudes del cliente cargadas:', this.userRequests);
+  } catch (error) {
+    console.error('Error loading client requests:', error);
   }
+}
+
+private async subscribeToClientRequests(): Promise<void> {
+  this.unsubscribe = await this.pbService.pb.collection('requests').subscribe('*', async (e) => {
+    try {
+      const record = e.record;
+
+      if (record['client_id'] !== this.currentUser.id) return;
+
+      if (e.action === 'create') {
+        const fullRequest = await this.pbService.pb.collection('requests').getOne(record.id, {
+          expand: 'photos'
+        });
+
+        const exists = this.userRequests.some(r => r.id === fullRequest.id);
+        if (!exists) {
+          this.userRequests = [fullRequest, ...this.userRequests];
+        }
+
+        setTimeout(() => this.initCarousel(fullRequest.id), 150);
+      }
+
+      else if (e.action === 'update') {
+        const fullRequest = await this.pbService.pb.collection('requests').getOne(record.id, {
+          expand: 'photos'
+        });
+
+        const index = this.userRequests.findIndex(r => r.id === fullRequest.id);
+        if (index !== -1) {
+          this.userRequests[index] = fullRequest;
+          this.userRequests = [...this.userRequests];
+        } else {
+          this.userRequests = [fullRequest, ...this.userRequests];
+        }
+
+        setTimeout(() => this.initCarousel(fullRequest.id), 150);
+      }
+
+      else if (e.action === 'delete') {
+        this.userRequests = this.userRequests.filter(r => r.id !== record.id);
+      }
+    } catch (error) {
+      console.error('Error en realtime cliente:', error);
+    }
+  }, {
+    filter: `client_id="${this.currentUser.id}"`
+  });
+}
   private async processPayment(professionalId: string, requestId: string): Promise<boolean> {
     try {
       const LEAD_PRICE = 4.99;

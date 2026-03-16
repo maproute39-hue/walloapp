@@ -13,41 +13,6 @@
                 <!-- ... tu contenido actual para clientes ... -->
                 <div class="booking-details">
                     <!-- REQUEST STATUS TRACKER -->
-                    <!-- <div class="request-tracker mb-3">
-  <div class="tracker-step"
-       [class.active]="getStatusStep(request.status) >= 1">
-    <div class="tracker-circle">1</div>
-    <span>Sent</span>
-  </div>
-
-  <div class="tracker-line"
-       [class.active]="getStatusStep(request.status) >= 2"></div>
-
-  <div class="tracker-step"
-       [class.active]="getStatusStep(request.status) >= 2">
-    <div class="tracker-circle">2</div>
-    <span>Reviewing</span>
-  </div>
-
-  <div class="tracker-line"
-       [class.active]="getStatusStep(request.status) >= 3"></div>
-
-  <div class="tracker-step"
-       [class.active]="getStatusStep(request.status) >= 3">
-    <div class="tracker-circle">3</div>
-    <span>Contacted</span>
-  </div>
-
-  <div class="tracker-line"
-       [class.active]="getStatusStep(request.status) >= 4"></div>
-
-  <div class="tracker-step"
-       [class.active]="getStatusStep(request.status) >= 4">
-    <div class="tracker-circle">4</div>
-    <span>Closed</span>
-  </div>
-</div> -->
-                    <!-- REQUEST STATUS TRACKER -->
                     <div class="request-tracker mb-3">
                         <div class="tracker-step" [class.active]="getStatusStep(request.status) >= 1">
                             <div class="tracker-circle">1</div>
@@ -73,7 +38,7 @@
                             <div class="d-flex align-items-center gap-2 mb-1">
                                 <h5 class="theme-color fw-medium">#{{ request.id | slice:0:5 }}</h5>
                             </div>
-                            <a [routerLink]="['/request-details', request.id]">
+                            <a>
                                 <h4 class="title-color fw-medium">{{ request.wallpaper_type }}</h4>
                             </a>
                             <div class="d-flex align-items-center gap-2 mt-1">
@@ -82,53 +47,51 @@
                                 </h6>
                             </div>
                         </div>
-                        <div class="service-img">
-                            <!-- ✅ Fotos visibles SOLO si compró el lead -->
-                            <div *ngIf="canViewPhotos(request) && request.expand?.photos?.length > 0"
-                                class="photo-carousel position-relative">
 
-                                <div id="carousel-{{request.id}}" class="carousel slide" data-bs-ride="carousel">
+                    </div>
+                    <div class="">
+                        <div *ngIf="canViewPhotos(request) && request.expand?.photos?.length > 0"
+                            class="photo-carousel position-relative">
 
-                                    <div class="carousel-indicators">
-                                        <button *ngFor="let photo of request.expand.photos; let i = index" type="button"
-                                            [attr.data-bs-target]="'#carousel-' + request.id"
-                                            [attr.data-bs-slide-to]="i" [class.active]="i === 0">
-                                        </button>
-                                    </div>
+                            <div id="carousel-{{request.id}}" class="carousel slide" data-bs-ride="carousel">
 
-                                    <div class="carousel-inner rounded">
-                                        <div *ngFor="let photo of request.expand.photos; let i = index"
-                                            class="carousel-item" [class.active]="i === 0">
-
-                                            <img [src]="getPhotoUrl(photo)" class="d-block w-100"
-                                                alt="Project photo {{i + 1}}" style="height:200px;object-fit:cover;">
-
-                                        </div>
-                                    </div>
-
-                                    <button class="carousel-control-prev" type="button"
-                                        [attr.data-bs-target]="'#carousel-' + request.id" data-bs-slide="prev">
-
-                                        <span class="carousel-control-prev-icon"></span>
-
+                                <div class="carousel-indicators">
+                                    <button *ngFor="let photo of request.expand.photos; let i = index" type="button"
+                                        [attr.data-bs-target]="'#carousel-' + request.id" [attr.data-bs-slide-to]="i"
+                                        [class.active]="i === 0">
                                     </button>
-
-                                    <button class="carousel-control-next" type="button"
-                                        [attr.data-bs-target]="'#carousel-' + request.id" data-bs-slide="next">
-
-                                        <span class="carousel-control-next-icon"></span>
-
-                                    </button>
-
                                 </div>
+
+                                <div class="carousel-inner rounded">
+                                    <div *ngFor="let photo of request.expand.photos; let i = index"
+                                        class="carousel-item" [class.active]="i === 0">
+
+                                        <img [src]="getPhotoUrl(photo)" class="d-block w-100"
+                                            alt="Project photo {{i + 1}}" style="height:200px;object-fit:cover;">
+
+                                    </div>
+                                </div>
+
+                                <button class="carousel-control-prev" type="button"
+                                    [attr.data-bs-target]="'#carousel-' + request.id" data-bs-slide="prev">
+
+                                    <span class="carousel-control-prev-icon"></span>
+
+                                </button>
+
+                                <button class="carousel-control-next" type="button"
+                                    [attr.data-bs-target]="'#carousel-' + request.id" data-bs-slide="next">
+
+                                    <span class="carousel-control-next-icon"></span>
+
+                                </button>
 
                             </div>
 
-                            <!-- Imagen bloqueada si NO compró -->
-                            <!-- <img *ngIf="!hasPurchasedLead(request)" class="img-fluid rounded"
-                                src="../../assets/images/vertical-service/blocked_images.png" alt="Contact locked"> -->
                         </div>
+
                     </div>
+
                     <div class="line-box">
                         <div class="dot1"></div>
                         <div class="dot2"></div>
@@ -242,17 +205,7 @@
                             New
                         </span>
                     </div>
-                    <!-- Debug: Ver qué está pasando
-<div *ngIf="hasPurchasedLead(request)" class="alert alert-info mt-2">
-  <small>
-    <strong>Debug:</strong><br>
-    Has Purchased: {{ hasPurchasedLead(request) }}<br>
-    Photos Length: {{ request.expand?.photos?.length }}<br>
-    Client Name: {{ request.client_name }}<br>
-   Client phone:  {{ request.client_phone }}
-    Interested Prof IDs: {{ request.interested_professionals | json }}<br>
-  </small>
-</div> -->
+
                     <!-- Contenido principal del servicio -->
                     <div class="d-flex align-items-center gap-3">
                         <div class="service-content flex-grow-1">

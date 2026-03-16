@@ -294,9 +294,9 @@
 
     <div class="fixed-btn">
       <div class="custom-container">
-        <button class="btn theme-btn w-100" (click)="nextStep()" [disabled]="projectForm.invalid || isLoading">
-          {{ isLoading ? 'Processing...' : 'Next' }}
-        </button>
+      <button class="btn theme-btn w-100" (click)="nextStep()" [disabled]="projectForm.invalid || isLoading || hasActiveRequest">
+  {{ isLoading ? 'Processing...' : 'Next' }}
+</button>
       </div>
     </div>
   </div>
