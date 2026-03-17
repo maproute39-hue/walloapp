@@ -15,8 +15,9 @@ type Role = 'client' | 'professional';
 })
 
 export class HomeComponent implements OnInit, OnDestroy {
+  selectedRequest: any = null;
   professionalProfileId: string = '';  // ← AGREGAR ESTA
-selectedProfessional: any = null;
+  selectedProfessional: any = null;
   loading: boolean = false;
   professionalZipsCount: number = 0;
   private newRequestIds: Set<string> = new Set(); // Para marcar requests nuevas en tiempo real
@@ -33,87 +34,255 @@ selectedProfessional: any = null;
     private pocketbaseService: PocketbaseService,
     private pbService: PbService) { }
 
-async ngOnInit(): Promise<void> {
-  try {
-    this.currentUser = this.pocketbaseService.getCurrentUser();
+  async ngOnInit(): Promise<void> {
+    try {
+      this.currentUser = this.pocketbaseService.getCurrentUser();
 
-    if (!this.currentUser) return;
+      if (!this.currentUser) return;
 
-    if (this.currentUser['type'] === 'professional') {
-      const profile = await this.pbService.pb.collection('professional_profiles').getFirstListItem(
-        `userId="${this.currentUser.id}"`
-      );
+      if (this.currentUser['type'] === 'professional') {
+        const profile = await this.pbService.pb.collection('professional_profiles').getFirstListItem(
+          `userId="${this.currentUser.id}"`
+        );
 
-      this.professionalProfileId = profile.id;
+        this.professionalProfileId = profile.id;
 
-      await this.loadProfessionalCreditBalance();
-      await this.loadProfessionalRequests();
-      await this.subscribeToProfessionalRequests();
-    } else if (this.currentUser['type'] === 'client') {
-      await this.loadClientRequests();
-      await this.subscribeToClientRequests();
+        await this.loadProfessionalCreditBalance();
+        await this.loadProfessionalRequests();
+        await this.subscribeToProfessionalRequests();
+      } else if (this.currentUser['type'] === 'client') {
+        await this.loadClientRequests();
+        await this.subscribeToClientRequests();
+      }
+    } catch (error) {
+      console.error('Error inicializando HomeComponent:', error);
     }
-  } catch (error) {
-    console.error('Error inicializando HomeComponent:', error);
   }
-}
   // Obtener URL de la foto desde request_photos
   // Método CORREGIDO para obtener URL de fotos
-// getStatusStep(status: string): number {
+  // getStatusStep(status: string): number {
 
-//   const map: any = {
-//     sent: 1,
-//     reviewing: 2,
-//     contacted: 3,
-//     closed: 4
-//   };
+  //   const map: any = {
+  //     sent: 1,
+  //     reviewing: 2,
+  //     contacted: 3,
+  //     closed: 4
+  //   };
 
-//   return map[status] || 1;
-// }
-selectProfessional(professional: any) {
-  this.selectedProfessional = professional;
-}selectProForRequest() {
-  if (!this.selectedProfessional) return;
-
-  console.log('Selected:', this.selectedProfessional);
-
-  // aquí puedes:
-  // - asignarlo al request
-  // - enviar al backend
-  // - cambiar estado
-}
-canViewPhotos(request: any): boolean {
-  const user = this.pocketbaseService.getInstance().authStore.model;
-
-  console.log('USER:', user);
-  console.log('REQUEST:', request);
-  console.log('REQUEST CLIENT ID:', request?.client_id);
-  console.log('USER ID:', user?.id);
-  console.log('HAS PURCHASED:', this.hasPurchasedLead(request));
-  console.log('PHOTOS:', request?.expand?.photos);
-
-  if (!user) return false;
-
-  if (request?.client_id === user.id) {
-    return true;
+  //   return map[status] || 1;
+  // }
+  selectProfessional(professional: any, request: any) {
+    this.selectedProfessional = professional;
+    this.selectedRequest = request; // 🔥 ESTA LÍNEA ES LA CLAVE
   }
 
-  return this.hasPurchasedLead(request);
-}
-getPortfolioPhotoUrl(photo: string, professional: any): string {
-  return `${environment.pbUrl}/api/files/professional_profiles/${professional.id}/${photo}`;
-}
-getStatusStep(status: string): number {
-  const map: Record<string, number> = {
-    sent: 1,
-    reviewing: 2,
-    full: 2,
-    contacted: 3, 
-    closed: 4
-  };
+  selectProForRequest() {
+    if (!this.selectedProfessional) return;
 
-  return map[status?.toLowerCase()] || 1;
+    console.log('Selected:', this.selectedProfessional);
+
+    // aquí puedes:
+    // - asignarlo al request
+    // - enviar al backend
+    // - cambiar estado
+  }
+  canViewPhotos(request: any): boolean {
+    const user = this.pocketbaseService.getInstance().authStore.model;
+
+    console.log('USER:', user);
+    console.log('REQUEST:', request);
+    console.log('REQUEST CLIENT ID:', request?.client_id);
+    console.log('USER ID:', user?.id);
+    console.log('HAS PURCHASED:', this.hasPurchasedLead(request));
+    console.log('PHOTOS:', request?.expand?.photos);
+
+    if (!user) return false;
+
+    if (request?.client_id === user.id) {
+      return true;
+    }
+
+    return this.hasPurchasedLead(request);
+  }
+confirmSelectProfessional() {
+  if (!this.selectedProfessional) return;
+
+  Swal.fire({
+    title: 'Confirm Selection',
+    text: 'Are you sure you want to select this professional? The others will be refunded.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, select',
+    cancelButtonText: 'Cancel'
+  }).then(async (result) => {
+    if (!result.isConfirmed) return;
+
+    // ✅ Mostrar loading mientras se procesa
+    Swal.fire({
+      title: 'Processing selection...',
+     html: `
+  <div class="text-center">
+    <p class="mb-2">Updating request status...</p>
+    <p class="mb-0">Refunding non-selected professionals...</p>
+  </div>
+`,
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    await this.handleProfessionalSelection();
+  });
+} 
+  hasSelectedProfessional(request: any): boolean {
+    return !!request?.selected_professional || !!request?.expand?.selected_professional;
+  }
+
+  getSelectedProfessional(request: any): any {
+    if (request?.expand?.selected_professional) {
+      return request.expand.selected_professional;
+    }
+
+    if (request?.selected_professional && request?.expand?.interested_professionals?.length) {
+      return request.expand.interested_professionals.find(
+        (pro: any) => pro.id === request.selected_professional
+      );
+    }
+
+    return null;
+  }
+async handleProfessionalSelection() {
+  try {
+    const request = this.selectedRequest;
+    const selected = this.selectedProfessional;
+
+    if (!request || !selected) {
+      Swal.close();
+
+      Swal.fire({
+        title: 'Error',
+        text: 'Missing selected request or professional',
+        icon: 'error'
+      });
+      return;
+    }
+
+    const allPros = request.expand?.interested_professionals || [];
+    const leadPrice = this.leadPrice || 4.99;
+
+    // 1. Actualizar request
+    await this.pbService.pb.collection('requests').update(request.id, {
+      status: 'contacted',
+      selected_professional: selected.id
+    });
+
+    // 2. Reembolsar a los no seleccionados
+    const nonSelected = allPros.filter((pro: any) => pro.id !== selected.id);
+
+    for (const pro of nonSelected) {
+      const freshProfile = await this.pbService.pb
+        .collection('professional_profiles')
+        .getOne(pro.id);
+
+      const currentBalance = freshProfile['credit_balance'] || 0;
+
+      await this.pbService.pb.collection('professional_profiles').update(pro.id, {
+        credit_balance: currentBalance + leadPrice
+      });
+    }
+
+    // 3. Traer request actualizada
+    const updatedRequest = await this.pbService.pb.collection('requests').getOne(request.id, {
+      expand: 'photos,interested_professionals,interested_professionals.userId,selected_professional,selected_professional.userId'
+    });
+
+    const normalizedRequest = {
+      ...updatedRequest,
+      expand: {
+        photos: updatedRequest.expand?.['photos'] ?? [],
+        interested_professionals: updatedRequest.expand?.['interested_professionals'] ?? [],
+        selected_professional: updatedRequest.expand?.['selected_professional'] ?? null
+      }
+    };
+
+    // 4. Reemplazar localmente
+    const index = this.userRequests.findIndex((r: any) => r.id === request.id);
+    if (index !== -1) {
+      this.userRequests[index] = normalizedRequest;
+      this.userRequests = [...this.userRequests];
+    }
+
+    // 5. Cerrar offcanvas
+    this.closeDetailsOffcanvas();
+
+    // 6. Limpiar selección
+    this.selectedProfessional = null;
+    this.selectedRequest = null;
+
+    // ✅ cerrar loading antes del mensaje final
+    Swal.close();
+
+    Swal.fire({
+      title: 'Success',
+      text: 'Professional selected successfully. Other professionals were refunded.',
+      icon: 'success'
+    });
+
+  } catch (error) {
+    console.error('Error selecting professional:', error);
+
+    // ✅ cerrar loading antes del error
+    Swal.close();
+
+    Swal.fire({
+      title: 'Error',
+      text: 'Something went wrong while selecting the professional.',
+      icon: 'error'
+    });
+  }
 }
+  private closeDetailsOffcanvas(): void {
+    if (typeof window === 'undefined') return;
+
+    const bootstrap = (window as any).bootstrap;
+    const offcanvasEl = document.getElementById('details');
+
+    if (offcanvasEl && bootstrap?.Offcanvas) {
+      const instance =
+        bootstrap.Offcanvas.getInstance(offcanvasEl) ||
+        new bootstrap.Offcanvas(offcanvasEl);
+
+      instance.hide();
+    }
+
+    // 🔥 LIMPIEZA FORZADA (CLAVE)
+    setTimeout(() => {
+      // 1. Eliminar backdrop(s)
+      document.querySelectorAll('.offcanvas-backdrop').forEach(el => el.remove());
+
+      // 2. Restaurar body
+      document.body.classList.remove('modal-open');
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    }, 300);
+  }
+  getPortfolioPhotoUrl(photo: string, professional: any): string {
+    return `${environment.pbUrl}/api/files/professional_profiles/${professional.id}/${photo}`;
+  }
+  getStatusStep(status: string): number {
+    const map: Record<string, number> = {
+      sent: 1,
+      reviewing: 2,
+      full: 2,
+      contacted: 3,
+      closed: 4
+    };
+
+    return map[status?.toLowerCase()] || 1;
+  }
   getPhotoUrl(photo: any): string {
     if (!photo?.file) {
       return '../../assets/images/vertical-service/blocked_images.png';
@@ -510,170 +679,170 @@ getStatusStep(status: string): number {
       console.error('Error loading credit balance:', error);
     }
   }
-// private async loadClientRequests(): Promise<void> {
-//   try {
-//     const records = await this.pbService.pb.collection('requests').getList(1, 50, {
-//       filter: `client_id="${this.currentUser.id}"`,
-//       sort: '-created',
-//       expand: 'photos'
-//     });
+  // private async loadClientRequests(): Promise<void> {
+  //   try {
+  //     const records = await this.pbService.pb.collection('requests').getList(1, 50, {
+  //       filter: `client_id="${this.currentUser.id}"`,
+  //       sort: '-created',
+  //       expand: 'photos'
+  //     });
 
-//     this.userRequests = records.items;
+  //     this.userRequests = records.items;
 
-//     setTimeout(() => {
-//       this.initAllCarousels();
-//     }, 100);
+  //     setTimeout(() => {
+  //       this.initAllCarousels();
+  //     }, 100);
 
-//     console.log('Solicitudes del cliente cargadas:', this.userRequests);
-//   } catch (error) {
-//     console.error('Error loading client requests:', error);
-//   }
-// }
-async loadClientRequests() {
-  try {
-    const userId = this.currentUser?.id;
-    if (!userId) {
-      this.userRequests = [];
-      return;
-    }
-
-    const requests = await this.pbService.pb
-      .collection('requests')
-      .getFullList({
-        filter: `client_id="${userId}"`,
-        sort: '-created',
-        expand: 'photos,interested_professionals,interested_professionals.userId'
-      });
-
-    this.userRequests = requests.map((request: any) => ({
-      ...request,
-      expand: {
-        photos: request.expand?.photos ?? [],
-        interested_professionals: request.expand?.interested_professionals ?? []
-      }
-    }));
-
-    console.log('✅ Requests del cliente:', this.userRequests);
-  } catch (error) {
-    console.error('❌ Error cargando requests del cliente:', error);
-    this.userRequests = [];
-  }
-}
-// private async subscribeToClientRequests(): Promise<void> {
-//   this.unsubscribe = await this.pbService.pb.collection('requests').subscribe('*', async (e) => {
-//     try {
-//       const record = e.record;
-
-//       if (record['client_id'] !== this.currentUser.id) return;
-
-//       if (e.action === 'create') {
-//         const fullRequest = await this.pbService.pb.collection('requests').getOne(record.id, {
-//           expand: 'photos'
-//         });
-
-//         const exists = this.userRequests.some(r => r.id === fullRequest.id);
-//         if (!exists) {
-//           this.userRequests = [fullRequest, ...this.userRequests];
-//         }
-
-//         setTimeout(() => this.initCarousel(fullRequest.id), 150);
-//       }
-
-//       else if (e.action === 'update') {
-//         const fullRequest = await this.pbService.pb.collection('requests').getOne(record.id, {
-//           expand: 'photos'
-//         });
-
-//         const index = this.userRequests.findIndex(r => r.id === fullRequest.id);
-//         if (index !== -1) {
-//           this.userRequests[index] = fullRequest;
-//           this.userRequests = [...this.userRequests];
-//         } else {
-//           this.userRequests = [fullRequest, ...this.userRequests];
-//         }
-
-//         setTimeout(() => this.initCarousel(fullRequest.id), 150);
-//       }
-
-//       else if (e.action === 'delete') {
-//         this.userRequests = this.userRequests.filter(r => r.id !== record.id);
-//       }
-//     } catch (error) {
-//       console.error('Error en realtime cliente:', error);
-//     }
-//   }, {
-//     filter: `client_id="${this.currentUser.id}"`
-//   });
-// }
-getProfessionalImage(professional: any): string {
-  const user = professional?.expand?.userId;
-
-  if (user?.avatar) {
-    return this.pbService.fileUrl(user, user.avatar);
-  }
-
-  return '../../assets/images/profile/p4.png';
-}
-
-getProfessionalExperience(professional: any): string {
-  if (professional?.experience_years) {
-    return `${professional.experience_years} years of experience`;
-  }
-
-  if (professional?.experience) {
-    return professional.experience;
-  }
-
-  if (professional?.specialty) {
-    return professional.specialty;
-  }
-
-  return 'Professional available';
-}
-async subscribeToClientRequests() {
-  try {
-    const userId = this.currentUser?.id;
-    if (!userId) return;
-
-    await this.pbService.pb.collection('requests').subscribe('*', async (e) => {
-      const record = e.record as any;
-
-      if (record?.client_id !== userId) return;
-
-      if (e.action === 'delete') {
-        this.userRequests = this.userRequests.filter((r: any) => r.id !== record.id);
+  //     console.log('Solicitudes del cliente cargadas:', this.userRequests);
+  //   } catch (error) {
+  //     console.error('Error loading client requests:', error);
+  //   }
+  // }
+  async loadClientRequests() {
+    try {
+      const userId = this.currentUser?.id;
+      if (!userId) {
+        this.userRequests = [];
         return;
       }
 
-      if (e.action === 'create' || e.action === 'update') {
-        const freshRequest = await this.pbService.pb
-          .collection('requests')
-          .getOne(record.id, {
-            expand: 'photos,interested_professionals,interested_professionals.userId'
-          });
+      const requests = await this.pbService.pb
+        .collection('requests')
+        .getFullList({
+          filter: `client_id="${userId}"`,
+          sort: '-created',
+          expand: 'photos,interested_professionals,interested_professionals.userId'
+        });
 
-        const normalized = {
-          ...freshRequest,
-          expand: {
-            photos: freshRequest.expand?.['photos'] ?? [],
-            interested_professionals: freshRequest.expand?.['interested_professionals'] ?? []
-          }
-        };
-
-        const index = this.userRequests.findIndex((r: any) => r.id === record.id);
-
-        if (index >= 0) {
-          this.userRequests[index] = normalized;
-          this.userRequests = [...this.userRequests];
-        } else {
-          this.userRequests = [normalized, ...this.userRequests];
+      this.userRequests = requests.map((request: any) => ({
+        ...request,
+        expand: {
+          photos: request.expand?.photos ?? [],
+          interested_professionals: request.expand?.interested_professionals ?? []
         }
-      }
-    });
-  } catch (error) {
-    console.error('❌ Error en suscripción cliente:', error);
+      }));
+
+      console.log('✅ Requests del cliente:', this.userRequests);
+    } catch (error) {
+      console.error('❌ Error cargando requests del cliente:', error);
+      this.userRequests = [];
+    }
   }
-}
+  // private async subscribeToClientRequests(): Promise<void> {
+  //   this.unsubscribe = await this.pbService.pb.collection('requests').subscribe('*', async (e) => {
+  //     try {
+  //       const record = e.record;
+
+  //       if (record['client_id'] !== this.currentUser.id) return;
+
+  //       if (e.action === 'create') {
+  //         const fullRequest = await this.pbService.pb.collection('requests').getOne(record.id, {
+  //           expand: 'photos'
+  //         });
+
+  //         const exists = this.userRequests.some(r => r.id === fullRequest.id);
+  //         if (!exists) {
+  //           this.userRequests = [fullRequest, ...this.userRequests];
+  //         }
+
+  //         setTimeout(() => this.initCarousel(fullRequest.id), 150);
+  //       }
+
+  //       else if (e.action === 'update') {
+  //         const fullRequest = await this.pbService.pb.collection('requests').getOne(record.id, {
+  //           expand: 'photos'
+  //         });
+
+  //         const index = this.userRequests.findIndex(r => r.id === fullRequest.id);
+  //         if (index !== -1) {
+  //           this.userRequests[index] = fullRequest;
+  //           this.userRequests = [...this.userRequests];
+  //         } else {
+  //           this.userRequests = [fullRequest, ...this.userRequests];
+  //         }
+
+  //         setTimeout(() => this.initCarousel(fullRequest.id), 150);
+  //       }
+
+  //       else if (e.action === 'delete') {
+  //         this.userRequests = this.userRequests.filter(r => r.id !== record.id);
+  //       }
+  //     } catch (error) {
+  //       console.error('Error en realtime cliente:', error);
+  //     }
+  //   }, {
+  //     filter: `client_id="${this.currentUser.id}"`
+  //   });
+  // }
+  getProfessionalImage(professional: any): string {
+    const user = professional?.expand?.userId;
+
+    if (user?.avatar) {
+      return this.pbService.fileUrl(user, user.avatar);
+    }
+
+    return '../../assets/images/profile/p4.png';
+  }
+
+  getProfessionalExperience(professional: any): string {
+    if (professional?.experience_years) {
+      return `${professional.experience_years} years of experience`;
+    }
+
+    if (professional?.experience) {
+      return professional.experience;
+    }
+
+    if (professional?.specialty) {
+      return professional.specialty;
+    }
+
+    return 'Professional available';
+  }
+  async subscribeToClientRequests() {
+    try {
+      const userId = this.currentUser?.id;
+      if (!userId) return;
+
+      await this.pbService.pb.collection('requests').subscribe('*', async (e) => {
+        const record = e.record as any;
+
+        if (record?.client_id !== userId) return;
+
+        if (e.action === 'delete') {
+          this.userRequests = this.userRequests.filter((r: any) => r.id !== record.id);
+          return;
+        }
+
+        if (e.action === 'create' || e.action === 'update') {
+          const freshRequest = await this.pbService.pb
+            .collection('requests')
+            .getOne(record.id, {
+              expand: 'photos,interested_professionals,interested_professionals.userId'
+            });
+
+          const normalized = {
+            ...freshRequest,
+            expand: {
+              photos: freshRequest.expand?.['photos'] ?? [],
+              interested_professionals: freshRequest.expand?.['interested_professionals'] ?? []
+            }
+          };
+
+          const index = this.userRequests.findIndex((r: any) => r.id === record.id);
+
+          if (index >= 0) {
+            this.userRequests[index] = normalized;
+            this.userRequests = [...this.userRequests];
+          } else {
+            this.userRequests = [normalized, ...this.userRequests];
+          }
+        }
+      });
+    } catch (error) {
+      console.error('❌ Error en suscripción cliente:', error);
+    }
+  }
   private async processPayment(professionalId: string, requestId: string): Promise<boolean> {
     try {
       const LEAD_PRICE = 4.99;
@@ -803,16 +972,16 @@ async subscribeToClientRequests() {
       return 0;
     }
   }
-getProfessionalName(professional: any): string {
-  const user = professional?.expand?.userId;
+  getProfessionalName(professional: any): string {
+    const user = professional?.expand?.userId;
 
-  return (
-    user?.name ||
-    professional?.name ||
-    professional?.full_name ||
-    'Professional'
-  );
-}
+    return (
+      user?.name ||
+      professional?.name ||
+      professional?.full_name ||
+      'Professional'
+    );
+  }
   private async showInsufficientCreditsModal(): Promise<void> {
     const result = await Swal.fire({
       icon: 'warning',
@@ -920,51 +1089,51 @@ getProfessionalName(professional: any): string {
   //     this.loading = false;
   //   }
   // }
-private async loadProfessionalRequests(): Promise<void> {
-  this.loading = true;
+  private async loadProfessionalRequests(): Promise<void> {
+    this.loading = true;
 
-  try {
-    const profile = await this.pbService.pb.collection('professional_profiles').getFirstListItem(
-      `userId="${this.currentUser.id}"`,
-      { expand: 'service_zips' }
-    );
+    try {
+      const profile = await this.pbService.pb.collection('professional_profiles').getFirstListItem(
+        `userId="${this.currentUser.id}"`,
+        { expand: 'service_zips' }
+      );
 
-    const serviceZipRecords = profile.expand?.['service_zips'] || [];
-    this.professionalZipsCount = serviceZipRecords.length;
+      const serviceZipRecords = profile.expand?.['service_zips'] || [];
+      this.professionalZipsCount = serviceZipRecords.length;
 
-    if (!serviceZipRecords.length) {
-      this.userRequests = [];
-      return;
+      if (!serviceZipRecords.length) {
+        this.userRequests = [];
+        return;
+      }
+
+      const professionalZipCodes = serviceZipRecords
+        .map((zip: any) => zip.code || zip.zip_code || zip.name)
+        .filter(Boolean);
+
+      const zipFilters = professionalZipCodes
+        .map((code: string) => `zip_code="${code}"`)
+        .join(' || ');
+
+      const filterQuery = `(${zipFilters}) && status != "contacted"`;
+
+      const records = await this.pbService.pb.collection('requests').getList(1, 50, {
+        filter: filterQuery,
+        sort: '-created',
+        expand: 'photos'
+      });
+
+      this.userRequests = records.items;
+
+      setTimeout(() => {
+        this.initAllCarousels();
+      }, 100);
+
+    } catch (error) {
+      console.error('Error loading professional requests:', error);
+    } finally {
+      this.loading = false;
     }
-
-    const professionalZipCodes = serviceZipRecords
-      .map((zip: any) => zip.code || zip.zip_code || zip.name)
-      .filter(Boolean);
-
-    const zipFilters = professionalZipCodes
-      .map((code: string) => `zip_code="${code}"`)
-      .join(' || ');
-
-    const filterQuery = `(${zipFilters}) && status != "contacted"`;
-
-    const records = await this.pbService.pb.collection('requests').getList(1, 50, {
-      filter: filterQuery,
-      sort: '-created',
-      expand: 'photos'
-    });
-
-    this.userRequests = records.items;
-
-    setTimeout(() => {
-      this.initAllCarousels();
-    }, 100);
-
-  } catch (error) {
-    console.error('Error loading professional requests:', error);
-  } finally {
-    this.loading = false;
   }
-}
   isNewRequest(request: any): boolean {
     return this.newRequestIds.has(request.id);
   }
@@ -989,125 +1158,125 @@ private async loadProfessionalRequests(): Promise<void> {
     }
   }
 
-private async subscribeToProfessionalRequests(): Promise<void> {
-  try {
-    const profile = await this.pbService.pb.collection('professional_profiles').getFirstListItem(
-      `userId="${this.currentUser.id}"`,
-      { expand: 'service_zips' }
-    );
+  private async subscribeToProfessionalRequests(): Promise<void> {
+    try {
+      const profile = await this.pbService.pb.collection('professional_profiles').getFirstListItem(
+        `userId="${this.currentUser.id}"`,
+        { expand: 'service_zips' }
+      );
 
-    const serviceZipRecords = profile.expand?.['service_zips'] || [];
+      const serviceZipRecords = profile.expand?.['service_zips'] || [];
 
-    if (!serviceZipRecords.length) {
-      console.warn('El profesional no tiene zonas configuradas');
-      return;
-    }
-
-    const professionalZipCodes = new Set(
-      serviceZipRecords.map((zip: any) => zip.code || zip.zip_code || zip.name).filter(Boolean)
-    );
-
-    this.unsubscribe = await this.pbService.pb.collection('requests').subscribe('*', async (e) => {
-      try {
-        const record = e.record;
-        const requestZipCode = record['zip_code'];
-        const isMatchingZip = professionalZipCodes.has(requestZipCode);
-        const isNotOwnRequest = record['client_id'] !== this.currentUser.id;
-
-        if (!isMatchingZip || !isNotOwnRequest) return;
-
-        const existingIndex = this.userRequests.findIndex(r => r.id === record.id);
-
-        // ===== CREATE =====
-        if (e.action === 'create') {
-          if (record['status'] !== 'sent') return;
-          if (existingIndex !== -1) return;
-
-          // Traer la request completa con expand
-          const fullRequest = await this.pbService.pb.collection('requests').getOne(record.id, {
-            expand: 'photos'
-          });
-
-          this.newRequestIds.add(fullRequest.id);
-          this.userRequests = [fullRequest, ...this.userRequests];
-
-          setTimeout(() => {
-            this.newRequestIds.delete(fullRequest.id);
-          }, 30000);
-
-          this.showNotification(
-            'Nueva solicitud',
-            'Se ha publicado una nueva solicitud en una de tus zonas.',
-            'success'
-          );
-
-          setTimeout(() => this.initCarousel(fullRequest.id), 150);
-        }
-
-        // ===== UPDATE =====
-        else if (e.action === 'update') {
-          // Traer versión completa actualizada
-          const fullRequest = await this.pbService.pb.collection('requests').getOne(record.id, {
-            expand: 'photos'
-          });
-
-          // Si ya no cumple condiciones, eliminarla
-          const stillValid =
-            professionalZipCodes.has(fullRequest['zip_code']) &&
-            fullRequest['client_id'] !== this.currentUser.id &&
-            fullRequest['status'] !== 'contacted';
-
-          if (!stillValid) {
-            if (existingIndex !== -1) {
-              this.userRequests = this.userRequests.filter(r => r.id !== fullRequest.id);
-            }
-            return;
-          }
-
-          if (existingIndex !== -1) {
-            this.userRequests[existingIndex] = fullRequest;
-            this.userRequests = [...this.userRequests];
-            this.markRequestAsUpdated(fullRequest.id);
-          } else {
-            this.userRequests = [fullRequest, ...this.userRequests];
-          }
-
-          const sold = fullRequest['interested_professionals']?.length || 0;
-
-          if (sold >= 3) {
-            this.showNotification(
-              'Solicitud completada',
-              'Esta solicitud ya alcanzó el máximo de 3 profesionales.',
-              'info'
-            );
-          } else {
-            const spotsLeft = 3 - sold;
-            this.showNotification(
-              'Solicitud actualizada',
-              `Quedan ${spotsLeft} cupo(s) disponibles.`,
-              'warning'
-            );
-          }
-
-          setTimeout(() => this.initCarousel(fullRequest.id), 150);
-        }
-
-        // ===== DELETE =====
-        else if (e.action === 'delete') {
-          if (existingIndex !== -1) {
-            this.userRequests = this.userRequests.filter(r => r.id !== record.id);
-          }
-        }
-      } catch (innerError) {
-        console.error('Error procesando evento realtime:', innerError);
+      if (!serviceZipRecords.length) {
+        console.warn('El profesional no tiene zonas configuradas');
+        return;
       }
-    });
 
-    console.log('✅ Suscripción realtime para profesionales activa');
-  } catch (error) {
-    console.error('Error subscribing to professional requests:', error);
+      const professionalZipCodes = new Set(
+        serviceZipRecords.map((zip: any) => zip.code || zip.zip_code || zip.name).filter(Boolean)
+      );
+
+      this.unsubscribe = await this.pbService.pb.collection('requests').subscribe('*', async (e) => {
+        try {
+          const record = e.record;
+          const requestZipCode = record['zip_code'];
+          const isMatchingZip = professionalZipCodes.has(requestZipCode);
+          const isNotOwnRequest = record['client_id'] !== this.currentUser.id;
+
+          if (!isMatchingZip || !isNotOwnRequest) return;
+
+          const existingIndex = this.userRequests.findIndex(r => r.id === record.id);
+
+          // ===== CREATE =====
+          if (e.action === 'create') {
+            if (record['status'] !== 'sent') return;
+            if (existingIndex !== -1) return;
+
+            // Traer la request completa con expand
+            const fullRequest = await this.pbService.pb.collection('requests').getOne(record.id, {
+              expand: 'photos'
+            });
+
+            this.newRequestIds.add(fullRequest.id);
+            this.userRequests = [fullRequest, ...this.userRequests];
+
+            setTimeout(() => {
+              this.newRequestIds.delete(fullRequest.id);
+            }, 30000);
+
+            this.showNotification(
+              'Nueva solicitud',
+              'Se ha publicado una nueva solicitud en una de tus zonas.',
+              'success'
+            );
+
+            setTimeout(() => this.initCarousel(fullRequest.id), 150);
+          }
+
+          // ===== UPDATE =====
+          else if (e.action === 'update') {
+            // Traer versión completa actualizada
+            const fullRequest = await this.pbService.pb.collection('requests').getOne(record.id, {
+              expand: 'photos'
+            });
+
+            // Si ya no cumple condiciones, eliminarla
+            const stillValid =
+              professionalZipCodes.has(fullRequest['zip_code']) &&
+              fullRequest['client_id'] !== this.currentUser.id &&
+              fullRequest['status'] !== 'contacted';
+
+            if (!stillValid) {
+              if (existingIndex !== -1) {
+                this.userRequests = this.userRequests.filter(r => r.id !== fullRequest.id);
+              }
+              return;
+            }
+
+            if (existingIndex !== -1) {
+              this.userRequests[existingIndex] = fullRequest;
+              this.userRequests = [...this.userRequests];
+              this.markRequestAsUpdated(fullRequest.id);
+            } else {
+              this.userRequests = [fullRequest, ...this.userRequests];
+            }
+
+            const sold = fullRequest['interested_professionals']?.length || 0;
+
+            if (sold >= 3) {
+              this.showNotification(
+                'Solicitud completada',
+                'Esta solicitud ya alcanzó el máximo de 3 profesionales.',
+                'info'
+              );
+            } else {
+              const spotsLeft = 3 - sold;
+              this.showNotification(
+                'Solicitud actualizada',
+                `Quedan ${spotsLeft} cupo(s) disponibles.`,
+                'warning'
+              );
+            }
+
+            setTimeout(() => this.initCarousel(fullRequest.id), 150);
+          }
+
+          // ===== DELETE =====
+          else if (e.action === 'delete') {
+            if (existingIndex !== -1) {
+              this.userRequests = this.userRequests.filter(r => r.id !== record.id);
+            }
+          }
+        } catch (innerError) {
+          console.error('Error procesando evento realtime:', innerError);
+        }
+      });
+
+      console.log('✅ Suscripción realtime para profesionales activa');
+    } catch (error) {
+      console.error('Error subscribing to professional requests:', error);
+    }
   }
-}
 
   ngOnDestroy(): void {
     if (this.unsubscribe) {
@@ -1115,7 +1284,14 @@ private async subscribeToProfessionalRequests(): Promise<void> {
     }
   }
 
+private forceCleanupOverlays(): void {
+  document.querySelectorAll('.offcanvas-backdrop, .modal-backdrop')
+    .forEach(el => el.remove());
 
+  document.body.classList.remove('modal-open');
+  document.body.style.overflow = '';
+  document.body.style.paddingRight = '';
+}
 
 
   // private async loadUserRequests(): Promise<void> {
@@ -1131,35 +1307,35 @@ private async subscribeToProfessionalRequests(): Promise<void> {
   //     console.error('Error loading user requests:', error);
   //   }
   // }
-async loadUserRequests() {
-  try {
-    const userId = this.currentUser?.id;
-    if (!userId) {
-      this.userRequests = [];
-      return;
-    }
-
-    const requests = await this.pbService.pb
-      .collection('requests')
-      .getFullList({
-        filter: `client_id="${userId}"`,
-        sort: '-created',
-        expand: 'photos,interested_professionals'
-      });
-
-    this.userRequests = requests.map((request: any) => ({
-      ...request,
-      expand: {
-        ...request.expand,
-        photos: request.expand?.photos || [],
-        interested_professionals: request.expand?.interested_professionals || []
+  async loadUserRequests() {
+    try {
+      const userId = this.currentUser?.id;
+      if (!userId) {
+        this.userRequests = [];
+        return;
       }
-    }));
-  } catch (error) {
-    console.error('❌ Error cargando requests:', error);
-    this.userRequests = [];
+
+      const requests = await this.pbService.pb
+        .collection('requests')
+        .getFullList({
+          filter: `client_id="${userId}"`,
+          sort: '-created',
+          expand: 'photos,interested_professionals'
+        });
+
+      this.userRequests = requests.map((request: any) => ({
+        ...request,
+        expand: {
+          ...request.expand,
+          photos: request.expand?.photos || [],
+          interested_professionals: request.expand?.interested_professionals || []
+        }
+      }));
+    } catch (error) {
+      console.error('❌ Error cargando requests:', error);
+      this.userRequests = [];
+    }
   }
-}
 
   // private async subscribeToUserRequests(): Promise<void> {
   //   // Suscribirse a cambios en tiempo real para las solicitudes del usuario

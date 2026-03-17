@@ -136,19 +136,18 @@
                         </span>
                     </div>
                 </div>
-                <div class="mt-4" *ngIf="request.expand?.interested_professionals?.length > 0">
+                <div class="mt-4"
+                    *ngIf="request.expand?.interested_professionals?.length > 0 && !hasSelectedProfessional(request)">
                     <h5 class="fw-medium title-color mb-3">Interested Professionals</h5>
 
-                    <ul class="servicemen-listing mt-4" *ngIf="request.expand?.interested_professionals?.length > 0">
-
+                    <ul class="servicemen-listing mt-4">
                         <li class="servicemen-box select-servicemen-box white-background mb-3"
                             *ngFor="let professional of request.expand.interested_professionals"
                             data-bs-toggle="offcanvas" data-bs-target="#details"
-                            (click)="selectProfessional(professional)">
+                            (click)="selectProfessional(professional, request)">
 
                             <div class="form-check form-check-reverse text-start">
                                 <label class="form-check-label d-flex align-items-center">
-
                                     <span class="profile-image">
                                         <img class="img-fluid img" [src]="getProfessionalImage(professional)"
                                             [alt]="getProfessionalName(professional)">
@@ -174,11 +173,46 @@
                                             </span>
                                         </span>
                                     </span>
-
                                 </label>
                             </div>
                         </li>
                     </ul>
+                </div>
+                <div class="mt-4" *ngIf="hasSelectedProfessional(request)">
+                    <h5 class="fw-medium title-color mb-3">Selected Professional</h5>
+
+                    <div class="servicemen-box select-servicemen-box white-background mb-3"
+                        *ngIf="getSelectedProfessional(request) as professional">
+
+                        <div class="form-check form-check-reverse text-start">
+                            <label class="form-check-label d-flex align-items-center">
+                                <span class="profile-image">
+                                    <img class="img-fluid img" [src]="getProfessionalImage(professional)"
+                                        [alt]="getProfessionalName(professional)">
+                                </span>
+
+                                <span class="profile-content">
+                                    <span>
+                                        <span class="d-flex align-items-center">
+                                            <span class="name fw-medium title-color">
+                                                {{ getProfessionalName(professional) }}
+                                            </span>
+
+                                            <span class="badge bg-success ms-2">Selected</span>
+                                        </span>
+
+                                        <span class="content-color fw-normal mt-1 d-block">
+                                            {{ getProfessionalExperience(professional) }}
+                                        </span>
+                                    </span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <p class="content-color small mb-0">
+                        Other interested professionals were refunded automatically.
+                    </p>
                 </div>
 
                 <div *ngIf="request.expand?.interested_professionals?.length === 0" class="mt-3">
@@ -519,56 +553,51 @@
                     {{ selectedProfessional.service_zips?.length }} areas covered
                 </p>
             </div>
-<div *ngIf="selectedProfessional?.portfolio_photos?.length > 0" class="mb-3">
+            <div *ngIf="selectedProfessional?.portfolio_photos?.length > 0" class="mb-3">
 
-    <h6 class="fw-medium mb-2">Portfolio</h6>
+                <h6 class="fw-medium mb-2">Portfolio</h6>
 
-    <div id="portfolioCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div id="portfolioCarousel" class="carousel slide" data-bs-ride="carousel">
 
-        <!-- Indicators -->
-        <div class="carousel-indicators">
-            <button *ngFor="let photo of selectedProfessional.portfolio_photos; let i = index"
-                type="button"
-                data-bs-target="#portfolioCarousel"
-                [attr.data-bs-slide-to]="i"
-                [class.active]="i === 0">
-            </button>
-        </div>
+                    <!-- Indicators -->
+                    <div class="carousel-indicators">
+                        <button *ngFor="let photo of selectedProfessional.portfolio_photos; let i = index" type="button"
+                            data-bs-target="#portfolioCarousel" [attr.data-bs-slide-to]="i" [class.active]="i === 0">
+                        </button>
+                    </div>
 
-        <!-- Images -->
-        <div class="carousel-inner rounded">
-            <div *ngFor="let photo of selectedProfessional.portfolio_photos; let i = index"
-                class="carousel-item"
-                [class.active]="i === 0">
+                    <!-- Images -->
+                    <div class="carousel-inner rounded">
+                        <div *ngFor="let photo of selectedProfessional.portfolio_photos; let i = index"
+                            class="carousel-item" [class.active]="i === 0">
 
-                <img 
-                    [src]="getPortfolioPhotoUrl(photo, selectedProfessional)"
-                    class="d-block w-100"
-                    style="height:200px;object-fit:cover;"
-                    alt="Portfolio {{i + 1}}">
+                            <img [src]="getPortfolioPhotoUrl(photo, selectedProfessional)" class="d-block w-100"
+                                style="height:200px;object-fit:cover;" alt="Portfolio {{i + 1}}">
+                        </div>
+                    </div>
+
+                    <!-- Controls -->
+                    <button class="carousel-control-prev" type="button" data-bs-target="#portfolioCarousel"
+                        data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon"></span>
+                    </button>
+
+                    <button class="carousel-control-next" type="button" data-bs-target="#portfolioCarousel"
+                        data-bs-slide="next">
+                        <span class="carousel-control-next-icon"></span>
+                    </button>
+
+                </div>
+
             </div>
         </div>
-
-        <!-- Controls -->
-        <button class="carousel-control-prev" type="button" data-bs-target="#portfolioCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon"></span>
-        </button>
-
-        <button class="carousel-control-next" type="button" data-bs-target="#portfolioCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon"></span>
-        </button>
-
     </div>
 
-</div>
-        </div>
-    </div>
-    
     <div class="grid-btn fixed-button position-relative">
         <div class="custom-container">
             <div class="d-flex align-items-center gap-3">
                 <a class="btn outline-btn w-50">Cancelar</a>
-                <a class="btn theme-btn w-50" (click)="selectProForRequest()">
+                <a class="btn theme-btn w-50" (click)="confirmSelectProfessional()">
                     Select
                 </a>
             </div>
