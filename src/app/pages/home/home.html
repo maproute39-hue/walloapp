@@ -136,13 +136,61 @@
                         </span>
                     </div>
                 </div>
+                <div class="mt-4" *ngIf="request.expand?.interested_professionals?.length > 0">
+    <h5 class="fw-medium title-color mb-3">Interested Professionals</h5>
+
+   <ul class="servicemen-listing mt-4"
+    *ngIf="request.expand?.interested_professionals?.length > 0">
+
+    <li class="servicemen-box select-servicemen-box white-background mb-3"
+        *ngFor="let professional of request.expand.interested_professionals">
+
+        <div class="form-check form-check-reverse text-start">
+            <label class="form-check-label d-flex align-items-center">
+
+                <span class="profile-image">
+                    <img class="img-fluid img"
+                        [src]="getProfessionalImage(professional)"
+                        [alt]="getProfessionalName(professional)">
+                </span>
+
+                <span class="profile-content">
+                    <span>
+                        <span class="d-flex align-items-center">
+                            <a [routerLink]="['/servicemen-details', professional.id]">
+                                <span class="name fw-medium title-color">
+                                    {{ getProfessionalName(professional) }}
+                                </span>
+                            </a>
+
+                            <span class="fw-normal title-color ps-2" *ngIf="professional.rating">
+                                <img src="../../assets/images/svg/star-fill.svg" alt="star">
+                                {{ professional.rating }}
+                            </span>
+                        </span>
+
+                        <span class="content-color fw-normal mt-1 d-block">
+                            {{ getProfessionalExperience(professional) }}
+                        </span>
+                    </span>
+                </span>
+
+            </label>
+        </div>
+    </li>
+</ul>
+</div>
+
+<div *ngIf="request.expand?.interested_professionals?.length === 0" class="mt-3">
+    <p class="content-color mb-0">No professionals interested yet.</p>
+</div>
             </li>
         </ul>
     </div>
 </section>
 
-<!-- ✅ NUEVA SECCIÓN PARA PROFESIONALES -->
-<!-- ✅ SECCIÓN PARA PROFESIONALES (ACTUALIZADA) -->
+
+<!-- ✅ SECCIÓN PARA PROFESIONALES  -->
 <section class="section-lg-t-space section-b-space" *ngIf="currentUser?.['type'] === 'professional'">
     <div class="custom-container">
         <!-- Header con saldo de créditos -->

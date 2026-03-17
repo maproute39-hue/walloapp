@@ -494,71 +494,169 @@ getStatusStep(status: string): number {
       console.error('Error loading credit balance:', error);
     }
   }
-private async loadClientRequests(): Promise<void> {
+// private async loadClientRequests(): Promise<void> {
+//   try {
+//     const records = await this.pbService.pb.collection('requests').getList(1, 50, {
+//       filter: `client_id="${this.currentUser.id}"`,
+//       sort: '-created',
+//       expand: 'photos'
+//     });
+
+//     this.userRequests = records.items;
+
+//     setTimeout(() => {
+//       this.initAllCarousels();
+//     }, 100);
+
+//     console.log('Solicitudes del cliente cargadas:', this.userRequests);
+//   } catch (error) {
+//     console.error('Error loading client requests:', error);
+//   }
+// }
+async loadClientRequests() {
   try {
-    const records = await this.pbService.pb.collection('requests').getList(1, 50, {
-      filter: `client_id="${this.currentUser.id}"`,
-      sort: '-created',
-      expand: 'photos'
-    });
+    const userId = this.currentUser?.id;
+    if (!userId) {
+      this.userRequests = [];
+      return;
+    }
 
-    this.userRequests = records.items;
+    const requests = await this.pbService.pb
+      .collection('requests')
+      .getFullList({
+        filter: `client_id="${userId}"`,
+        sort: '-created',
+        expand: 'photos,interested_professionals,interested_professionals.userId'
+      });
 
-    setTimeout(() => {
-      this.initAllCarousels();
-    }, 100);
+    this.userRequests = requests.map((request: any) => ({
+      ...request,
+      expand: {
+        photos: request.expand?.photos ?? [],
+        interested_professionals: request.expand?.interested_professionals ?? []
+      }
+    }));
 
-    console.log('Solicitudes del cliente cargadas:', this.userRequests);
+    console.log('✅ Requests del cliente:', this.userRequests);
   } catch (error) {
-    console.error('Error loading client requests:', error);
+    console.error('❌ Error cargando requests del cliente:', error);
+    this.userRequests = [];
   }
 }
+// private async subscribeToClientRequests(): Promise<void> {
+//   this.unsubscribe = await this.pbService.pb.collection('requests').subscribe('*', async (e) => {
+//     try {
+//       const record = e.record;
 
-private async subscribeToClientRequests(): Promise<void> {
-  this.unsubscribe = await this.pbService.pb.collection('requests').subscribe('*', async (e) => {
-    try {
-      const record = e.record;
+//       if (record['client_id'] !== this.currentUser.id) return;
 
-      if (record['client_id'] !== this.currentUser.id) return;
+//       if (e.action === 'create') {
+//         const fullRequest = await this.pbService.pb.collection('requests').getOne(record.id, {
+//           expand: 'photos'
+//         });
 
-      if (e.action === 'create') {
-        const fullRequest = await this.pbService.pb.collection('requests').getOne(record.id, {
-          expand: 'photos'
-        });
+//         const exists = this.userRequests.some(r => r.id === fullRequest.id);
+//         if (!exists) {
+//           this.userRequests = [fullRequest, ...this.userRequests];
+//         }
 
-        const exists = this.userRequests.some(r => r.id === fullRequest.id);
-        if (!exists) {
-          this.userRequests = [fullRequest, ...this.userRequests];
-        }
+//         setTimeout(() => this.initCarousel(fullRequest.id), 150);
+//       }
 
-        setTimeout(() => this.initCarousel(fullRequest.id), 150);
+//       else if (e.action === 'update') {
+//         const fullRequest = await this.pbService.pb.collection('requests').getOne(record.id, {
+//           expand: 'photos'
+//         });
+
+//         const index = this.userRequests.findIndex(r => r.id === fullRequest.id);
+//         if (index !== -1) {
+//           this.userRequests[index] = fullRequest;
+//           this.userRequests = [...this.userRequests];
+//         } else {
+//           this.userRequests = [fullRequest, ...this.userRequests];
+//         }
+
+//         setTimeout(() => this.initCarousel(fullRequest.id), 150);
+//       }
+
+//       else if (e.action === 'delete') {
+//         this.userRequests = this.userRequests.filter(r => r.id !== record.id);
+//       }
+//     } catch (error) {
+//       console.error('Error en realtime cliente:', error);
+//     }
+//   }, {
+//     filter: `client_id="${this.currentUser.id}"`
+//   });
+// }
+getProfessionalImage(professional: any): string {
+  const user = professional?.expand?.userId;
+
+  if (user?.avatar) {
+    return this.pbService.fileUrl(user, user.avatar);
+  }
+
+  return '../../assets/images/profile/p4.png';
+}
+
+getProfessionalExperience(professional: any): string {
+  if (professional?.experience_years) {
+    return `${professional.experience_years} years of experience`;
+  }
+
+  if (professional?.experience) {
+    return professional.experience;
+  }
+
+  if (professional?.specialty) {
+    return professional.specialty;
+  }
+
+  return 'Professional available';
+}
+async subscribeToClientRequests() {
+  try {
+    const userId = this.currentUser?.id;
+    if (!userId) return;
+
+    await this.pbService.pb.collection('requests').subscribe('*', async (e) => {
+      const record = e.record as any;
+
+      if (record?.client_id !== userId) return;
+
+      if (e.action === 'delete') {
+        this.userRequests = this.userRequests.filter((r: any) => r.id !== record.id);
+        return;
       }
 
-      else if (e.action === 'update') {
-        const fullRequest = await this.pbService.pb.collection('requests').getOne(record.id, {
-          expand: 'photos'
-        });
+      if (e.action === 'create' || e.action === 'update') {
+        const freshRequest = await this.pbService.pb
+          .collection('requests')
+          .getOne(record.id, {
+            expand: 'photos,interested_professionals,interested_professionals.userId'
+          });
 
-        const index = this.userRequests.findIndex(r => r.id === fullRequest.id);
-        if (index !== -1) {
-          this.userRequests[index] = fullRequest;
+        const normalized = {
+          ...freshRequest,
+          expand: {
+            photos: freshRequest.expand?.['photos'] ?? [],
+            interested_professionals: freshRequest.expand?.['interested_professionals'] ?? []
+          }
+        };
+
+        const index = this.userRequests.findIndex((r: any) => r.id === record.id);
+
+        if (index >= 0) {
+          this.userRequests[index] = normalized;
           this.userRequests = [...this.userRequests];
         } else {
-          this.userRequests = [fullRequest, ...this.userRequests];
+          this.userRequests = [normalized, ...this.userRequests];
         }
-
-        setTimeout(() => this.initCarousel(fullRequest.id), 150);
       }
-
-      else if (e.action === 'delete') {
-        this.userRequests = this.userRequests.filter(r => r.id !== record.id);
-      }
-    } catch (error) {
-      console.error('Error en realtime cliente:', error);
-    }
-  }, {
-    filter: `client_id="${this.currentUser.id}"`
-  });
+    });
+  } catch (error) {
+    console.error('❌ Error en suscripción cliente:', error);
+  }
 }
   private async processPayment(professionalId: string, requestId: string): Promise<boolean> {
     try {
@@ -689,7 +787,16 @@ private async subscribeToClientRequests(): Promise<void> {
       return 0;
     }
   }
+getProfessionalName(professional: any): string {
+  const user = professional?.expand?.userId;
 
+  return (
+    user?.name ||
+    professional?.name ||
+    professional?.full_name ||
+    'Professional'
+  );
+}
   private async showInsufficientCreditsModal(): Promise<void> {
     const result = await Swal.fire({
       icon: 'warning',
@@ -995,39 +1102,68 @@ private async subscribeToProfessionalRequests(): Promise<void> {
 
 
 
-  private async loadUserRequests(): Promise<void> {
-    try {
-      // Cargar solicitudes iniciales del usuario usando el índice client_id
-      const records = await this.pbService.pb.collection('requests').getList(1, 50, {
-        filter: `client_id="${this.pocketbaseService.getCurrentUser()?.id}"`,
-        sort: '-created'
-      });
-      this.userRequests = records.items;
-      console.log('Solicitudes cargadas:', this.userRequests);
-    } catch (error) {
-      console.error('Error loading user requests:', error);
+  // private async loadUserRequests(): Promise<void> {
+  //   try {
+  //     // Cargar solicitudes iniciales del usuario usando el índice client_id
+  //     const records = await this.pbService.pb.collection('requests').getList(1, 50, {
+  //       filter: `client_id="${this.pocketbaseService.getCurrentUser()?.id}"`,
+  //       sort: '-created'
+  //     });
+  //     this.userRequests = records.items;
+  //     console.log('Solicitudes cargadas:', this.userRequests);
+  //   } catch (error) {
+  //     console.error('Error loading user requests:', error);
+  //   }
+  // }
+async loadUserRequests() {
+  try {
+    const userId = this.currentUser?.id;
+    if (!userId) {
+      this.userRequests = [];
+      return;
     }
-  }
 
-  private async subscribeToUserRequests(): Promise<void> {
-    // Suscribirse a cambios en tiempo real para las solicitudes del usuario
-    this.unsubscribe = await this.pbService.pb.collection('requests').subscribe('*', (e) => {
-      console.log('Cambio en solicitudes:', e.action, e.record);
+    const requests = await this.pbService.pb
+      .collection('requests')
+      .getFullList({
+        filter: `client_id="${userId}"`,
+        sort: '-created',
+        expand: 'photos,interested_professionals'
+      });
 
-      if (e.record['client_id'] === this.pocketbaseService.getCurrentUser()?.id) {
-        if (e.action === 'create') {
-          this.userRequests.unshift(e.record);
-        } else if (e.action === 'update') {
-          const index = this.userRequests.findIndex(r => r.id === e.record.id);
-          if (index !== -1) {
-            this.userRequests[index] = e.record;
-          }
-        } else if (e.action === 'delete') {
-          this.userRequests = this.userRequests.filter(r => r.id !== e.record.id);
-        }
+    this.userRequests = requests.map((request: any) => ({
+      ...request,
+      expand: {
+        ...request.expand,
+        photos: request.expand?.photos || [],
+        interested_professionals: request.expand?.interested_professionals || []
       }
-    }, {
-      filter: `client_id="${this.pocketbaseService.getCurrentUser()?.id}"`
-    });
+    }));
+  } catch (error) {
+    console.error('❌ Error cargando requests:', error);
+    this.userRequests = [];
   }
+}
+
+  // private async subscribeToUserRequests(): Promise<void> {
+  //   // Suscribirse a cambios en tiempo real para las solicitudes del usuario
+  //   this.unsubscribe = await this.pbService.pb.collection('requests').subscribe('*', (e) => {
+  //     console.log('Cambio en solicitudes:', e.action, e.record);
+
+  //     if (e.record['client_id'] === this.pocketbaseService.getCurrentUser()?.id) {
+  //       if (e.action === 'create') {
+  //         this.userRequests.unshift(e.record);
+  //       } else if (e.action === 'update') {
+  //         const index = this.userRequests.findIndex(r => r.id === e.record.id);
+  //         if (index !== -1) {
+  //           this.userRequests[index] = e.record;
+  //         }
+  //       } else if (e.action === 'delete') {
+  //         this.userRequests = this.userRequests.filter(r => r.id !== e.record.id);
+  //       }
+  //     }
+  //   }, {
+  //     filter: `client_id="${this.pocketbaseService.getCurrentUser()?.id}"`
+  //   });
+  // }
 }

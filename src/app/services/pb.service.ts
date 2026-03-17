@@ -26,7 +26,9 @@ currentUserName: string | undefined;
     // ajusta el nombre del campo si en PB no es "dni"
     return (this.currentUser?.dni as string) || undefined;
   }
-
+getInstance(): PocketBase {
+  return this.pb;
+}
   /** Upload genérico (lo usas para QR también) */
   async uploadImage(file: File, type?: string): Promise<GalleryImage> {
     const form = new FormData();
