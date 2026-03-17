@@ -1,49 +1,48 @@
-      <div class="profile-list">
-        <h5 class="inner-sub-title theme-color text-capitalize mb-2">General</h5>
-        <ul class="setting-listing">
-          <li class="w-100">
-<a [routerLink]="['/profile', { outlets: { panel: ['client-biografy'] } }]" class="setting-box">             
-   <div class="setting-icon">
-                <span class="material-symbols-rounded msr">account_circle</span>
-              </div>
-              <div class="setting-content">
-                <h5>Contact info</h5>
-                <span class="material-symbols-rounded msr arrow">chevron_right</span>
-              </div>
-            </a>
-          </li>
-          <li class="w-100">
-            <a [routerLink]="['/profile',
-             { outlets: { panel: ['client-reviews'] } }]"
-              class="setting-box">
-              <div class="setting-icon">
-                <span class="material-symbols-rounded msr"></span>
-                <i class="fa fa-star-half-o" aria-hidden="true"></i>
-              </div>
-              <div class="setting-content">
-                <h5>Mis reseñas</h5>
-                <span class="material-symbols-rounded msr arrow">chevron_right</span>
-              </div>
-            </a>
-          </li>
-        </ul>
-      </div>
-  
-     
-      <!-- ALERTAS -->
-      <div class="profile-list">
-        <h5 class="inner-sub-title error-color text-capitalize mb-2">
-          </h5>
-        <ul class="setting-listing alert-list">
-          <li class="w-100">
-            <a (click)="logout()" class="setting-box" data-bs-toggle="modal">
-              <div class="setting-icon">
-                <span class="material-symbols-rounded msr">logout</span>
-              </div>
-              <div class="setting-content">
-                <h5 class="error-color">Salir</h5>
-              </div>
-            </a>
-          </li>
-        </ul>
-      </div>
+<div class="profile-list">
+  <h5 class="inner-sub-title theme-color text-capitalize mb-2">General</h5>
+  <ul class="setting-listing">
+    <li class="w-100">
+      <a [routerLink]="['/profile', { outlets: { panel: ['client-biografy'] } }]" class="setting-box">
+        <div class="setting-icon">
+          <span class="material-symbols-rounded msr">account_circle</span>
+        </div>
+        <div class="setting-content">
+          <h5>Contact info</h5>
+          <span class="material-symbols-rounded msr arrow">chevron_right</span>
+        </div>
+      </a>
+    </li>
+    <!-- <li class="w-100">
+      <a [routerLink]="['/profile',
+             { outlets: { panel: ['client-reviews'] } }]" class="setting-box">
+        <div class="setting-icon">
+          <span class="material-symbols-rounded msr"></span>
+          <i class="fa fa-star-half-o" aria-hidden="true"></i>
+        </div>
+        <div class="setting-content">
+          <h5>Mis reseñas</h5>
+          <span class="material-symbols-rounded msr arrow">chevron_right</span>
+        </div>
+      </a>
+    </li> -->
+  </ul>
+</div>
+
+
+<!-- ALERTAS -->
+<div class="profile-list">
+  <h5 class="inner-sub-title error-color text-capitalize mb-2">
+  </h5>
+  <ul class="setting-listing alert-list">
+    <li class="w-100">
+      <a (click)="logout()" class="setting-box" data-bs-toggle="modal">
+        <div class="setting-icon">
+          <span class="material-symbols-rounded msr">logout</span>
+        </div>
+        <div class="setting-content">
+          <h5 class="error-color">Salir</h5>
+        </div>
+      </a>
+    </li>
+  </ul>
+</div>

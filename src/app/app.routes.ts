@@ -6,6 +6,7 @@ import { AuthGuard } from './guards/auth.guard';
 import { provideRouter, withViewTransitions } from '@angular/router';
 import { PortfolioGalleryComponent } from './pages/profile/sections/expert/portfolio-gallery/portfolio-gallery';
 import { Landing } from '@app/pages/landing/landing';
+import { ProfessionalReviews } from './pages/profile/sections/expert/professional-reviews/professional-reviews';
 export const routes: Routes = [
   {
     path: '',
@@ -35,6 +36,8 @@ export const routes: Routes = [
       outlet: 'panel', 
       loadComponent: () => import('./pages/profile/sections/expert/portfolio-gallery/portfolio-gallery').then(c => c.PortfolioGalleryComponent) 
     },
+      { path: 'professional-reviews',   outlet: 'panel', loadComponent: () => import('./pages/profile/sections/expert/professional-reviews/professional-reviews').then(c => c.ProfessionalReviews) },
+
       { path: 'biografy',   outlet: 'panel', loadComponent: () => import('./pages/profile/sections/expert/biografy/biografy.component').then(c => c.BiografyComponent) },
       { path: 'services',   outlet: 'panel', loadComponent: () => import('./pages/profile/sections/expert/services/services').then(c => c.Services) },
       { path: 'documents',  outlet: 'panel', loadComponent: () => import('./pages/profile/sections/expert/documents/documents').then(c => c.Documents) },
@@ -75,7 +78,7 @@ export const routes: Routes = [
       { path: 'client-biografy',   outlet: 'panel', loadComponent: () => import('./pages/profile/sections/client/biografy/biografy').then(c => c.BiografyComponent) },
     ],
   },
-
+  
   { path: 'notifications', loadComponent: () => import('./pages/notifications/notifications').then(c => c.Notifications) },
   { path: 'servicios',     loadComponent: () => import('./pages/services/services').then(c => c.Services) },
   { path: 'servicio/:slug',loadComponent: () => import('@app/pages/service-detail/service-detail').then(c => c.ServiceDetail) },

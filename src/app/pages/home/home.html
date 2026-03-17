@@ -30,6 +30,13 @@
 
                         <div class="tracker-step" [class.active]="getStatusStep(request.status) >= 3">
                             <div class="tracker-circle">3</div>
+                            <span>Contacted</span>
+                        </div>
+
+                        <div class="tracker-line" [class.active]="getStatusStep(request.status) >= 4"></div>
+
+                        <div class="tracker-step" [class.active]="getStatusStep(request.status) >= 4">
+                            <div class="tracker-circle">4</div>
                             <span>Closed</span>
                         </div>
                     </div>
@@ -277,7 +284,7 @@
                         </div>
                         <small class="text-muted d-block mt-2">
                             <i data-feather="info" style="width: 12px;"></i>
-                            Communication happens outside WALLO
+                            Communication happens outside WALLIZO
                         </small>
                     </div>
 
@@ -294,7 +301,8 @@
                                 <span class="booking-tag" [ngClass]="{
                                 'pending-bg': request.status === 'sent',
                                 'warning-bg': request.status === 'reviewing',
-                                'secondary-bg': request.status === 'full'
+                                'success-bg': request.status === 'contacted',
+                                'secondary-bg': request.status === 'closed'
                             }">
                                     {{ request.status }}
                                 </span>

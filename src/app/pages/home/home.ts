@@ -92,7 +92,8 @@ getStatusStep(status: string): number {
   const map: Record<string, number> = {
     sent: 1,
     reviewing: 2,
-    closed: 3
+    contacted: 3,
+    closed: 4
   };
 
   return map[status?.toLowerCase()] || 1;
