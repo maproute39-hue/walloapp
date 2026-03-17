@@ -128,7 +128,7 @@
                         <!-- <a [routerLink]="['/booking', request.id]" class="btn btn-sm theme-btn w-100">Close Request</a> -->
                         <a *ngIf="request.status !== 'closed'" [routerLink]="['/booking', request.id]"
                             class="btn btn-sm theme-btn w-100">
-                            Close Request
+                            Cancel Request
                         </a>
 
                         <span *ngIf="request.status === 'closed'" class="btn btn-sm btn-secondary w-100">
@@ -519,9 +519,51 @@
                     {{ selectedProfessional.service_zips?.length }} areas covered
                 </p>
             </div>
+<div *ngIf="selectedProfessional?.portfolio_photos?.length > 0" class="mb-3">
 
+    <h6 class="fw-medium mb-2">Portfolio</h6>
+
+    <div id="portfolioCarousel" class="carousel slide" data-bs-ride="carousel">
+
+        <!-- Indicators -->
+        <div class="carousel-indicators">
+            <button *ngFor="let photo of selectedProfessional.portfolio_photos; let i = index"
+                type="button"
+                data-bs-target="#portfolioCarousel"
+                [attr.data-bs-slide-to]="i"
+                [class.active]="i === 0">
+            </button>
+        </div>
+
+        <!-- Images -->
+        <div class="carousel-inner rounded">
+            <div *ngFor="let photo of selectedProfessional.portfolio_photos; let i = index"
+                class="carousel-item"
+                [class.active]="i === 0">
+
+                <img 
+                    [src]="getPortfolioPhotoUrl(photo, selectedProfessional)"
+                    class="d-block w-100"
+                    style="height:200px;object-fit:cover;"
+                    alt="Portfolio {{i + 1}}">
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <button class="carousel-control-prev" type="button" data-bs-target="#portfolioCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+        </button>
+
+        <button class="carousel-control-next" type="button" data-bs-target="#portfolioCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+        </button>
+
+    </div>
+
+</div>
         </div>
     </div>
+    
     <div class="grid-btn fixed-button position-relative">
         <div class="custom-container">
             <div class="d-flex align-items-center gap-3">

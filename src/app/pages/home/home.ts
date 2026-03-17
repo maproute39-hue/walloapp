@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import Swal from 'sweetalert2';  // ← AGREGAR ESTE IMPORT
-
+import { environment } from '../../environments/environment';
 import { PbService } from '../../services/pb.service';
 import { PocketbaseService } from '@app/services/pocketbase.service';
 type Role = 'client' | 'professional';
@@ -100,12 +100,15 @@ canViewPhotos(request: any): boolean {
 
   return this.hasPurchasedLead(request);
 }
+getPortfolioPhotoUrl(photo: string, professional: any): string {
+  return `${environment.pbUrl}/api/files/professional_profiles/${professional.id}/${photo}`;
+}
 getStatusStep(status: string): number {
   const map: Record<string, number> = {
     sent: 1,
     reviewing: 2,
     full: 2,
-    contacted: 3,
+    contacted: 3, 
     closed: 4
   };
 
