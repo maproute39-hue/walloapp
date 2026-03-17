@@ -141,11 +141,10 @@
 
                     <ul class="servicemen-listing mt-4" *ngIf="request.expand?.interested_professionals?.length > 0">
 
-                      <li class="servicemen-box select-servicemen-box white-background mb-3"
-    *ngFor="let professional of request.expand.interested_professionals"
-    data-bs-toggle="offcanvas"
-    data-bs-target="#details"
-    (click)="selectProfessional(professional)">
+                        <li class="servicemen-box select-servicemen-box white-background mb-3"
+                            *ngFor="let professional of request.expand.interested_professionals"
+                            data-bs-toggle="offcanvas" data-bs-target="#details"
+                            (click)="selectProfessional(professional)">
 
                             <div class="form-check form-check-reverse text-start">
                                 <label class="form-check-label d-flex align-items-center">
@@ -483,55 +482,53 @@
     <div class="custom-container">
         <div class="offcanvas-body p-0" *ngIf="selectedProfessional">
 
-    <div class="text-center mb-3">
-        <img 
-            [src]="getProfessionalImage(selectedProfessional)" 
-            class="rounded-circle"
-            style="width:80px;height:80px;object-fit:cover;">
-        
-        <h5 class="mt-2">
-            {{ getProfessionalName(selectedProfessional) }}
-        </h5>
+            <div class="text-center mb-3">
+                <img [src]="getProfessionalImage(selectedProfessional)" class="rounded-circle"
+                    style="width:80px;height:80px;object-fit:cover;">
 
-        <p class="content-color mb-1">
-            {{ selectedProfessional.city }}
-        </p>
+                <h5 class="mt-2">
+                    {{ getProfessionalName(selectedProfessional) }}
+                </h5>
 
-        <span *ngIf="selectedProfessional.rating">
-            ⭐ {{ selectedProfessional.rating }}
-        </span>
-    </div>
+                <p class="content-color mb-1">
+                    {{ selectedProfessional.city }}
+                </p>
 
-    <div class="mb-3">
-        <h6 class="fw-medium">Experience</h6>
-        <p class="content-color">
-            {{ getProfessionalExperience(selectedProfessional) }}
-        </p>
-    </div>
+                <span *ngIf="selectedProfessional.rating">
+                    ⭐ {{ selectedProfessional.rating }}
+                </span>
+            </div>
 
-    <div class="mb-3">
-        <h6 class="fw-medium">Services</h6>
-        <p class="content-color">
-            {{ selectedProfessional.wallpaper_types?.join(', ') }}
-        </p>
-    </div>
+            <div class="mb-3">
+                <h6 class="fw-medium">Experience</h6>
+                <p class="content-color">
+                    {{ getProfessionalExperience(selectedProfessional) }}
+                </p>
+            </div>
 
-    <div class="mb-3">
-        <h6 class="fw-medium">Service Areas</h6>
-        <p class="content-color">
-            {{ selectedProfessional.service_zips?.length }} areas covered
-        </p>
-    </div>
+            <div class="mb-3">
+                <h6 class="fw-medium">Services</h6>
+                <p class="content-color">
+                    {{ selectedProfessional.wallpaper_types?.join(', ') }}
+                </p>
+            </div>
 
-</div>
+            <div class="mb-3">
+                <h6 class="fw-medium">Service Areas</h6>
+                <p class="content-color">
+                    {{ selectedProfessional.service_zips?.length }} areas covered
+                </p>
+            </div>
+
+        </div>
     </div>
     <div class="grid-btn fixed-button position-relative">
         <div class="custom-container">
             <div class="d-flex align-items-center gap-3">
-                <a  class="btn outline-btn w-50">Cancelar</a>
+                <a class="btn outline-btn w-50">Cancelar</a>
                 <a class="btn theme-btn w-50" (click)="selectProForRequest()">
-    Select
-</a>
+                    Select
+                </a>
             </div>
         </div>
     </div>

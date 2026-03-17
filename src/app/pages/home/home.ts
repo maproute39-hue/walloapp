@@ -104,6 +104,7 @@ getStatusStep(status: string): number {
   const map: Record<string, number> = {
     sent: 1,
     reviewing: 2,
+    full: 2,
     contacted: 3,
     closed: 4
   };
