@@ -16,7 +16,7 @@ type Role = 'client' | 'professional';
 
 export class HomeComponent implements OnInit, OnDestroy {
   professionalProfileId: string = '';  // ← AGREGAR ESTA
-
+selectedProfessional: any = null;
   loading: boolean = false;
   professionalZipsCount: number = 0;
   private newRequestIds: Set<string> = new Set(); // Para marcar requests nuevas en tiempo real
@@ -70,6 +70,18 @@ async ngOnInit(): Promise<void> {
 
 //   return map[status] || 1;
 // }
+selectProfessional(professional: any) {
+  this.selectedProfessional = professional;
+}selectProForRequest() {
+  if (!this.selectedProfessional) return;
+
+  console.log('Selected:', this.selectedProfessional);
+
+  // aquí puedes:
+  // - asignarlo al request
+  // - enviar al backend
+  // - cambiar estado
+}
 canViewPhotos(request: any): boolean {
   const user = this.pocketbaseService.getInstance().authStore.model;
 
@@ -713,7 +725,7 @@ async subscribeToClientRequests() {
       if (newSoldLeads === 1) {
         newStatus = 'reviewing';
       } else if (newSoldLeads >= 3) {
-        newStatus = 'full';
+        newStatus = 'contacted';
       }
 
       await this.pbService.pb.collection('requests').update(requestId, {

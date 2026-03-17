@@ -137,53 +137,54 @@
                     </div>
                 </div>
                 <div class="mt-4" *ngIf="request.expand?.interested_professionals?.length > 0">
-    <h5 class="fw-medium title-color mb-3">Interested Professionals</h5>
+                    <h5 class="fw-medium title-color mb-3">Interested Professionals</h5>
 
-   <ul class="servicemen-listing mt-4"
-    *ngIf="request.expand?.interested_professionals?.length > 0">
+                    <ul class="servicemen-listing mt-4" *ngIf="request.expand?.interested_professionals?.length > 0">
 
-    <li class="servicemen-box select-servicemen-box white-background mb-3"
-        *ngFor="let professional of request.expand.interested_professionals">
+                      <li class="servicemen-box select-servicemen-box white-background mb-3"
+    *ngFor="let professional of request.expand.interested_professionals"
+    data-bs-toggle="offcanvas"
+    data-bs-target="#details"
+    (click)="selectProfessional(professional)">
 
-        <div class="form-check form-check-reverse text-start">
-            <label class="form-check-label d-flex align-items-center">
+                            <div class="form-check form-check-reverse text-start">
+                                <label class="form-check-label d-flex align-items-center">
 
-                <span class="profile-image">
-                    <img class="img-fluid img"
-                        [src]="getProfessionalImage(professional)"
-                        [alt]="getProfessionalName(professional)">
-                </span>
+                                    <span class="profile-image">
+                                        <img class="img-fluid img" [src]="getProfessionalImage(professional)"
+                                            [alt]="getProfessionalName(professional)">
+                                    </span>
 
-                <span class="profile-content">
-                    <span>
-                        <span class="d-flex align-items-center">
-                            <a [routerLink]="['/servicemen-details', professional.id]">
-                                <span class="name fw-medium title-color">
-                                    {{ getProfessionalName(professional) }}
-                                </span>
-                            </a>
+                                    <span class="profile-content">
+                                        <span>
+                                            <span class="d-flex align-items-center">
+                                                <a [routerLink]="['/servicemen-details', professional.id]">
+                                                    <span class="name fw-medium title-color">
+                                                        {{ getProfessionalName(professional) }}
+                                                    </span>
+                                                </a>
 
-                            <span class="fw-normal title-color ps-2" *ngIf="professional.rating">
-                                <img src="../../assets/images/svg/star-fill.svg" alt="star">
-                                {{ professional.rating }}
-                            </span>
-                        </span>
+                                                <span class="fw-normal title-color ps-2" *ngIf="professional.rating">
+                                                    <img src="../../assets/images/svg/star-fill.svg" alt="star">
+                                                    {{ professional.rating }}
+                                                </span>
+                                            </span>
 
-                        <span class="content-color fw-normal mt-1 d-block">
-                            {{ getProfessionalExperience(professional) }}
-                        </span>
-                    </span>
-                </span>
+                                            <span class="content-color fw-normal mt-1 d-block">
+                                                {{ getProfessionalExperience(professional) }}
+                                            </span>
+                                        </span>
+                                    </span>
 
-            </label>
-        </div>
-    </li>
-</ul>
-</div>
+                                </label>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
 
-<div *ngIf="request.expand?.interested_professionals?.length === 0" class="mt-3">
-    <p class="content-color mb-0">No professionals interested yet.</p>
-</div>
+                <div *ngIf="request.expand?.interested_professionals?.length === 0" class="mt-3">
+                    <p class="content-color mb-0">No professionals interested yet.</p>
+                </div>
             </li>
         </ul>
     </div>
@@ -472,3 +473,66 @@
         </ul>
     </div>
 </section>
+
+<!-- ✅ OFFCANVAS DE DETALLE DE PROFESIONAL INTERESADO  -->
+<div class="offcanvas offcanvas-bottom filter-offcanvas h-auto" tabindex="-1" id="details">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasBottomLabel">Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="custom-container">
+        <div class="offcanvas-body p-0" *ngIf="selectedProfessional">
+
+    <div class="text-center mb-3">
+        <img 
+            [src]="getProfessionalImage(selectedProfessional)" 
+            class="rounded-circle"
+            style="width:80px;height:80px;object-fit:cover;">
+        
+        <h5 class="mt-2">
+            {{ getProfessionalName(selectedProfessional) }}
+        </h5>
+
+        <p class="content-color mb-1">
+            {{ selectedProfessional.city }}
+        </p>
+
+        <span *ngIf="selectedProfessional.rating">
+            ⭐ {{ selectedProfessional.rating }}
+        </span>
+    </div>
+
+    <div class="mb-3">
+        <h6 class="fw-medium">Experience</h6>
+        <p class="content-color">
+            {{ getProfessionalExperience(selectedProfessional) }}
+        </p>
+    </div>
+
+    <div class="mb-3">
+        <h6 class="fw-medium">Services</h6>
+        <p class="content-color">
+            {{ selectedProfessional.wallpaper_types?.join(', ') }}
+        </p>
+    </div>
+
+    <div class="mb-3">
+        <h6 class="fw-medium">Service Areas</h6>
+        <p class="content-color">
+            {{ selectedProfessional.service_zips?.length }} areas covered
+        </p>
+    </div>
+
+</div>
+    </div>
+    <div class="grid-btn fixed-button position-relative">
+        <div class="custom-container">
+            <div class="d-flex align-items-center gap-3">
+                <a  class="btn outline-btn w-50">Cancelar</a>
+                <a class="btn theme-btn w-50" (click)="selectProForRequest()">
+    Select
+</a>
+            </div>
+        </div>
+    </div>
+</div>
