@@ -15,8 +15,13 @@ type Role = 'client' | 'professional';
 })
 
 export class HomeComponent implements OnInit, OnDestroy {
+  private reviewPopupOpen = false;
+  pendingCompletionRequest: any = null;
+  reviewingRequest: any = null;
+  reviewRating: number = 5;
+  reviewComment: string = '';
   selectedRequest: any = null;
-  professionalProfileId: string = '';  // ← AGREGAR ESTA
+  professionalProfileId: string = '';
   selectedProfessional: any = null;
   loading: boolean = false;
   professionalZipsCount: number = 0;
@@ -24,7 +29,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   leadPrice: number = 4.99;
   professionalCreditBalance: number = 0;
   // private newRequestIds: Set<string> = new Set();
-  private updatedRequestIds: Set<string> = new Set();  // ← ESTA ES LA QUE FALTA
+  private updatedRequestIds: Set<string> = new Set();
 
   userId: string = ''; // Usuario simulado para pruebas
   userRequests: any[] = [];
@@ -52,6 +57,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         await this.subscribeToProfessionalRequests();
       } else if (this.currentUser['type'] === 'client') {
         await this.loadClientRequests();
+        await this.checkPendingClientReviewRequests();
         await this.subscribeToClientRequests();
       }
     } catch (error) {
@@ -73,7 +79,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   // }
   selectProfessional(professional: any, request: any) {
     this.selectedProfessional = professional;
-    this.selectedRequest = request; // 🔥 ESTA LÍNEA ES LA CLAVE
+    this.selectedRequest = request;
   }
 
   selectProForRequest() {
@@ -104,39 +110,39 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     return this.hasPurchasedLead(request);
   }
-confirmSelectProfessional() {
-  if (!this.selectedProfessional) return;
+  confirmSelectProfessional() {
+    if (!this.selectedProfessional) return;
 
-  Swal.fire({
-    title: 'Confirm Selection',
-    text: 'Are you sure you want to select this professional? The others will be refunded.',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Yes, select',
-    cancelButtonText: 'Cancel'
-  }).then(async (result) => {
-    if (!result.isConfirmed) return;
-
-    // ✅ Mostrar loading mientras se procesa
     Swal.fire({
-      title: 'Processing selection...',
-     html: `
+      title: 'Confirm Selection',
+      text: 'Are you sure you want to select this professional? The others will be refunded.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, select',
+      cancelButtonText: 'Cancel'
+    }).then(async (result) => {
+      if (!result.isConfirmed) return;
+
+      // ✅ Mostrar loading mientras se procesa
+      Swal.fire({
+        title: 'Processing selection...',
+        html: `
   <div class="text-center">
     <p class="mb-2">Updating request status...</p>
     <p class="mb-0">Refunding non-selected professionals...</p>
   </div>
 `,
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      showConfirmButton: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
 
-    await this.handleProfessionalSelection();
-  });
-} 
+      await this.handleProfessionalSelection();
+    });
+  }
   hasSelectedProfessional(request: any): boolean {
     return !!request?.selected_professional || !!request?.expand?.selected_professional;
   }
@@ -154,96 +160,96 @@ confirmSelectProfessional() {
 
     return null;
   }
-async handleProfessionalSelection() {
-  try {
-    const request = this.selectedRequest;
-    const selected = this.selectedProfessional;
+  async handleProfessionalSelection() {
+    try {
+      const request = this.selectedRequest;
+      const selected = this.selectedProfessional;
 
-    if (!request || !selected) {
+      if (!request || !selected) {
+        Swal.close();
+
+        Swal.fire({
+          title: 'Error',
+          text: 'Missing selected request or professional',
+          icon: 'error'
+        });
+        return;
+      }
+
+      const allPros = request.expand?.interested_professionals || [];
+      const leadPrice = this.leadPrice || 4.99;
+
+      // 1. Actualizar request
+      await this.pbService.pb.collection('requests').update(request.id, {
+        status: 'contacted',
+        selected_professional: selected.id
+      });
+
+      // 2. Reembolsar a los no seleccionados
+      const nonSelected = allPros.filter((pro: any) => pro.id !== selected.id);
+
+      for (const pro of nonSelected) {
+        const freshProfile = await this.pbService.pb
+          .collection('professional_profiles')
+          .getOne(pro.id);
+
+        const currentBalance = freshProfile['credit_balance'] || 0;
+
+        await this.pbService.pb.collection('professional_profiles').update(pro.id, {
+          credit_balance: currentBalance + leadPrice
+        });
+      }
+
+      // 3. Traer request actualizada
+      const updatedRequest = await this.pbService.pb.collection('requests').getOne(request.id, {
+        expand: 'photos,interested_professionals,interested_professionals.userId,selected_professional,selected_professional.userId'
+      });
+
+      const normalizedRequest = {
+        ...updatedRequest,
+        expand: {
+          photos: updatedRequest.expand?.['photos'] ?? [],
+          interested_professionals: updatedRequest.expand?.['interested_professionals'] ?? [],
+          selected_professional: updatedRequest.expand?.['selected_professional'] ?? null
+        }
+      };
+
+      // 4. Reemplazar localmente
+      const index = this.userRequests.findIndex((r: any) => r.id === request.id);
+      if (index !== -1) {
+        this.userRequests[index] = normalizedRequest;
+        this.userRequests = [...this.userRequests];
+      }
+
+      // 5. Cerrar offcanvas
+      this.closeDetailsOffcanvas();
+
+      // 6. Limpiar selección
+      this.selectedProfessional = null;
+      this.selectedRequest = null;
+
+      // ✅ cerrar loading antes del mensaje final
+      Swal.close();
+
+      Swal.fire({
+        title: 'Success',
+        text: 'Professional selected successfully. Other professionals were refunded.',
+        icon: 'success'
+      });
+
+    } catch (error) {
+      console.error('Error selecting professional:', error);
+
+      // ✅ cerrar loading antes del error
       Swal.close();
 
       Swal.fire({
         title: 'Error',
-        text: 'Missing selected request or professional',
+        text: 'Something went wrong while selecting the professional.',
         icon: 'error'
       });
-      return;
     }
-
-    const allPros = request.expand?.interested_professionals || [];
-    const leadPrice = this.leadPrice || 4.99;
-
-    // 1. Actualizar request
-    await this.pbService.pb.collection('requests').update(request.id, {
-      status: 'contacted',
-      selected_professional: selected.id
-    });
-
-    // 2. Reembolsar a los no seleccionados
-    const nonSelected = allPros.filter((pro: any) => pro.id !== selected.id);
-
-    for (const pro of nonSelected) {
-      const freshProfile = await this.pbService.pb
-        .collection('professional_profiles')
-        .getOne(pro.id);
-
-      const currentBalance = freshProfile['credit_balance'] || 0;
-
-      await this.pbService.pb.collection('professional_profiles').update(pro.id, {
-        credit_balance: currentBalance + leadPrice
-      });
-    }
-
-    // 3. Traer request actualizada
-    const updatedRequest = await this.pbService.pb.collection('requests').getOne(request.id, {
-      expand: 'photos,interested_professionals,interested_professionals.userId,selected_professional,selected_professional.userId'
-    });
-
-    const normalizedRequest = {
-      ...updatedRequest,
-      expand: {
-        photos: updatedRequest.expand?.['photos'] ?? [],
-        interested_professionals: updatedRequest.expand?.['interested_professionals'] ?? [],
-        selected_professional: updatedRequest.expand?.['selected_professional'] ?? null
-      }
-    };
-
-    // 4. Reemplazar localmente
-    const index = this.userRequests.findIndex((r: any) => r.id === request.id);
-    if (index !== -1) {
-      this.userRequests[index] = normalizedRequest;
-      this.userRequests = [...this.userRequests];
-    }
-
-    // 5. Cerrar offcanvas
-    this.closeDetailsOffcanvas();
-
-    // 6. Limpiar selección
-    this.selectedProfessional = null;
-    this.selectedRequest = null;
-
-    // ✅ cerrar loading antes del mensaje final
-    Swal.close();
-
-    Swal.fire({
-      title: 'Success',
-      text: 'Professional selected successfully. Other professionals were refunded.',
-      icon: 'success'
-    });
-
-  } catch (error) {
-    console.error('Error selecting professional:', error);
-
-    // ✅ cerrar loading antes del error
-    Swal.close();
-
-    Swal.fire({
-      title: 'Error',
-      text: 'Something went wrong while selecting the professional.',
-      icon: 'error'
-    });
   }
-}
   private closeDetailsOffcanvas(): void {
     if (typeof window === 'undefined') return;
 
@@ -272,16 +278,314 @@ async handleProfessionalSelection() {
   getPortfolioPhotoUrl(photo: string, professional: any): string {
     return `${environment.pbUrl}/api/files/professional_profiles/${professional.id}/${photo}`;
   }
+  // getStatusStep(status: string): number {
+  //   const map: Record<string, number> = {
+  //     sent: 1,
+  //     reviewing: 2,
+  //     full: 2,
+  //     contacted: 3,
+  //     closed: 4
+  //   };
+
+  //   return map[status?.toLowerCase()] || 1;
+  // }
   getStatusStep(status: string): number {
     const map: Record<string, number> = {
       sent: 1,
       reviewing: 2,
       full: 2,
       contacted: 3,
+      work_completed_pending_client: 4,
       closed: 4
     };
 
     return map[status?.toLowerCase()] || 1;
+  }
+  isSelectedProfessionalForRequest(request: any): boolean {
+    return request?.selected_professional === this.professionalProfileId;
+  }
+
+  canRequestClosure(request: any): boolean {
+    return (
+      this.currentUser?.['type'] === 'professional' &&
+      this.isSelectedProfessionalForRequest(request) &&
+      request?.status === 'contacted'
+    );
+  }
+
+  isWaitingClientClosure(request: any): boolean {
+    return (
+      this.currentUser?.['type'] === 'professional' &&
+      this.isSelectedProfessionalForRequest(request) &&
+      request?.status === 'work_completed_pending_client'
+    );
+  }
+  async requestClosure(request: any): Promise<void> {
+    try {
+      const existing = await this.pbService.pb
+        .collection('request_completion_requests')
+        .getFullList({
+          filter: `request_completion_requests="${request.id}" && status="pending"`
+        });
+
+      if (existing.length > 0) {
+        Swal.fire({
+          icon: 'info',
+          title: 'Already requested',
+          text: 'A closure request for this service is already pending client confirmation.'
+        });
+        return;
+      }
+
+      const confirm = await Swal.fire({
+        title: 'Request closure?',
+        text: 'This will ask the client to confirm the work completion and leave a review.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, request closure',
+        cancelButtonText: 'Cancel'
+      });
+
+      if (!confirm.isConfirmed) return;
+
+      Swal.fire({
+        title: 'Processing...',
+        text: 'Sending closure request to the client.',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => Swal.showLoading()
+      });
+
+      await this.pbService.pb.collection('request_completion_requests').create({
+        request_completion_requests: request.id,
+        client: request.client_id,
+        professional_profile: this.professionalProfileId,
+        status: 'pending',
+        requested_at: new Date().toISOString(),
+        professional_message: 'The work has been completed and is ready for your review.'
+      });
+
+      await this.pbService.pb.collection('requests').update(request.id, {
+        status: 'work_completed_pending_client',
+        completed_at: new Date().toISOString()
+      });
+
+      const updatedRequest = await this.pbService.pb.collection('requests').getOne(request.id, {
+        expand: 'photos,selected_professional,selected_professional.userId'
+      });
+
+      const index = this.userRequests.findIndex((r: any) => r.id === request.id);
+      if (index >= 0) {
+        this.userRequests[index] = updatedRequest;
+        this.userRequests = [...this.userRequests];
+      }
+
+      Swal.close();
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Closure requested',
+        text: 'The client has been notified to confirm completion and leave a review.'
+      });
+
+    } catch (error) {
+      console.error('Error requesting closure:', error);
+      Swal.close();
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Could not request service closure.'
+      });
+    }
+  }
+  async checkPendingClientReviewRequests(): Promise<void> {
+    try {
+      if (this.currentUser?.['type'] !== 'client') return;
+      if (this.reviewPopupOpen) return;
+
+      const pending = await this.pbService.pb
+        .collection('request_completion_requests')
+        .getFullList({
+          filter: `client="${this.currentUser.id}" && status="pending"`,
+          sort: '-created',
+          expand: 'request_completion_requests,professional_profile,professional_profile.userId'
+        });
+
+      if (!pending.length) return;
+
+      const pendingRequest = pending[0];
+      const relatedRequest = pendingRequest.expand?.['request_completion_requests'];
+
+      if (!relatedRequest) return;
+
+      this.pendingCompletionRequest = pendingRequest;
+      this.reviewingRequest = relatedRequest;
+      this.reviewPopupOpen = true;
+
+      await this.openClientReviewPopup(pendingRequest, relatedRequest);
+
+      this.reviewPopupOpen = false;
+
+    } catch (error) {
+      this.reviewPopupOpen = false;
+      console.error('Error checking pending client review requests:', error);
+    }
+  }
+  async openClientReviewPopup(completionRequest: any, request: any): Promise<void> {
+    const professional =
+      completionRequest.expand?.professional_profile?.expand?.userId?.name ||
+      completionRequest.expand?.professional_profile?.full_name ||
+      'the professional';
+
+    const result = await Swal.fire({
+      title: 'Complete service review',
+      html: `
+      <div class="text-start">
+        <p class="mb-3">
+          <strong>${professional}</strong> marked this service as completed.
+          Please rate the service and leave an opinion.
+        </p>
+
+        <label class="form-label fw-medium">Rating (1 to 5)</label>
+        <select id="swal-rating" class="swal2-input">
+          <option value="5" selected>5 - Excellent</option>
+          <option value="4">4 - Very good</option>
+          <option value="3">3 - Good</option>
+          <option value="2">2 - Fair</option>
+          <option value="1">1 - Poor</option>
+        </select>
+
+        <label class="form-label fw-medium mt-2">Opinion</label>
+        <textarea id="swal-comment" class="swal2-textarea" placeholder="Write your opinion here..."></textarea>
+      </div>
+    `,
+      showCancelButton: true,
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      confirmButtonText: 'Submit review',
+      cancelButtonText: 'Later',
+      preConfirm: () => {
+        const ratingEl = document.getElementById('swal-rating') as HTMLSelectElement;
+        const commentEl = document.getElementById('swal-comment') as HTMLTextAreaElement;
+
+        const rating = Number(ratingEl?.value || 0);
+        const comment = (commentEl?.value || '').trim();
+
+        if (!rating || rating < 1 || rating > 5) {
+          Swal.showValidationMessage('Please select a valid rating.');
+          return null;
+        }
+
+        if (!comment) {
+          Swal.showValidationMessage('Please enter your opinion.');
+          return null;
+        }
+
+        return { rating, comment };
+      }
+    });
+
+    if (!result.isConfirmed || !result.value) return;
+
+    await this.submitClientReview(completionRequest, request, result.value.rating, result.value.comment);
+  }
+  async submitClientReview(
+    completionRequest: any,
+    request: any,
+    rating: number,
+    comment: string
+  ): Promise<void> {
+    try {
+      Swal.fire({
+        title: 'Saving review...',
+        text: 'Please wait while we close the request.',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => Swal.showLoading()
+      });
+
+      const existingReviews = await this.pbService.pb
+        .collection('reviews')
+        .getFullList({
+          filter: `request="${request.id}" && client="${this.currentUser.id}"`
+        });
+
+      if (existingReviews.length > 0) {
+        Swal.close();
+
+        Swal.fire({
+          icon: 'info',
+          title: 'Already reviewed',
+          text: 'You have already submitted a review for this request.'
+        });
+        return;
+      }
+
+      await this.pbService.pb.collection('reviews').create({
+        request: request.id,
+        client: this.currentUser.id,
+        professional_profile: completionRequest.professional_profile,
+        rating,
+        comment,
+        is_public: true,
+        status: 'published'
+      });
+
+      await this.pbService.pb.collection('request_completion_requests').update(completionRequest.id, {
+        status: 'approved',
+        resolved_at: new Date().toISOString(),
+        client_message: comment
+      });
+
+      await this.pbService.pb.collection('requests').update(request.id, {
+        status: 'closed',
+        closed_at: new Date().toISOString(),
+        client_rating_submitted: true
+      });
+
+      const updatedRequest = await this.pbService.pb.collection('requests').getOne(request.id, {
+        expand: 'photos,interested_professionals,interested_professionals.userId,selected_professional,selected_professional.userId'
+      });
+
+      const normalizedRequest = {
+        ...updatedRequest,
+        expand: {
+          photos: updatedRequest.expand?.['photos'] ?? [],
+          interested_professionals: updatedRequest.expand?.['interested_professionals'] ?? [],
+          selected_professional: updatedRequest.expand?.['selected_professional'] ?? null
+        }
+      };
+
+      const index = this.userRequests.findIndex((r: any) => r.id === request.id);
+      if (index >= 0) {
+        this.userRequests[index] = normalizedRequest;
+        this.userRequests = [...this.userRequests];
+      }
+
+      this.pendingCompletionRequest = null;
+      this.reviewingRequest = null;
+
+      Swal.close();
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Review submitted',
+        text: 'Thank you. The request has been closed successfully.'
+      });
+
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      Swal.close();
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Could not submit the review.'
+      });
+    }
   }
   getPhotoUrl(photo: any): string {
     if (!photo?.file) {
@@ -311,22 +615,28 @@ async handleProfessionalSelection() {
   }
   // Obtener cupos restantes
   getSpotsLeft(request: any): number {
-    const soldLeads = request.interested_professionals?.length || 0;
+    const soldLeads = this.getInterestedProfessionals(request).length;
     return Math.max(0, 3 - soldLeads);
   }
 
-  // Obtener leads vendidos
   getSoldLeads(request: any): number {
-    return request.interested_professionals?.length || 0;
+    return this.getInterestedProfessionals(request).length;
   }
 
-  // Verificar si ya compró este lead
-  // Verificar si ya compró este lead
   hasPurchasedLead(request: any): boolean {
-    if (!request.interested_professionals) return false;
+    const interested = request?.interested_professionals || [];
+    return interested.includes(this.professionalProfileId);
+  }
+  getInterestedProfessionals(request: any): any[] {
+    if (Array.isArray(request?.expand?.interested_professionals)) {
+      return request.expand.interested_professionals;
+    }
 
-    // ✅ Comparar con el ID del professional_profile, NO del user
-    return request.interested_professionals.includes(this.professionalProfileId);
+    if (Array.isArray(request?.interested_professionals)) {
+      return request.interested_professionals;
+    }
+
+    return [];
   }
   // Método para mostrar detalles del lead en modal
   async showLeadDetailsModal(request: any): Promise<void> {
@@ -679,25 +989,7 @@ async handleProfessionalSelection() {
       console.error('Error loading credit balance:', error);
     }
   }
-  // private async loadClientRequests(): Promise<void> {
-  //   try {
-  //     const records = await this.pbService.pb.collection('requests').getList(1, 50, {
-  //       filter: `client_id="${this.currentUser.id}"`,
-  //       sort: '-created',
-  //       expand: 'photos'
-  //     });
-
-  //     this.userRequests = records.items;
-
-  //     setTimeout(() => {
-  //       this.initAllCarousels();
-  //     }, 100);
-
-  //     console.log('Solicitudes del cliente cargadas:', this.userRequests);
-  //   } catch (error) {
-  //     console.error('Error loading client requests:', error);
-  //   }
-  // }
+  
   async loadClientRequests() {
     try {
       const userId = this.currentUser?.id;
@@ -711,14 +1003,15 @@ async handleProfessionalSelection() {
         .getFullList({
           filter: `client_id="${userId}"`,
           sort: '-created',
-          expand: 'photos,interested_professionals,interested_professionals.userId'
+          expand: 'photos,interested_professionals,interested_professionals.userId,selected_professional,selected_professional.userId'
         });
 
       this.userRequests = requests.map((request: any) => ({
         ...request,
         expand: {
           photos: request.expand?.photos ?? [],
-          interested_professionals: request.expand?.interested_professionals ?? []
+          interested_professionals: request.expand?.interested_professionals ?? [],
+          selected_professional: request.expand?.selected_professional ?? null
         }
       }));
 
@@ -728,52 +1021,6 @@ async handleProfessionalSelection() {
       this.userRequests = [];
     }
   }
-  // private async subscribeToClientRequests(): Promise<void> {
-  //   this.unsubscribe = await this.pbService.pb.collection('requests').subscribe('*', async (e) => {
-  //     try {
-  //       const record = e.record;
-
-  //       if (record['client_id'] !== this.currentUser.id) return;
-
-  //       if (e.action === 'create') {
-  //         const fullRequest = await this.pbService.pb.collection('requests').getOne(record.id, {
-  //           expand: 'photos'
-  //         });
-
-  //         const exists = this.userRequests.some(r => r.id === fullRequest.id);
-  //         if (!exists) {
-  //           this.userRequests = [fullRequest, ...this.userRequests];
-  //         }
-
-  //         setTimeout(() => this.initCarousel(fullRequest.id), 150);
-  //       }
-
-  //       else if (e.action === 'update') {
-  //         const fullRequest = await this.pbService.pb.collection('requests').getOne(record.id, {
-  //           expand: 'photos'
-  //         });
-
-  //         const index = this.userRequests.findIndex(r => r.id === fullRequest.id);
-  //         if (index !== -1) {
-  //           this.userRequests[index] = fullRequest;
-  //           this.userRequests = [...this.userRequests];
-  //         } else {
-  //           this.userRequests = [fullRequest, ...this.userRequests];
-  //         }
-
-  //         setTimeout(() => this.initCarousel(fullRequest.id), 150);
-  //       }
-
-  //       else if (e.action === 'delete') {
-  //         this.userRequests = this.userRequests.filter(r => r.id !== record.id);
-  //       }
-  //     } catch (error) {
-  //       console.error('Error en realtime cliente:', error);
-  //     }
-  //   }, {
-  //     filter: `client_id="${this.currentUser.id}"`
-  //   });
-  // }
   getProfessionalImage(professional: any): string {
     const user = professional?.expand?.userId;
 
@@ -837,6 +1084,7 @@ async handleProfessionalSelection() {
           } else {
             this.userRequests = [normalized, ...this.userRequests];
           }
+          await this.checkPendingClientReviewRequests();
         }
       });
     } catch (error) {
@@ -1114,12 +1362,13 @@ async handleProfessionalSelection() {
         .map((code: string) => `zip_code="${code}"`)
         .join(' || ');
 
-      const filterQuery = `(${zipFilters}) && status != "contacted"`;
+      const filterQuery = `(${zipFilters})`;
 
       const records = await this.pbService.pb.collection('requests').getList(1, 50, {
         filter: filterQuery,
         sort: '-created',
-        expand: 'photos'
+        // expand: 'photos'
+        expand: 'photos,selected_professional,selected_professional.userId'
       });
 
       this.userRequests = records.items;
@@ -1157,7 +1406,17 @@ async handleProfessionalSelection() {
       console.error('Error updating credits:', error);
     }
   }
+  getReadableStatus(status: string): string {
+    const map: Record<string, string> = {
+      sent: 'Sent',
+      reviewing: 'Reviewing',
+      contacted: 'Contacted',
+      work_completed_pending_client: 'Pending Client Review',
+      closed: 'Closed'
+    };
 
+    return map[status] || status;
+  }
   private async subscribeToProfessionalRequests(): Promise<void> {
     try {
       const profile = await this.pbService.pb.collection('professional_profiles').getFirstListItem(
@@ -1194,7 +1453,8 @@ async handleProfessionalSelection() {
 
             // Traer la request completa con expand
             const fullRequest = await this.pbService.pb.collection('requests').getOne(record.id, {
-              expand: 'photos'
+              // expand: 'photos'
+              expand: 'photos,selected_professional,selected_professional.userId'
             });
 
             this.newRequestIds.add(fullRequest.id);
@@ -1217,14 +1477,14 @@ async handleProfessionalSelection() {
           else if (e.action === 'update') {
             // Traer versión completa actualizada
             const fullRequest = await this.pbService.pb.collection('requests').getOne(record.id, {
-              expand: 'photos'
+              // expand: 'photos'
+              expand: 'photos,selected_professional,selected_professional.userId'
             });
 
             // Si ya no cumple condiciones, eliminarla
             const stillValid =
               professionalZipCodes.has(fullRequest['zip_code']) &&
-              fullRequest['client_id'] !== this.currentUser.id &&
-              fullRequest['status'] !== 'contacted';
+              fullRequest['client_id'] !== this.currentUser.id;
 
             if (!stillValid) {
               if (existingIndex !== -1) {
@@ -1278,35 +1538,22 @@ async handleProfessionalSelection() {
     }
   }
 
+
   ngOnDestroy(): void {
     if (this.unsubscribe) {
       this.unsubscribe();
     }
   }
 
-private forceCleanupOverlays(): void {
-  document.querySelectorAll('.offcanvas-backdrop, .modal-backdrop')
-    .forEach(el => el.remove());
+  private forceCleanupOverlays(): void {
+    document.querySelectorAll('.offcanvas-backdrop, .modal-backdrop')
+      .forEach(el => el.remove());
 
-  document.body.classList.remove('modal-open');
-  document.body.style.overflow = '';
-  document.body.style.paddingRight = '';
-}
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+  }
 
-
-  // private async loadUserRequests(): Promise<void> {
-  //   try {
-  //     // Cargar solicitudes iniciales del usuario usando el índice client_id
-  //     const records = await this.pbService.pb.collection('requests').getList(1, 50, {
-  //       filter: `client_id="${this.pocketbaseService.getCurrentUser()?.id}"`,
-  //       sort: '-created'
-  //     });
-  //     this.userRequests = records.items;
-  //     console.log('Solicitudes cargadas:', this.userRequests);
-  //   } catch (error) {
-  //     console.error('Error loading user requests:', error);
-  //   }
-  // }
   async loadUserRequests() {
     try {
       const userId = this.currentUser?.id;
@@ -1337,25 +1584,4 @@ private forceCleanupOverlays(): void {
     }
   }
 
-  // private async subscribeToUserRequests(): Promise<void> {
-  //   // Suscribirse a cambios en tiempo real para las solicitudes del usuario
-  //   this.unsubscribe = await this.pbService.pb.collection('requests').subscribe('*', (e) => {
-  //     console.log('Cambio en solicitudes:', e.action, e.record);
-
-  //     if (e.record['client_id'] === this.pocketbaseService.getCurrentUser()?.id) {
-  //       if (e.action === 'create') {
-  //         this.userRequests.unshift(e.record);
-  //       } else if (e.action === 'update') {
-  //         const index = this.userRequests.findIndex(r => r.id === e.record.id);
-  //         if (index !== -1) {
-  //           this.userRequests[index] = e.record;
-  //         }
-  //       } else if (e.action === 'delete') {
-  //         this.userRequests = this.userRequests.filter(r => r.id !== e.record.id);
-  //       }
-  //     }
-  //   }, {
-  //     filter: `client_id="${this.pocketbaseService.getCurrentUser()?.id}"`
-  //   });
-  // }
 }
