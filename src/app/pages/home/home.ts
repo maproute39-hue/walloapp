@@ -119,7 +119,11 @@ export class HomeComponent implements OnInit, OnDestroy {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Yes, select',
-      cancelButtonText: 'Cancel'
+      cancelButtonText: 'Cancel',
+        didOpen: () => {
+      this.applyThemeToSwalButtons();
+      this.bindThemeHoverToSwalButtons();
+    }
     }).then(async (result) => {
       if (!result.isConfirmed) return;
 
@@ -234,7 +238,11 @@ export class HomeComponent implements OnInit, OnDestroy {
       Swal.fire({
         title: 'Success',
         text: 'Professional selected successfully. Other professionals were refunded.',
-        icon: 'success'
+        icon: 'success',
+        didOpen: () => {
+      this.applyThemeToSwalButtons();
+      this.bindThemeHoverToSwalButtons();
+    }
       });
 
     } catch (error) {
@@ -343,7 +351,11 @@ export class HomeComponent implements OnInit, OnDestroy {
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: 'Yes, request closure',
-        cancelButtonText: 'Cancel'
+        cancelButtonText: 'Cancel',
+        didOpen: () => {
+      this.applyThemeToSwalButtons();
+      this.bindThemeHoverToSwalButtons();
+    }
       });
 
       if (!confirm.isConfirmed) return;
@@ -386,7 +398,11 @@ export class HomeComponent implements OnInit, OnDestroy {
       Swal.fire({
         icon: 'success',
         title: 'Closure requested',
-        text: 'The client has been notified to confirm completion and leave a review.'
+        text: 'The client has been notified to confirm completion and leave a review.',
+        didOpen: () => {
+      this.applyThemeToSwalButtons();
+      this.bindThemeHoverToSwalButtons();
+    }
       });
 
     } catch (error) {
@@ -396,7 +412,11 @@ export class HomeComponent implements OnInit, OnDestroy {
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'Could not request service closure.'
+        text: 'Could not request service closure.',
+        didOpen: () => {
+      this.applyThemeToSwalButtons();
+      this.bindThemeHoverToSwalButtons();
+    }
       });
     }
   }
@@ -433,160 +453,327 @@ export class HomeComponent implements OnInit, OnDestroy {
       console.error('Error checking pending client review requests:', error);
     }
   }
-  async openClientReviewPopup(completionRequest: any, request: any): Promise<void> {
-    const professional =
-      completionRequest.expand?.professional_profile?.expand?.userId?.name ||
-      completionRequest.expand?.professional_profile?.full_name ||
-      'the professional';
+async openClientReviewPopup(completionRequest: any, request: any): Promise<void> {
+  const professional =
+    completionRequest.expand?.professional_profile?.expand?.userId?.name ||
+    completionRequest.expand?.professional_profile?.full_name ||
+    'the professional';
 
-    const result = await Swal.fire({
-      title: 'Complete service review',
-      html: `
-      <div class="text-start">
-        <p class="mb-3">
-          <strong>${professional}</strong> marked this service as completed.
-          Please rate the service and leave an opinion.
-        </p>
+const result = await Swal.fire({
+  title: 'Complete service review',
+  html: `
+    <div class="text-start">
+      <p class="mb-3">
+        <strong>${professional}</strong> marked this service as completed.
+        Please rate the service and leave an opinion.
+      </p>
 
-        <label class="form-label fw-medium">Rating (1 to 5)</label>
-        <select id="swal-rating" class="swal2-input">
-          <option value="5" selected>5 - Excellent</option>
-          <option value="4">4 - Very good</option>
-          <option value="3">3 - Good</option>
-          <option value="2">2 - Fair</option>
-          <option value="1">1 - Poor</option>
-        </select>
+      <label class="form-label fw-medium d-block text-center">Rating</label>
 
-        <label class="form-label fw-medium mt-2">Opinion</label>
-        <textarea id="swal-comment" class="swal2-textarea" placeholder="Write your opinion here..."></textarea>
+      <div id="star-rating"
+           class="mb-3 d-flex justify-content-center align-items-center gap-2"
+           style="font-size: 42px; cursor: pointer;">
+        <span data-value="1" style="color:#ffc107;">★</span>
+        <span data-value="2" style="color:#ffc107;">★</span>
+        <span data-value="3" style="color:#ffc107;">★</span>
+        <span data-value="4" style="color:#ffc107;">★</span>
+        <span data-value="5" style="color:#ffc107;">★</span>
       </div>
-    `,
-      showCancelButton: true,
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      confirmButtonText: 'Submit review',
-      cancelButtonText: 'Later',
-      preConfirm: () => {
-        const ratingEl = document.getElementById('swal-rating') as HTMLSelectElement;
-        const commentEl = document.getElementById('swal-comment') as HTMLTextAreaElement;
 
-        const rating = Number(ratingEl?.value || 0);
-        const comment = (commentEl?.value || '').trim();
+      <input type="hidden" id="swal-rating" value="5">
 
-        if (!rating || rating < 1 || rating > 5) {
-          Swal.showValidationMessage('Please select a valid rating.');
-          return null;
-        }
+      <label class="form-label fw-medium mt-2">Opinion</label>
+      <textarea id="swal-comment" class="swal2-textarea" placeholder="Write your opinion here..."></textarea>
+    </div>
+  `,
+  showCancelButton: true,
+  allowOutsideClick: false,
+  allowEscapeKey: false,
+  confirmButtonText: 'Submit review',
+  cancelButtonText: 'Later',
 
-        if (!comment) {
-          Swal.showValidationMessage('Please enter your opinion.');
-          return null;
-        }
+  didOpen: () => {
+    // ====== FORZAR ESTILO DE BOTONES ======
+    const confirmBtn = Swal.getConfirmButton();
+    const cancelBtn = Swal.getCancelButton();
 
-        return { rating, comment };
-      }
+    if (confirmBtn) {
+      confirmBtn.style.background = '#FF6B35';
+      confirmBtn.style.backgroundColor = '#FF6B35';
+      confirmBtn.style.color = '#FFFFFF';
+      confirmBtn.style.border = 'none';
+      confirmBtn.style.boxShadow = 'none';
+      confirmBtn.style.borderRadius = '8px';
+      confirmBtn.style.fontWeight = '600';
+      confirmBtn.style.padding = '10px 18px';
+    }
+
+    if (cancelBtn) {
+      cancelBtn.style.background = '#6c757d';
+      cancelBtn.style.backgroundColor = '#6c757d';
+      cancelBtn.style.color = '#FFFFFF';
+      cancelBtn.style.border = 'none';
+      cancelBtn.style.boxShadow = 'none';
+      cancelBtn.style.borderRadius = '8px';
+      cancelBtn.style.fontWeight = '500';
+      cancelBtn.style.padding = '10px 18px';
+    }
+
+    // Hover botón confirmar
+    confirmBtn?.addEventListener('mouseenter', () => {
+      confirmBtn.style.background = '#F7931E';
+      confirmBtn.style.backgroundColor = '#F7931E';
     });
 
-    if (!result.isConfirmed || !result.value) return;
+    confirmBtn?.addEventListener('mouseleave', () => {
+      confirmBtn.style.background = '#FF6B35';
+      confirmBtn.style.backgroundColor = '#FF6B35';
+    });
 
-    await this.submitClientReview(completionRequest, request, result.value.rating, result.value.comment);
-  }
-  async submitClientReview(
-    completionRequest: any,
-    request: any,
-    rating: number,
-    comment: string
-  ): Promise<void> {
-    try {
-      Swal.fire({
-        title: 'Saving review...',
-        text: 'Please wait while we close the request.',
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        showConfirmButton: false,
-        didOpen: () => Swal.showLoading()
-      });
+    // Hover botón cancelar
+    cancelBtn?.addEventListener('mouseenter', () => {
+      cancelBtn.style.background = '#5c636a';
+      cancelBtn.style.backgroundColor = '#5c636a';
+    });
 
-      const existingReviews = await this.pbService.pb
-        .collection('reviews')
-        .getFullList({
-          filter: `request="${request.id}" && client="${this.currentUser.id}"`
-        });
+    cancelBtn?.addEventListener('mouseleave', () => {
+      cancelBtn.style.background = '#6c757d';
+      cancelBtn.style.backgroundColor = '#6c757d';
+    });
 
-      if (existingReviews.length > 0) {
-        Swal.close();
+    // ====== ESTRELLAS ======
+    const stars = document.querySelectorAll('#star-rating span');
+    const ratingInput = document.getElementById('swal-rating') as HTMLInputElement;
 
-        Swal.fire({
-          icon: 'info',
-          title: 'Already reviewed',
-          text: 'You have already submitted a review for this request.'
-        });
-        return;
-      }
+    let currentRating = Number(ratingInput.value || 5);
 
-      await this.pbService.pb.collection('reviews').create({
-        request: request.id,
-        client: this.currentUser.id,
-        professional_profile: completionRequest.professional_profile,
-        rating,
-        comment,
-        is_public: true,
-        status: 'published'
-      });
+    const updateStars = (rating: number) => {
+      stars.forEach((star: Element) => {
+        const htmlStar = star as HTMLElement;
+        const value = Number(htmlStar.getAttribute('data-value'));
 
-      await this.pbService.pb.collection('request_completion_requests').update(completionRequest.id, {
-        status: 'approved',
-        resolved_at: new Date().toISOString(),
-        client_message: comment
-      });
-
-      await this.pbService.pb.collection('requests').update(request.id, {
-        status: 'closed',
-        closed_at: new Date().toISOString(),
-        client_rating_submitted: true
-      });
-
-      const updatedRequest = await this.pbService.pb.collection('requests').getOne(request.id, {
-        expand: 'photos,interested_professionals,interested_professionals.userId,selected_professional,selected_professional.userId'
-      });
-
-      const normalizedRequest = {
-        ...updatedRequest,
-        expand: {
-          photos: updatedRequest.expand?.['photos'] ?? [],
-          interested_professionals: updatedRequest.expand?.['interested_professionals'] ?? [],
-          selected_professional: updatedRequest.expand?.['selected_professional'] ?? null
+        if (value <= rating) {
+          htmlStar.textContent = '★';
+          htmlStar.style.color = '#FF9800';
+          htmlStar.style.transform = 'scale(1.1)';
+        } else {
+          htmlStar.textContent = '★';
+          htmlStar.style.color = '#e0e0e0';
+          htmlStar.style.transform = 'scale(1)';
         }
-      };
 
-      const index = this.userRequests.findIndex((r: any) => r.id === request.id);
-      if (index >= 0) {
-        this.userRequests[index] = normalizedRequest;
-        this.userRequests = [...this.userRequests];
-      }
+        htmlStar.style.transition = 'all 0.2s ease';
+      });
+    };
 
-      this.pendingCompletionRequest = null;
-      this.reviewingRequest = null;
+    updateStars(currentRating);
 
-      Swal.close();
+    stars.forEach((star: Element) => {
+      const htmlStar = star as HTMLElement;
+      const value = Number(htmlStar.getAttribute('data-value'));
 
-      Swal.fire({
-        icon: 'success',
-        title: 'Review submitted',
-        text: 'Thank you. The request has been closed successfully.'
+      htmlStar.addEventListener('mouseenter', () => {
+        updateStars(value);
       });
 
-    } catch (error) {
-      console.error('Error submitting review:', error);
-      Swal.close();
-
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Could not submit the review.'
+      htmlStar.addEventListener('click', () => {
+        currentRating = value;
+        ratingInput.value = String(value);
+        updateStars(currentRating);
       });
+    });
+
+    document.getElementById('star-rating')?.addEventListener('mouseleave', () => {
+      updateStars(currentRating);
+    });
+  },
+
+  preConfirm: () => {
+    const ratingEl = document.getElementById('swal-rating') as HTMLInputElement;
+    const commentEl = document.getElementById('swal-comment') as HTMLTextAreaElement;
+
+    const rating = Number(ratingEl?.value || 0);
+    const comment = (commentEl?.value || '').trim();
+
+    if (!rating || rating < 1 || rating > 5) {
+      Swal.showValidationMessage('Please select a rating.');
+      return null;
     }
+
+    if (!comment) {
+      Swal.showValidationMessage('Please enter your opinion.');
+      return null;
+    }
+
+    return { rating, comment };
   }
+});
+
+  if (!result.isConfirmed || !result.value) return;
+
+  await this.submitClientReview(
+    completionRequest,
+    request,
+    result.value.rating,
+    result.value.comment
+  );
+}
+private applyThemeToSwalButtons(): void {
+  const confirmBtn = Swal.getConfirmButton();
+  const cancelBtn = Swal.getCancelButton();
+
+  if (confirmBtn) {
+    confirmBtn.style.background = '#FF6B35';
+    confirmBtn.style.backgroundColor = '#FF6B35';
+    confirmBtn.style.color = '#FFFFFF';
+    confirmBtn.style.border = 'none';
+    confirmBtn.style.boxShadow = 'none';
+    confirmBtn.style.borderRadius = '8px';
+    confirmBtn.style.fontWeight = '600';
+    confirmBtn.style.padding = '10px 18px';
+  }
+
+  if (cancelBtn) {
+    cancelBtn.style.background = '#6c757d';
+    cancelBtn.style.backgroundColor = '#6c757d';
+    cancelBtn.style.color = '#FFFFFF';
+    cancelBtn.style.border = 'none';
+    cancelBtn.style.boxShadow = 'none';
+    cancelBtn.style.borderRadius = '8px';
+    cancelBtn.style.fontWeight = '500';
+    cancelBtn.style.padding = '10px 18px';
+  }
+}
+
+private bindThemeHoverToSwalButtons(): void {
+  const confirmBtn = Swal.getConfirmButton();
+  const cancelBtn = Swal.getCancelButton();
+
+  if (confirmBtn) {
+    confirmBtn.addEventListener('mouseenter', () => {
+      confirmBtn.style.background = '#F7931E';
+      confirmBtn.style.backgroundColor = '#F7931E';
+    });
+
+    confirmBtn.addEventListener('mouseleave', () => {
+      confirmBtn.style.background = '#FF6B35';
+      confirmBtn.style.backgroundColor = '#FF6B35';
+    });
+  }
+
+  if (cancelBtn) {
+    cancelBtn.addEventListener('mouseenter', () => {
+      cancelBtn.style.background = '#5c636a';
+      cancelBtn.style.backgroundColor = '#5c636a';
+    });
+
+    cancelBtn.addEventListener('mouseleave', () => {
+      cancelBtn.style.background = '#6c757d';
+      cancelBtn.style.backgroundColor = '#6c757d';
+    });
+  }
+}
+async submitClientReview(
+  completionRequest: any,
+  request: any,
+  rating: number,
+  comment: string
+): Promise<void> {
+  try {
+    Swal.fire({
+      title: 'Saving review...',
+      text: 'Please wait while we close the request.',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      didOpen: () => Swal.showLoading()
+    });
+
+    const existingReviews = await this.pbService.pb
+      .collection('reviews')
+      .getFullList({
+        filter: `request="${request.id}" && client="${this.currentUser.id}"`
+      });
+
+    if (existingReviews.length > 0) {
+      Swal.close();
+
+      Swal.fire({
+        icon: 'info',
+        title: 'Already reviewed',
+        text: 'You have already submitted a review for this request.'
+      });
+      return;
+    }
+
+    await this.pbService.pb.collection('reviews').create({
+      request: request.id,
+      client: this.currentUser.id,
+      professional_profile: completionRequest.professional_profile,
+      rating,
+      comment,
+      is_public: true,
+      status: 'published'
+    });
+
+    await this.pbService.pb.collection('request_completion_requests').update(completionRequest.id, {
+      status: 'approved',
+      resolved_at: new Date().toISOString(),
+      client_message: comment
+    });
+
+    await this.pbService.pb.collection('requests').update(request.id, {
+      status: 'closed',
+      closed_at: new Date().toISOString(),
+      client_rating_submitted: true
+    });
+
+    const updatedRequest = await this.pbService.pb.collection('requests').getOne(request.id, {
+      expand: 'photos,interested_professionals,interested_professionals.userId,selected_professional,selected_professional.userId'
+    });
+
+    const normalizedRequest = {
+      ...updatedRequest,
+      expand: {
+        photos: updatedRequest.expand?.['photos'] ?? [],
+        interested_professionals: updatedRequest.expand?.['interested_professionals'] ?? [],
+        selected_professional: updatedRequest.expand?.['selected_professional'] ?? null
+      }
+    };
+
+    const index = this.userRequests.findIndex((r: any) => r.id === request.id);
+    if (index >= 0) {
+      this.userRequests[index] = normalizedRequest;
+      this.userRequests = [...this.userRequests];
+    }
+
+    this.pendingCompletionRequest = null;
+    this.reviewingRequest = null;
+
+    Swal.close();
+
+ Swal.fire({
+  icon: 'success',
+  title: 'Review submitted',
+  text: 'Thank you. The request has been closed successfully.',
+  confirmButtonText: 'OK',
+  didOpen: () => {
+    this.applyThemeToSwalButtons();
+    this.bindThemeHoverToSwalButtons();
+  }
+});
+
+  } catch (error) {
+    console.error('Error submitting review:', error);
+    Swal.close();
+
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Could not submit the review.'
+    });
+  }
+}
   getPhotoUrl(photo: any): string {
     if (!photo?.file) {
       return '../../assets/images/vertical-service/blocked_images.png';
@@ -748,7 +935,11 @@ export class HomeComponent implements OnInit, OnDestroy {
         width: '95%',
         showConfirmButton: true,
         confirmButtonText: 'Close',
-        confirmButtonColor: '#0d6efd',
+ buttonsStyling: false,
+customClass: {
+  confirmButton: 'swal-confirm-theme',
+  cancelButton: 'swal-cancel-theme'
+},
         didOpen: () => {
           // Inicializar Feather icons dentro del modal
           if (typeof window !== 'undefined' && (window as any).feather) {
@@ -763,7 +954,11 @@ export class HomeComponent implements OnInit, OnDestroy {
         icon: 'error',
         title: 'Error',
         text: 'Could not load lead details. Please try again.',
-        confirmButtonColor: '#0d6efd'
+ buttonsStyling: false,
+customClass: {
+  confirmButton: 'swal-confirm-theme',
+  cancelButton: 'swal-cancel-theme'
+}
       });
     }
   }
@@ -778,7 +973,11 @@ export class HomeComponent implements OnInit, OnDestroy {
         title: 'Créditos insuficientes',
         text: `Necesitas $${this.leadPrice} para comprar este lead.`,
         confirmButtonText: 'Comprar créditos',
-        confirmButtonColor: '#0d6efd',
+ buttonsStyling: false,
+customClass: {
+  confirmButton: 'swal-confirm-theme',
+  cancelButton: 'swal-cancel-theme'
+},
         showCancelButton: true,
         cancelButtonText: 'Cancelar'
       }).then((result) => {
@@ -799,7 +998,11 @@ export class HomeComponent implements OnInit, OnDestroy {
         title: 'Sin cupos disponibles',
         text: 'Esta solicitud ya tiene 3 profesionales asignados.',
         confirmButtonText: 'Entendido',
-        confirmButtonColor: '#0d6efd'
+ buttonsStyling: false,
+customClass: {
+  confirmButton: 'swal-confirm-theme',
+  cancelButton: 'swal-cancel-theme'
+}
       });
       return;
     }
@@ -845,7 +1048,11 @@ export class HomeComponent implements OnInit, OnDestroy {
           icon: 'error',
           title: 'Error',
           text: 'Tu saldo ha cambiado. Verifica tus créditos e intenta nuevamente.',
-          confirmButtonColor: '#0d6efd'
+   buttonsStyling: false,
+customClass: {
+  confirmButton: 'swal-confirm-theme',
+  cancelButton: 'swal-cancel-theme'
+}
         });
         return;
       }
@@ -941,7 +1148,11 @@ export class HomeComponent implements OnInit, OnDestroy {
         icon: 'error',
         title: 'Error',
         text: 'No se pudo completar la compra. Por favor, intenta nuevamente.',
-        confirmButtonColor: '#0d6efd'
+ buttonsStyling: false,
+customClass: {
+  confirmButton: 'swal-confirm-theme',
+  cancelButton: 'swal-cancel-theme'
+}
       });
     }
   }
@@ -1241,7 +1452,9 @@ export class HomeComponent implements OnInit, OnDestroy {
       </div>
     `,
       confirmButtonText: 'Comprar créditos',
-      confirmButtonColor: '#0d6efd',
+      customClass: {
+  confirmButton: 'swal-confirm-theme'
+},
       showCancelButton: true,
       cancelButtonText: 'Cancelar'
     });

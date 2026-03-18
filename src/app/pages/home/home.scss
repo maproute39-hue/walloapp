@@ -933,3 +933,23 @@ html {
 .tracker-line.active {
   background: #ff6b00;
 }
+.swal-confirm-theme {
+  background-color: #ff9800 !important; // naranja WALLIZO
+  border: none !important;
+  color: #fff !important;
+  font-weight: 500;
+  box-shadow: none !important;
+}
+
+.swal-confirm-theme:hover {
+  background-color: #f57c00 !important;
+}
+
+.swal-confirm-theme:focus {
+  box-shadow: none !important;
+}
+:host ::ng-deep .swal-confirm-theme {
+  background-color: #FF6B35 !important;
+  border: none !important;
+  color: #fff !important;
+}

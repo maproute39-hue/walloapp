@@ -8423,3 +8423,35 @@ body.dark .header.chatting-header .head-content a {
 body.dark .profile-background .profile-bg {
   background-color: rgba(229, 232, 234, 0.1); }
 
+.swal-confirm-theme {
+  background-color: #FF6B35 !important;
+  border: none !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+  box-shadow: none !important;
+  border-radius: 8px !important;
+  padding: 10px 18px !important;
+}
+
+.swal-confirm-theme:hover {
+  background-color: #F7931E !important;
+}
+
+.swal-confirm-theme:focus {
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.swal-cancel-theme {
+  background-color: #6c757d !important;
+  border: none !important;
+  color: #fff !important;
+  font-weight: 500 !important;
+  box-shadow: none !important;
+  border-radius: 8px !important;
+  padding: 10px 18px !important;
+}
+
+.swal-cancel-theme:hover {
+  background-color: #5c636a !important;
+}
