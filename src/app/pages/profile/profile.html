@@ -17,7 +17,8 @@
         <a [routerLink]="['/profile', { outlets: { panel: ['wallet'] } }]" class="balance-details">
           <h5 class="fw-medium">Saldo disponible :</h5>
           <div class="d-flex align-items-center gap-1">
-            <h4>$0.00</h4>
+            <!-- <h4>$0.00</h4> -->
+             <h4>{{ balanceAvailable | currency:'USD':'symbol':'1.2-2' }}</h4>
             <span class="material-symbols-rounded arrow-icon">arrow_forward</span>
           </div>
         </a>

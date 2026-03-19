@@ -1,9 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { PbService } from '@app/services/pb.service';
+import { WalletApiService } from '@app/services/wallet-api.service';
+
+type CreditPackage = {
+  id: string;
+  credits: number;
+  priceUsd: number;
+};
 
 @Component({
   selector: 'app-wallet',
@@ -14,136 +21,158 @@ import { PbService } from '@app/services/pb.service';
 })
 export class Wallet {
   router = inject(Router);
+  route = inject(ActivatedRoute);
   pb = inject(PbService);
+  walletApi = inject(WalletApiService);
 
-  availableBalance: number = 0;
-  pendingBalance: number = 0;
-  // Estado
-  file: File | null = null;
-  previewUrl: string | ArrayBuffer | null = null;
-
-  balance: number = 0;
+  availableBalance = 0;
+  pendingBalance = 0;
   transactions: any[] = [];
-
-  deposito = {
-    method: '' as 'agente' | 'yape' | 'plin' | '',
-    amount: null as number | null,
-    note: ''
-  };
-
   loading = false;
+  processingSession = false;
 
-  // ===== Ciclo de vida =====
+  packages: CreditPackage[] = [
+    { id: 'pkg_5', credits: 5, priceUsd: 5 },
+    { id: 'pkg_10', credits: 10, priceUsd: 10 },
+    { id: 'pkg_20', credits: 20, priceUsd: 20 }
+  ];
+
   async ngOnInit() {
+    await this.handleStripeReturn();
     await this.loadWallet();
-      await this.loadWallet();
-  await this.loadBalances();  
+    await this.loadBalances();
   }
 
- 
+  async handleStripeReturn() {
+    const payment = this.route.snapshot.queryParamMap.get('payment');
+    const sessionId = this.route.snapshot.queryParamMap.get('session_id');
 
-  // ===== Cargar archivo comprobante =====
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input?.files?.[0] || null;
-    this.file = null;
-
-    if (!file) return;
-
-    const maxBytes = 5 * 1024 * 1024;
-    const okType = /^image\/(png|jpe?g|webp)$/i.test(file.type);
-
-    if (!okType) {
-      Swal.fire('Formato inválido', 'Solo se permiten JPG, PNG o WEBP.', 'error');
-      return;
-    }
-    if (file.size > maxBytes) {
-      Swal.fire('Archivo muy grande', 'El comprobante debe ser menor a 5MB.', 'error');
-      return;
-    }
-
-    this.file = file;
-    const reader = new FileReader();
-    reader.onload = () => (this.previewUrl = reader.result);
-    reader.readAsDataURL(file);
-  }
-
-  // ===== Enviar depósito =====
-  async submitDeposit(): Promise<void> {
-    if (!this.deposito.method) {
-      Swal.fire('Campo obligatorio', 'Selecciona un método de pago.', 'warning');
-      return;
-    }
-    if (!this.deposito.amount || this.deposito.amount < 20 || this.deposito.amount > 500) {
-      Swal.fire('Monto inválido', 'Debe ser entre S/20 y S/500.', 'warning');
-      return;
-    }
-    if (!this.file) {
-      Swal.fire('Falta comprobante', 'Debes subir una imagen del pago.', 'warning');
-      return;
-    }
+    if (payment !== 'success' || !sessionId) return;
 
     try {
-      this.loading = true;
+      this.processingSession = true;
+
+      const result = await this.walletApi.getSessionStatus(sessionId);
+
+      if (result?.ok && result?.wallet_transaction?.status === 'approved') {
+        await Swal.fire({
+          icon: 'success',
+          title: 'Recharge successful',
+          text: `You now have ${result.wallet_transaction.balance_after} credits available.`
+        });
+      } else if (result?.ok && result?.payment_status === 'paid') {
+        await Swal.fire({
+          icon: 'info',
+          title: 'Payment received',
+          text: 'Your payment was received. We are updating your credits.'
+        });
+      } else {
+        await Swal.fire({
+          icon: 'warning',
+          title: 'Payment verification pending',
+          text: 'We could not confirm the recharge yet.'
+        });
+      }
+
+      // limpia query params
+      await this.router.navigate([], {
+        queryParams: {},
+        replaceUrl: true
+      });
+    } catch (error) {
+      console.error('Error confirming Stripe session', error);
+      await Swal.fire('Error', 'Could not validate the payment session.', 'error');
+    } finally {
+      this.processingSession = false;
+    }
+  }
+
+  async loadWallet() {
+    try {
       const user = this.pb.currentUser;
       if (!user?.id) throw new Error('Usuario no autenticado');
 
-      // 1️⃣ Subir comprobante a `images`
-      const img = await this.pb.uploadImage(this.file, 'wallet-proof');
-
-      // 2️⃣ Crear depósito usando el método del servicio
-      await this.pb.createWalletDeposit({
-        userId: user.id,
-        amount: this.deposito.amount!,
-        currency: 'pen',
-        method: this.deposito.method,
-        note: this.deposito.note || '',
-        receiptId: img.id
-      });
-
-      Swal.fire('Enviado', 'Tu comprobante fue cargado y está pendiente de aprobación.', 'success');
-
-      // 3️⃣ Reset UI
-      this.deposito = { method: '', amount: null, note: '' };
-      this.file = null;
-      this.previewUrl = null;
-
-      // 4️⃣ Recargar cartera
-      await this.loadWallet();
+      const list = await this.pb.listProfessionalWalletHistory(user.id);
+      this.transactions = list.items || [];
     } catch (e) {
       console.error(e);
-      Swal.fire('Error', 'No se pudo enviar el depósito.', 'error');
+      Swal.fire('Error', 'No se pudo cargar el historial.', 'error');
+    }
+  }
+
+  async loadBalances() {
+    try {
+      const user = this.pb.currentUser;
+      if (!user?.id) return;
+
+      const credits = await this.walletApi.getAvailableCredits(user.id);
+      this.availableBalance = Number(credits.availableCredits || 0);
+
+      const pendingPage = await this.pb.listMyWalletEntries(user.id, 'pending');
+      this.pendingBalance = (pendingPage.items || [])
+        .filter((it: any) => it.kind === 'credit_purchase')
+        .reduce((sum: number, it: any) => sum + Number(it['credits_delta'] || 0), 0);
+    } catch (error) {
+      console.error(error);
+      Swal.fire('Error', 'No se pudo cargar el saldo.', 'error');
+    }
+  }
+
+  async recharge(pkg: CreditPackage) {
+    try {
+      this.loading = true;
+
+      const user = this.pb.currentUser;
+      if (!user?.id) throw new Error('Usuario no autenticado');
+
+      // ajusta según tu estructura real
+      const professionalProfile = await this.pb.getProfessionalProfileByUserId(user.id);
+
+      const checkout = await this.walletApi.createCheckout({
+        userId: user.id,
+        professionalProfileId: professionalProfile?.id || null,
+        customer: {
+          name: professionalProfile?.['full_name'] || user.name || 'Professional',
+          email: user.email
+        },
+        packageId: pkg.id,
+        credits: pkg.credits,
+        amountTotal: Math.round(pkg.priceUsd * 100),
+        currency: 'usd'
+      });
+
+      if (!checkout?.ok || !checkout.url) {
+        throw new Error('No se pudo crear la sesión de pago');
+      }
+
+      window.location.href = checkout.url;
+    } catch (error: any) {
+      console.error(error);
+      Swal.fire('Error', error?.message || 'No se pudo iniciar la recarga.', 'error');
     } finally {
       this.loading = false;
     }
   }
-   // ===== Cargar saldo e historial =====
 
- async loadWallet() {
-  try {
-    const user = this.pb.currentUser;
-    if (!user?.id) throw new Error('Usuario no autenticado');
-
-    const list = await this.pb.listMyWalletEntries(user.id); // sin status = todo el historial
-    this.transactions = list.items || [];
-
-    // Si quieres mantener balance “disponible” antiguo:
-    this.balance = await this.pb.computeBalance(user.id); // approved
-  } catch (e) {
-    console.error(e);
-    Swal.fire('Error', 'No se pudo cargar tu cartera', 'error');
+  trackByTxId(_: number, tx: any) {
+    return tx.id;
   }
-}
 
-async loadBalances() {
-  const userId = this.pb.currentUserId;
-  if (!userId) return;
+  txLabel(tx: any): string {
+    switch (tx.kind) {
+      case 'credit_purchase':
+        return 'Recharge';
+      case 'lead_purchase':
+        return 'Lead Purchase';
+      case 'lead_refund':
+        return 'Lead Refund';
+      default:
+        return tx.kind || 'Transaction';
+    }
+  }
 
-  const approvedPage = await this.pb.listMyWalletEntries(userId, 'approved');
-  const pendingPage  = await this.pb.listMyWalletEntries(userId, 'pending');
-
-  this.availableBalance = approvedPage.items.reduce((sum, it) => sum + Number(it['amount'] || 0), 0);
-  this.pendingBalance   = pendingPage.items.reduce((sum, it) => sum + Number(it['amount'] || 0), 0);
-}
-
+  txCredits(tx: any): string {
+    const credits = Number(tx.credits_delta || 0);
+    return credits > 0 ? `+${credits}` : `${credits}`;
+  }
 }

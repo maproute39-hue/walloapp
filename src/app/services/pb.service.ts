@@ -7,7 +7,8 @@ import { Payment } from '@app/models/payment.models';
 @Injectable({ providedIn: 'root' })
 export class PbService {
   readonly pb = new PocketBase(environment.pbUrl);
-    private readonly WALLET_COLLECTION = 'wallet';
+private readonly WALLET_COLLECTION = 'wallet_transactions';
+private readonly PROFESSIONAL_COLLECTION = 'professional_profiles';
 
   fileUrl(record: RecordModel, filename?: string) {
     if (!filename) return '';
@@ -26,6 +27,7 @@ currentUserName: string | undefined;
     // ajusta el nombre del campo si en PB no es "dni"
     return (this.currentUser?.dni as string) || undefined;
   }
+  
 getInstance(): PocketBase {
   return this.pb;
 }
@@ -143,28 +145,20 @@ async createRecord(collection: string, data: any) {
   }
 
 
-createWalletDeposit(data: {
-  userId: string;
-  amount: number;
-  currency: 'pen';                 // según tu esquema
-  method: 'agente' | 'yape' | 'plin';
-  note?: string;
-  receiptId?: string;
-  receiptUrl?: string;
-}) {
-  const body: any = {
-    userId: data.userId,
-    kind: 'deposit',
-    status: 'pending',
-    amount: data.amount,
-    currency: data.currency,               // 'pen' si así está en PB
-    method: data.method,
-    note: data.note || '',
-  };
-  if (data.receiptId) body.receipt = data.receiptId; // <— nombre del campo RELATION
-  if (data.receiptUrl) body.receiptUrl = data.receiptUrl;
 
-  return this.pb.collection(this.WALLET_COLLECTION).create(body);
+
+// =============================
+// WALLET / CREDITS (nuevo flujo)
+// =============================
+
+async getProfessionalProfileByUserId(userId: string) {
+  try {
+    return await this.pb
+      .collection(this.PROFESSIONAL_COLLECTION)
+      .getFirstListItem(`userId="${userId}"`);
+  } catch (error) {
+    return null;
+  }
 }
 
 listMyWalletEntries(
@@ -173,27 +167,77 @@ listMyWalletEntries(
 ) {
   const parts = [`userId="${userId}"`];
   if (status) parts.push(`status="${status}"`);
+
   const filter = parts.join(' && ');
 
-  return this.pb.collection(this.WALLET_COLLECTION).getList(1, 50, {
+  return this.pb.collection(this.WALLET_COLLECTION).getList(1, 100, {
     filter,
     sort: '-created',
-    expand: 'receipt',
   });
 }
 
-async computeBalance(userId: string): Promise<number> {
+async listProfessionalWalletHistory(userId: string) {
+  return await this.pb.collection(this.WALLET_COLLECTION).getList(1, 100, {
+    filter: `userId="${userId}"`,
+    sort: '-created',
+  });
+}
+
+async computeCreditsBalance(userId: string): Promise<number> {
   const page = await this.pb.collection(this.WALLET_COLLECTION).getList(1, 200, {
     filter: `userId="${userId}" && status="approved"`,
     sort: '+created',
   });
+
   const items = page?.items || [];
-  let balance = 0;
-  for (const it of items) {
-    if (it['kind'] === 'deposit') balance += Number(it['amount'] || 0);
-  }
-  return balance;
+  return items.reduce((sum, it) => sum + Number(it['credits_delta'] || 0), 0);
 }
+
+async getPendingCreditPurchases(userId: string): Promise<number> {
+  const page = await this.pb.collection(this.WALLET_COLLECTION).getList(1, 100, {
+    filter: `userId="${userId}" && status="pending" && kind="credit_purchase"`,
+    sort: '-created',
+  });
+
+  const items = page?.items || [];
+  return items.reduce((sum, it) => sum + Number(it['credits_delta'] || 0), 0);
+}
+getWalletKindLabel(kind: string): string {
+  switch (kind) {
+    case 'credit_purchase':
+      return 'Recharge';
+    case 'lead_purchase':
+      return 'Lead Purchase';
+    case 'lead_refund':
+      return 'Lead Refund';
+    default:
+      return kind || 'Transaction';
+  }
+}
+
+getWalletDirectionLabel(direction: string): string {
+  switch (direction) {
+    case 'credit':
+      return 'Credit';
+    case 'debit':
+      return 'Debit';
+    default:
+      return direction || '-';
+  }
+}
+
+// async computeBalance(userId: string): Promise<number> {
+//   const page = await this.pb.collection(this.WALLET_COLLECTION).getList(1, 200, {
+//     filter: `userId="${userId}" && status="approved"`,
+//     sort: '+created',
+//   });
+//   const items = page?.items || [];
+//   let balance = 0;
+//   for (const it of items) {
+//     if (it['kind'] === 'deposit') balance += Number(it['amount'] || 0);
+//   }
+//   return balance;
+// }
 
 
 

@@ -23,6 +23,8 @@ type Role = 'client' | 'professional';
 
 })
 export class Profile implements OnInit, OnDestroy {
+  balanceAvailable = 0;
+professionalProfile: any = null;
   private auth = inject(AuthPocketbaseService);
    router = inject(Router);
 
@@ -38,38 +40,71 @@ export class Profile implements OnInit, OnDestroy {
    private subs = new Subscription();
     private cdr = inject(ChangeDetectorRef);
 
+private async loadProfessionalProfile(): Promise<void> {
+  try {
+    if (!this.user?.id || this.role !== 'professional') {
+      this.professionalProfile = null;
+      this.balanceAvailable = 0;
+      return;
+    }
+
+    const profile = await this.auth.pb
+      .collection('professional_profiles')
+      .getFirstListItem(`userId="${this.user.id}"`);
+
+    this.professionalProfile = profile;
+    this.balanceAvailable = Number(profile?.['credit_balance'] || 0);
+    this.cdr.markForCheck();
+  } catch (error) {
+    console.error('❌ Error loading professional profile:', error);
+    this.professionalProfile = null;
+    this.balanceAvailable = 0;
+    this.cdr.markForCheck();
+  }
+}
 
 async ngOnInit() {
-    await this.checkAuthStatus();
+  await this.checkAuthStatus();
 
-    // 1) Reaccionar a cambios del usuario (updateProfile, login, logout)
-    this.subs.add(
-      this.auth.user$.subscribe((u) => {
-        this.user = u;
-        this.isLoggedIn = !!u;
-        this.role = u?.['type'] === 'professional' ? 'professional' : 'client';
-        this.avatarSrc.set(this.buildAvatarUrl(u));
-        this.cdr.markForCheck();
-        this.cdr.detectChanges();
+  // 1) Reaccionar a cambios del usuario (updateProfile, login, logout)
+  this.subs.add(
+    this.auth.user$.subscribe(async (u) => {
+      this.user = u;
+      this.isLoggedIn = !!u;
+      this.role = u?.['type'] === 'professional' ? 'professional' : 'client';
+      this.avatarSrc.set(this.buildAvatarUrl(u));
 
-      })
-    );
+      if (this.role === 'professional') {
+        await this.loadProfessionalProfile();
+      } else {
+        this.balanceAvailable = 0;
+      }
 
-    // 2) Al navegar (volver desde biografy), refresca y fuerza lectura
-    this.subs.add(
-      this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe(async () => {
+      this.cdr.markForCheck();
+      // this.cdr.detectChanges();
+    })
+  );
+
+  // 2) Al navegar (volver desde biografy), refresca y fuerza lectura
+  this.subs.add(
+    this.router.events
+      .pipe(filter(e => e instanceof NavigationEnd))
+      .subscribe(async () => {
         if (!this.auth.isLoggedIn()) return;
+
         try {
-          await this.auth.refreshAuth();               // intenta renovar
-          const rec = await this.auth.fetchCurrentUser(); // fuerza lectura desde servidor
+          await this.auth.refreshAuth();
+          const rec = await this.auth.fetchCurrentUser();
+
           if (rec) {
-            // conserva token actual y actualiza modelo → disparará user$
             this.auth.pb.authStore.save(this.auth.pb.authStore.token, rec as any);
           }
-        } catch {}
+        } catch (error) {
+          console.error('❌ Error refreshing auth/profile:', error);
+        }
       })
-    );
-  }
+  );
+}
 
   ngOnDestroy() {
     this.subs.unsubscribe();
@@ -85,19 +120,50 @@ async ngOnInit() {
   //   this.role = this.user?.['type'] === 'professional' ? 'professional' : 'client';
   //   this.avatarSrc.set(this.buildAvatarUrl(this.user));
   // }
-  private async checkAuthStatus() {
+// private async checkAuthStatus() {
+//   this.isLoggedIn = this.auth.isLoggedIn();
+
+//   if (!this.isLoggedIn) {
+//     await this.router.navigate(['/login'], { replaceUrl: true });
+//     return;
+//   }
+
+//   try {
+//     const freshUser = await this.auth.fetchCurrentUser();
+//     if (freshUser) {
+//       this.auth.pb.authStore.save(this.auth.pb.authStore.token, freshUser as any);
+//       this.user = freshUser;
+//     } else {
+//       this.user = this.auth.currentUser();
+//     }
+//   } catch (error) {
+//     console.error('❌ Error fetching user:', error);
+//     this.user = this.auth.currentUser();
+//   }
+
+//   this.role = this.user?.['type'] === 'professional' ? 'professional' : 'client';
+//   this.avatarSrc.set(this.buildAvatarUrl(this.user));
+
+//   if (this.role === 'professional') {
+//     await this.loadProfessionalProfile();
+//   } else {
+//     this.balanceAvailable = 0;
+//   }
+// this.cdr.markForCheck();
+// // this.cdr.detectChanges();
+// } 
+private async checkAuthStatus() {
   this.isLoggedIn = this.auth.isLoggedIn();
-  
+
   if (!this.isLoggedIn) {
     await this.router.navigate(['/login'], { replaceUrl: true });
     return;
   }
 
-  // 🔁 Intenta obtener usuario fresco SIEMPRE al entrar a Profile
   try {
     const freshUser = await this.auth.fetchCurrentUser();
+
     if (freshUser) {
-      // Actualiza authStore para que user$ emita
       this.auth.pb.authStore.save(this.auth.pb.authStore.token, freshUser as any);
       this.user = freshUser;
     } else {
@@ -105,15 +171,20 @@ async ngOnInit() {
     }
   } catch (error) {
     console.error('❌ Error fetching user:', error);
-    this.user = this.auth.currentUser(); // fallback
+    this.user = this.auth.currentUser();
   }
-  
-  // Ahora calcula el role con el usuario más actualizado posible
+
   this.role = this.user?.['type'] === 'professional' ? 'professional' : 'client';
   this.avatarSrc.set(this.buildAvatarUrl(this.user));
-  this.cdr.detectChanges(); // ← Fuerza renderizado
-}
 
+  if (this.role === 'professional') {
+    await this.loadProfessionalProfile();
+  } else {
+    this.balanceAvailable = 0;
+  }
+
+  this.cdr.markForCheck();
+}
   private buildAvatarUrl(rec: any): string {
     const name = rec?.avatar;
     if (!name) return this.defaultAvatar;
