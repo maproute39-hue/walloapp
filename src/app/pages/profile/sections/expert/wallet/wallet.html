@@ -21,7 +21,7 @@
       <div class="wallet-details">
         <div>
           <h5>Credits</h5>
-          <h4>{{ availableBalance }} credits</h4>
+          <h4>{{ availableBalance | number:'1.0-2'  }} credits</h4>
 
           <div *ngIf="pendingBalance > 0" class="pending-info">
             <small class="text-warning">{{ pendingBalance }} credits pending confirmation</small>
@@ -78,11 +78,11 @@
               </div>
 
               <div class="d-flex align-items-center justify-content-between pt-2">
-                <h5 class="fw-medium content-color">Balance</h5>
-                <h5 class="fw-medium title-color">
-                  {{ tx.balance_before }} → {{ tx.balance_after }}
-                </h5>
-              </div>
+  <h5 class="fw-medium content-color">Balance</h5>
+  <h5 class="fw-medium title-color">
+    {{ tx.balance_before | number:'1.2-2' }} → {{ tx.balance_after | number:'1.2-2' }}
+  </h5>
+</div>
 
               <div class="d-flex align-items-center justify-content-between pt-2" *ngIf="tx.description">
                 <h5 class="fw-medium content-color">Description</h5>

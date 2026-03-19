@@ -1,208 +1,135 @@
 <header class="main-header">
-    <div class="custom-container">
-      <div class="header-panel">
-        <a (click)="router.navigate(['/profile'])" class="back-link" style="color: #f9680f;">
-          <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
-          </svg>
-        </a>
-  
-        <h3>My Reviews</h3>
-  
-        
-      </div>
+  <div class="custom-container">
+    <div class="header-panel">
+      <a (click)="router.navigate(['/profile'])" class="back-link" style="color: #f9680f;">
+        <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+        </svg>
+      </a>
+
+      <h3>My Reviews</h3>
     </div>
-  </header>
-<section class="section-b-space section-lg-t-space" >
-        <div class="custom-container">
-            <div class="text-center">
-                <div class="average-rating mb-3">
-                    <ul class="rating">
-                        <li><img class="img-fluid star" src="../../assets/images/svg/theme-star-fill.svg" alt="star">
-                        </li>
-                        <li><img class="img-fluid star" src="../../assets/images/svg/theme-star-fill.svg" alt="star">
-                        </li>
-                        <li><img class="img-fluid star" src="../../assets/images/svg/theme-star-fill.svg" alt="star">
-                        </li>
-                        <li><img class="img-fluid star" src="../../assets/images/svg/theme-star-fill.svg" alt="star">
-                        </li>
-                        <li><img class="img-fluid star" src="../../assets/images/svg/theme-star-outline.svg" alt="star">
-                        </li>
-                    </ul>
-                    <h6 class="fw-normal theme-color">Average rate : <span class="fw-bold"> 4.0 / 5 </span></h6>
-                </div>
-            </div>
+  </div>
+</header>
 
-            <ul class="review-count">
-                <li>
-                    <h6>5 Star</h6>
-                    <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="65"
-                        aria-valuemin="0" aria-valuemax="100">
-                        <div class="progress-bar" style="width: 85%"></div>
-                    </div>
-                    <h6 class="text-content">85%</h6>
-                </li>
-                <li>
-                    <h6>4 Star</h6>
-                    <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="35"
-                        aria-valuemin="0" aria-valuemax="100">
-                        <div class="progress-bar" style="width: 65%"></div>
-                    </div>
-                    <h6 class="text-content">65%</h6>
-                </li>
-                <li>
-                    <h6>3 Star</h6>
-                    <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="15"
-                        aria-valuemin="0" aria-valuemax="100">
-                        <div class="progress-bar" style="width: 15%"></div>
-                    </div>
-                    <h6 class="text-content">15%</h6>
-                </li>
-                <li>
-                    <h6>2 Star</h6>
-                    <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="5"
-                        aria-valuemin="0" aria-valuemax="100">
-                        <div class="progress-bar" style="width: 5%"></div>
-                    </div>
-                    <h6 class="text-content">5%</h6>
-                </li>
-                <li>
-                    <h6>1 Star</h6>
-                    <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="5"
-                        aria-valuemin="0" aria-valuemax="100">
-                        <div class="progress-bar" style="width: 2%"></div>
-                    </div>
-                    <h6 class="text-content">2%</h6>
-                </li>
-            </ul>
+<section class="section-b-space section-lg-t-space">
+  <div class="custom-container">
 
-            <div class="title mt-3">
-                <h4 class="fw-medium title-color">Reviews</h4>
-                <select class="form-select w-50">
-                    <option selected>Lowest rate</option>
-                    <option value="1">Highest rate</option>
-                </select>
-            </div>
+    <div *ngIf="loading" class="text-center py-4">
+      <p>Cargando reseñas...</p>
+    </div>
 
-            <ul class="review-list p-0">
-                <li class="review-box">
-                    <div class="review-profile">
-                        <img class="img-fluid profile-img" src="../../assets/images/profile/p12.png" alt="">
+    <div *ngIf="!loading && errorMessage" class="text-center py-4">
+      <p class="text-danger">{{ errorMessage }}</p>
+    </div>
 
-                        <div class="profile-content">
-                            <div>
-                                <h5 class="fw-medium title-color">Devon Lane</h5>
-                                <h6 class="content-color mt-1">12 min ago</h6>
-                            </div>
-                            <h6 class="d-flex align-items-center">
-                                <img src="../../assets/images/svg/star-fill.svg" alt="star"> 3.0
-                            </h6>
-                        </div>
-                    </div>
+    <ng-container *ngIf="!loading && !errorMessage">
 
-                    <p class="review-content">“This is amazing service i have ever get”</p>
+      <div class="text-center">
+        <div class="average-rating mb-3">
+         <ul class="rating">
+  <li *ngFor="let filled of getStars(averageRating)">
+    <img
+      class="img-fluid star"
+      [src]="filled 
+        ? 'assets/images/svg/theme-star-fill.svg' 
+        : 'assets/images/svg/theme-star-outline.svg'"
+      alt="star"
+    >
+  </li>
+</ul>
 
-                    <div class="service-name-part mt-3">
-                        <h6 class="fw-normal content-color">Service name : <span class="title-color"> Kitchen
-                                cleaning</span></h6>
-                        <i class="iconsax arrow-icon" data-icon="arrow-right"> </i>
-                    </div>
-                </li>
-                <li class="review-box">
-                    <div class="review-profile">
-                        <img class="img-fluid profile-img" src="../../assets/images/profile/p15.png" alt="">
-
-                        <div class="profile-content">
-                            <div>
-                                <h5 class="fw-medium title-color">Guy Hawkins</h5>
-                                <h6 class="content-color mt-1">12 min ago</h6>
-                            </div>
-                            <h6 class="d-flex align-items-center">
-                                <img src="../../assets/images/svg/star-fill.svg" alt="star"> 3.0
-                            </h6>
-                        </div>
-                    </div>
-
-                    <p class="review-content">“I just love their service & the staff nature for work, I’d like to
-                        hire them again”</p>
-
-                    <div class="service-name-part mt-3">
-                        <h6 class="fw-normal content-color">Service name : <span class="title-color"> Kitchen
-                                cleaning</span></h6>
-                        <i class="iconsax arrow-icon" data-icon="arrow-right"> </i>
-                    </div>
-                </li>
-                <li class="review-box">
-                    <div class="review-profile">
-                        <img class="img-fluid profile-img" src="../../assets/images/profile/p1blocked_images.png" alt="">
-
-                        <div class="profile-content">
-                            <div>
-                                <h5 class="fw-medium title-color">Jane Cooper</h5>
-                                <h6 class="content-color mt-1">12 min ago</h6>
-                            </div>
-                            <h6 class="d-flex align-items-center">
-                                <img src="../../assets/images/svg/star-fill.svg" alt="star"> 3.0
-                            </h6>
-                        </div>
-                    </div>
-
-                    <p class="review-content">“I love their work with ease, Thank you !”</p>
-
-                    <div class="service-name-part mt-3">
-                        <h6 class="fw-normal content-color">Service name : <span class="title-color"> Curtain
-                                Cleaning</span></h6>
-                        <i class="iconsax arrow-icon" data-icon="arrow-right"> </i>
-                    </div>
-                </li>
-
-                <li class="review-box">
-                    <div class="review-profile">
-                        <img class="img-fluid profile-img" src="../../assets/images/profile/p13.png" alt="">
-
-                        <div class="profile-content">
-                            <div>
-                                <h5 class="fw-medium title-color">Lorri Warf</h5>
-                                <h6 class="content-color mt-1">12 min ago</h6>
-                            </div>
-                            <h6 class="d-flex align-items-center">
-                                <img src="../../assets/images/svg/star-fill.svg" alt="star"> 3.0
-                            </h6>
-                        </div>
-                    </div>
-
-                    <p class="review-content">“The stunning ap to get any service at your home.”</p>
-
-                    <div class="service-name-part mt-3">
-                        <h6 class="fw-normal content-color">Service name : <span class="title-color"> House
-                                cleaning</span></h6>
-                        <i class="iconsax arrow-icon" data-icon="arrow-right"> </i>
-                    </div>
-                </li>
-                <li class="review-box">
-                    <div class="review-profile">
-                        <img class="img-fluid profile-img" src="../../assets/images/profile/p10.png" alt="">
-
-                        <div class="profile-content">
-                            <div>
-                                <h5 class="fw-medium title-color">Iva Ryan</h5>
-                                <h6 class="content-color mt-1">12 min ago</h6>
-                            </div>
-                            <h6 class="d-flex align-items-center">
-                                <img src="../../assets/images/svg/star-fill.svg" alt="star"> 3.0
-                            </h6>
-                        </div>
-                    </div>
-
-                    <p class="review-content">“This provider has the best staff who assist us until the service is
-                        complete. Thank you!”</p>
-
-                    <div class="service-name-part mt-3">
-                        <h6 class="fw-normal content-color">Service name : <span class="title-color"> Chimney
-                                sweeping</span></h6>
-                        <i class="iconsax arrow-icon" data-icon="arrow-right"> </i>
-                    </div>
-                </li>
-            </ul>
+          <h6 class="fw-normal theme-color">
+            Average rate :
+            <span class="fw-bold"> {{ averageRating }} / 5 </span>
+            <span class="ms-2">({{ totalReviews }} reviews)</span>
+          </h6>
         </div>
-    </section>
+      </div>
+
+      <ul class="review-count">
+        <li *ngFor="let star of [5,4,3,2,1]">
+          <h6>{{ star }} Star</h6>
+
+          <div
+            class="progress"
+            role="progressbar"
+            [attr.aria-valuenow]="ratingStats[star].percent"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          >
+            <div
+              class="progress-bar"
+              [style.width.%]="ratingStats[star].percent">
+            </div>
+          </div>
+
+          <h6 class="text-content">
+            {{ ratingStats[star].percent }}%
+          </h6>
+        </li>
+      </ul>
+
+      <div class="title mt-3 d-flex justify-content-between align-items-center gap-2">
+        <h4 class="fw-medium title-color mb-0">Reviews</h4>
+
+        <select class="form-select w-50" [value]="sortValue" (change)="onSortChange($event)">
+          <option value="latest">Latest</option>
+          <option value="lowest">Lowest rate</option>
+          <option value="highest">Highest rate</option>
+        </select>
+      </div>
+
+      <div *ngIf="filteredReviews.length === 0" class="text-center py-4">
+        <p>No hay reseñas públicas para mostrar.</p>
+      </div>
+
+      <ul class="review-list p-0" *ngIf="filteredReviews.length > 0">
+        <li class="review-box" *ngFor="let review of filteredReviews; trackBy: trackByReview">
+          <div class="review-profile">
+            <img
+              class="img-fluid profile-img"
+              [src]="getClientAvatar(review)"
+              [alt]="getClientName(review)"
+            >
+
+            <div class="profile-content">
+              <div>
+                <h5 class="fw-medium title-color">{{ getClientName(review) }}</h5>
+                <h6 class="content-color mt-1">
+                  {{ review.created | date:'dd/MM/yyyy hh:mm a' }}
+                </h6>
+              </div>
+
+            <div class="d-flex align-items-center gap-1">
+  <img
+    *ngFor="let filled of getStars(review.rating)"
+    [src]="filled 
+      ? 'assets/images/svg/star-fill.svg' 
+      : 'assets/images/svg/theme-star-outline.svg'"
+    width="14"
+    height="14"
+    alt="star"
+  />
+  <span class="ms-1">{{ review.rating || 0 }}</span>
+</div>
+            </div>
+          </div>
+
+          <p class="review-content">
+            “{{ review.comment || 'Sin comentario.' }}”
+          </p>
+
+          <div class="service-name-part mt-3">
+            <h6 class="fw-normal content-color">
+              Service name :
+              <span class="title-color">{{ getRequestServiceName(review) }}</span>
+            </h6>
+            <i class="iconsax arrow-icon" data-icon="arrow-right"></i>
+          </div>
+        </li>
+      </ul>
+
+    </ng-container>
+  </div>
+</section>
