@@ -4,7 +4,7 @@ import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import Swal from 'sweetalert2';
 import { ChangeDetectionStrategy } from '@angular/core';
-
+import { WalletApiService } from '@app/services/wallet-api.service';
 
 import { AuthPocketbaseService } from '../../services/auth-pocketbase.service';
 import { Client } from './sections/client/client';
@@ -23,6 +23,7 @@ type Role = 'client' | 'professional';
 
 })
 export class Profile implements OnInit, OnDestroy {
+  private walletApi = inject(WalletApiService);
   balanceAvailable = 0;
 professionalProfile: any = null;
   private auth = inject(AuthPocketbaseService);
@@ -40,11 +41,34 @@ professionalProfile: any = null;
    private subs = new Subscription();
     private cdr = inject(ChangeDetectorRef);
 
+// private async loadProfessionalProfile(): Promise<void> {
+//   try {
+//     if (!this.user?.id || this.role !== 'professional') {
+//       this.professionalProfile = null;
+//       this.balanceAvailable = 0;
+//       return;
+//     }
+
+//     const profile = await this.auth.pb
+//       .collection('professional_profiles')
+//       .getFirstListItem(`userId="${this.user.id}"`);
+
+//     this.professionalProfile = profile;
+//     this.balanceAvailable = Number(profile?.['credit_balance'] || 0);
+//     this.cdr.markForCheck();
+//   } catch (error) {
+//     console.error('❌ Error loading professional profile:', error);
+//     this.professionalProfile = null;
+//     this.balanceAvailable = 0;
+//     this.cdr.markForCheck();
+//   }
+// }
 private async loadProfessionalProfile(): Promise<void> {
   try {
     if (!this.user?.id || this.role !== 'professional') {
       this.professionalProfile = null;
       this.balanceAvailable = 0;
+      this.cdr.markForCheck();
       return;
     }
 
@@ -53,7 +77,10 @@ private async loadProfessionalProfile(): Promise<void> {
       .getFirstListItem(`userId="${this.user.id}"`);
 
     this.professionalProfile = profile;
-    this.balanceAvailable = Number(profile?.['credit_balance'] || 0);
+
+    const creditsRes = await this.walletApi.getAvailableCredits(this.user.id);
+    this.balanceAvailable = Number(creditsRes?.availableCredits || 0);
+
     this.cdr.markForCheck();
   } catch (error) {
     console.error('❌ Error loading professional profile:', error);

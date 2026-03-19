@@ -8,6 +8,44 @@ export class WalletApiService {
 
   // ajusta esto a tu environment
   private apiUrl = 'https://db.wallizo.com:3500';
+purchaseLead(payload: {
+  userId: string;
+  professionalProfileId: string;
+  requestId: string;
+  leadPrice: number;
+}) {
+  return firstValueFrom(
+    this.http.post<any>(`${this.apiUrl}/payments/leads/purchase`, payload)
+  );
+}
+// refundLead(payload: {
+//   userId: string;
+//   professionalProfileId: string;
+//   requestId: string;
+//   leadPrice: number;
+// }) {
+//   return firstValueFrom(
+//     this.http.post<any>(`${this.apiUrl}/payments/leads/refund`, payload)
+//   );
+// }
+refundLead(payload: {
+  userId: string;
+  professionalProfileId: string;
+  requestId: string;
+  leadPrice: number;
+  reason?: string;
+}) {
+  return this.http.post<any>(`${this.apiUrl}/payments/leads/refund`, payload).toPromise();
+}
+
+refundLeadBulk(payload: {
+  requestId: string;
+  leadPrice: number;
+  selectedProfessionalProfileId: string;
+  refunds: Array<{ userId: string; professionalProfileId: string }>;
+}) {
+  return this.http.post<any>(`${this.apiUrl}/payments/leads/refund-bulk`, payload).toPromise();
+}
 
   createCheckout(payload: {
     userId: string;
