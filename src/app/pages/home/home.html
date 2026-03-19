@@ -493,18 +493,30 @@
                             </button>
                         </div>
                         <!-- ✅ Si NO ha comprado y hay cupo: muestra opción de compra -->
-                        <div *ngIf="!hasPurchasedLead(request) && getSpotsLeft(request) > 0" class="w-100">
-                            <button (click)="purchaseLead(request)" class="btn btn-sm theme-btn w-100"
-                                [disabled]="professionalCreditBalance < leadPrice">
-                                <i class="me-1" data-feather="lock"></i>
-                                Unlock Contact (${{ leadPrice }})
-                            </button>
-                            <small *ngIf="professionalCreditBalance < leadPrice"
-                                class="text-danger d-block mt-1 text-center">
-                                <i data-feather="alert-circle" style="width: 12px;"></i>
-                                Insufficient credits
-                            </small>
-                        </div>
+                      <div *ngIf="!hasPurchasedLead(request) && getSpotsLeft(request) > 0" class="w-100">
+
+    <!-- ✅ Tiene créditos suficientes -->
+    <button *ngIf="professionalCreditBalance >= leadPrice"
+        (click)="purchaseLead(request)"
+        class="btn btn-sm theme-btn w-100">
+        <i class="me-1" data-feather="lock"></i>
+        Unlock Contact (${{ leadPrice | number:'1.2-2' }})
+    </button>
+
+    <!-- ✅ No tiene créditos: lo diriges a wallet -->
+    <a *ngIf="professionalCreditBalance < leadPrice"
+       [routerLink]="['/profile', { outlets: { panel: ['wallet'] } }]"
+        class="btn btn-sm outline-btn w-100 text-center">
+        <i class="me-1" data-feather="wallet"></i>
+        Add Credits
+    </a>
+
+    <small *ngIf="professionalCreditBalance < leadPrice"
+        class="text-danger d-block mt-1 text-center">
+        <i data-feather="alert-circle" style="width: 12px;"></i>
+        Insufficient credits
+    </small>
+</div>
 
                         <!-- ✅ Si no hay cupo: muestra mensaje de cerrado -->
                         <div *ngIf="getSpotsLeft(request) === 0" class="w-100">
