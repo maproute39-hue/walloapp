@@ -242,13 +242,13 @@
                 <span class="badge bg-primary px-3 py-2 d-inline-flex align-items-center gap-1">
                     <i data-feather="map-pin" style="width: 14px; height: 14px;"></i>
                     <span class="d-none d-sm-inline">{{ professionalZipsCount }} zone(s)</span>
-                    <span class="d-sm-none">{{ professionalZipsCount }}z</span>
+                    <span class="d-sm-none">{{ professionalZipsCount }} zone(s)</span>
                 </span>
 
                 <!-- Badge de créditos -->
                 <div class="credit-balance badge bg-success px-3 py-2 d-inline-flex align-items-center gap-1">
                     <i data-feather="dollar-sign" style="width: 14px; height: 14px;"></i>
-                    <span class="fw-medium">{{ professionalCreditBalance | number:'1.0-2' }}</span>
+                    <span class="fw-medium" style="color:white;">{{ professionalCreditBalance | number:'1.0-2' }}</span>
                     <span class="d-none d-sm-inline">credits</span>
                     <a routerLink="/professional/credits"
                         class="text-white ms-1 ms-sm-2 border-start border-white border-opacity-25 ps-1 ps-sm-2">
