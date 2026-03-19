@@ -1,21 +1,21 @@
-import { CommonModule, } from '@angular/common';
-import { AfterViewInit, Component,inject } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import { CommonModule, ViewportScroller } from '@angular/common';
+import { AfterViewInit, Component, inject } from '@angular/core';
+import { Router, RouterOutlet, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { BottomNavbar } from './components/bottom-navbar/bottom-navbar';
 import { Header } from './components/header/header';
 import { Sidebar } from './components/sidebar/sidebar';
 import { filter } from 'rxjs/operators';
-import { NavigationEnd } from '@angular/router';
-import { ViewportScroller } from '@angular/common'; // ← ✅ Importar
-
-import { ConfigMobileService } from './core/config-mobile.service';
 import { ScriptLoaderService } from './services/script-loader.service';
+import Swal from 'sweetalert2';
+
 declare const iconsax: any;
+
 declare global {
   interface Window {
     iconsax?: (opts?: any) => void;
   }
 }
+
 @Component({
   selector: 'app-root',
   imports: [
@@ -31,20 +31,25 @@ declare global {
 })
 export class App implements AfterViewInit {
   hideHeader = false;
-    private viewportScroller = inject(ViewportScroller); // ← ✅ Inyectar
+
+  private viewportScroller = inject(ViewportScroller);
+  private route = inject(ActivatedRoute);
 
   constructor(
     public scriptLoaderService: ScriptLoaderService,
     public router: Router
   ) {}
+
   async ngAfterViewInit() {
-    // Re-inicializa iconsax en cada navegación (después de que el DOM cambie)
+    // ✅ Manejo del retorno de Stripe al cargar la app
+    await this.handleStripeReturn();
+
+    // ✅ Re-inicializa iconsax en cada navegación
     this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
       .subscribe(() => {
         this.viewportScroller.scrollToPosition([0, 0]);
 
-        // usa microtask o setTimeout(0) para esperar al render
         queueMicrotask(() => window.iconsax?.());
       });
 
@@ -52,9 +57,8 @@ export class App implements AfterViewInit {
       await this.scriptLoaderService.loadAll([
         { src: 'assets/js/swiper-bundle.min.js', attr: { defer: 'true' } },
         { src: 'assets/js/custom-swiper.js', attr: { defer: 'true' } },
-       { src: '../../assets/js/iconsax.js', attr: { defer: 'true' } }, // ❌ eliminado
+        { src: 'assets/js/iconsax.js', attr: { defer: 'true' } },
         { src: 'assets/js/bootstrap.bundle.min.js', attr: { defer: 'true' } },
-        // { src: 'assets/js/template-setting.js', attr: { defer: 'true' } },
         { src: 'assets/js/script.js', attr: { defer: 'true' } },
       ]);
 
@@ -63,8 +67,37 @@ export class App implements AfterViewInit {
       console.error('Error cargando scripts', err);
     }
 
-    // Primera pasada al montar la app
+    // ✅ Primera inicialización de íconos
     window.iconsax?.();
   }
-  
+
+  private async handleStripeReturn(): Promise<void> {
+    const url = new URL(window.location.href);
+    const payment = url.searchParams.get('payment');
+    const sessionId = url.searchParams.get('session_id');
+
+    if (payment === 'success' && sessionId) {
+      await Swal.fire({
+        icon: 'success',
+        title: 'Payment successful',
+        text: 'Your credits were added successfully.',
+        confirmButtonText: 'Go to Home'
+      });
+
+      await this.router.navigate(['/home'], { replaceUrl: true });
+      return;
+    }
+
+    if (payment === 'cancel') {
+      await Swal.fire({
+        icon: 'info',
+        title: 'Payment canceled',
+        text: 'The purchase was not completed.',
+        confirmButtonText: 'Go to Home'
+      });
+
+      await this.router.navigate(['/home'], { replaceUrl: true });
+      return;
+    }
+  }
 }
