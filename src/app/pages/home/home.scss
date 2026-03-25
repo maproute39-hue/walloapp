@@ -953,3 +953,19 @@ html {
   border: none !important;
   color: #fff !important;
 }
+.swal-btn-theme {
+  width: 100%;
+  margin: 8px 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  background-color: #FF6B35 !important; // 🔥 tu naranja
+  color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.swal-btn-theme:hover {
+  background-color: #F7931E !important; // 🔥 hover (ya lo usas en otros swal)
+  transform: translateY(-1px);
+}

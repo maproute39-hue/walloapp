@@ -1,44 +1,45 @@
- <header class="main-header">
-        <div class="custom-container">
-            <div class="header-panel">
-                 <a (click)="router.navigate(['/profile'])" class="back-link" style="color: #f9680f;">
-            <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-        </a>
-                <h3>Credits</h3>
-               <!--  <a href="notification.html">
+<header class="main-header">
+  <div class="custom-container">
+    <div class="header-panel">
+      <a (click)="router.navigate(['/profile'])" class="back-link" style="color: #f9680f;">
+        <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+        </svg>
+      </a>
+      <h3>Credits</h3>
+      <!--  <a href="notification.html">
                     <span class="material-symbols-rounded" data-icon="bell-2"> </span>
                 </a> -->
-            </div>
-        </div>
-    </header>
-    <!-- header end -->
+    </div>
+  </div>
+</header>
+<!-- header end -->
 
-    <!-- wallet balance section starts -->
-  <section class="section-lg-t-space">
+<!-- wallet balance section starts -->
+<section class="section-lg-t-space">
   <div class="custom-container">
     <div class="wallet-balance-box">
       <img class="img-fluid wallet-icon" src="../../assets/images/svg/wallet-open.svg" alt="wallet">
       <div class="wallet-details">
         <div>
           <h5>Credits</h5>
-          <h4>{{ availableBalance | number:'1.0-2'  }} credits</h4>
+          <h4>{{ availableBalance | number:'1.0-2' }} credits</h4>
 
           <div *ngIf="pendingBalance > 0" class="pending-info">
             <small class="text-warning">{{ pendingBalance }} credits pending confirmation</small>
           </div>
         </div>
 
-        <a href="#recharge" data-bs-toggle="offcanvas"
-           class="btn-sm theme-btn withdraw-btn theme-color">
+        <a href="#recharge" data-bs-toggle="offcanvas" class="btn-sm theme-btn withdraw-btn theme-color">
           Recharge
         </a>
       </div>
     </div>
   </div>
 </section>
-    <!-- wallet balance section end -->
+<!-- wallet balance section end -->
 
-  <!-- Historial -->
+<!-- Historial -->
 <section class="section-b-space">
   <div class="custom-container">
     <div class="title">
@@ -78,11 +79,11 @@
               </div>
 
               <div class="d-flex align-items-center justify-content-between pt-2">
-  <h5 class="fw-medium content-color">Balance</h5>
-  <h5 class="fw-medium title-color">
-    {{ tx.balance_before | number:'1.2-2' }} → {{ tx.balance_after | number:'1.2-2' }}
-  </h5>
-</div>
+                <h5 class="fw-medium content-color">Balance</h5>
+                <h5 class="fw-medium title-color">
+                  {{ tx.balance_before | number:'1.2-2' }} → {{ tx.balance_after | number:'1.2-2' }}
+                </h5>
+              </div>
 
               <div class="d-flex align-items-center justify-content-between pt-2" *ngIf="tx.description">
                 <h5 class="fw-medium content-color">Description</h5>
@@ -107,11 +108,7 @@
       <p class="mb-3">Choose a package</p>
 
       <div class="d-flex flex-column gap-3">
-        <button
-          type="button"
-          class="btn outline-btn w-100"
-          *ngFor="let pkg of packages"
-          [disabled]="loading"
+        <button type="button" class="btn outline-btn w-100" *ngFor="let pkg of packages" [disabled]="loading"
           (click)="recharge(pkg)">
           {{ pkg.credits }} credits — USD {{ pkg.priceUsd }}
         </button>

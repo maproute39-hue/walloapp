@@ -1,12 +1,17 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import Swal from 'sweetalert2';  // ← AGREGAR ESTE IMPORT
 import { environment } from '../../environments/environment';
 import { PbService } from '../../services/pb.service';
 import { PocketbaseService } from '@app/services/pocketbase.service';
 type Role = 'client' | 'professional';
 import { WalletApiService } from '@app/services/wallet-api.service';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+type CreditPackage = {
+  id: string;
+  credits: number;
+  priceUsd: number;
+};
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -16,6 +21,14 @@ import { WalletApiService } from '@app/services/wallet-api.service';
 })
 
 export class HomeComponent implements OnInit, OnDestroy {
+  packages: CreditPackage[] = [
+  { id: 'pkg_5', credits: 5, priceUsd: 5 },
+  { id: 'pkg_10', credits: 10, priceUsd: 10 },
+  { id: 'pkg_20', credits: 20, priceUsd: 20 }
+];
+
+buyingCredits = false;
+processingSession = false;
   private reviewPopupOpen = false;
   pendingCompletionRequest: any = null;
   reviewingRequest: any = null;
@@ -39,14 +52,158 @@ export class HomeComponent implements OnInit, OnDestroy {
   constructor(
     private walletApi: WalletApiService,
     private pocketbaseService: PocketbaseService,
-    private pbService: PbService) { }
+    private pbService: PbService,
+    private router: Router,
+    private route: ActivatedRoute,
+  ) { }
+async getAvailableProfessionalsByZip(
+  zipCode: string,
+  excludeIds: string[] = []
+): Promise<any[]> {
+  try {
+    if (!zipCode) return [];
 
+    const normalizedZip = String(zipCode).trim();
+
+    const professionals = await this.pbService.pb
+      .collection('professional_profiles')
+      .getFullList({
+        sort: '-created',
+        expand: 'userId,service_zips'
+      });
+
+    const filtered = professionals.filter((pro: any) => {
+      if (excludeIds.includes(pro.id)) return false;
+
+      const serviceZips = pro.expand?.service_zips ?? [];
+      if (!Array.isArray(serviceZips) || serviceZips.length === 0) return false;
+
+      return serviceZips.some((zip: any) => {
+        const code = String(zip?.code ?? '').trim();
+        return code === normalizedZip;
+      });
+    });
+
+    return filtered;
+  } catch (error) {
+    console.error('❌ Error loading available professionals by service_zips:', error);
+    return [];
+  }
+}
+async handleStripeReturn() {
+  const payment = this.route.snapshot.queryParamMap.get('payment');
+  const sessionId = this.route.snapshot.queryParamMap.get('session_id');
+
+  if (payment !== 'success' || !sessionId) return;
+
+  try {
+    this.processingSession = true;
+
+    const result = await this.walletApi.getSessionStatus(sessionId);
+
+    if (result?.ok && result?.wallet_transaction?.status === 'approved') {
+      await this.loadProfessionalCreditBalance();
+
+      await Swal.fire({
+        icon: 'success',
+        title: 'Recharge successful',
+        text: `You now have ${result.wallet_transaction.balance_after} credits available.`,
+        buttonsStyling: false,
+        customClass: {
+          confirmButton: 'swal-confirm-theme'
+        }
+      });
+    } else if (result?.ok && result?.payment_status === 'paid') {
+      await this.loadProfessionalCreditBalance();
+
+      await Swal.fire({
+        icon: 'info',
+        title: 'Payment received',
+        text: 'Your payment was received. We are updating your credits.',
+        buttonsStyling: false,
+        customClass: {
+          confirmButton: 'swal-confirm-theme'
+        }
+      });
+    } else {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Payment verification pending',
+        text: 'We could not confirm the recharge yet.',
+        buttonsStyling: false,
+        customClass: {
+          confirmButton: 'swal-confirm-theme'
+        }
+      });
+    }
+
+    await this.router.navigate([], {
+      queryParams: {},
+      replaceUrl: true
+    });
+  } catch (error) {
+    console.error('Error confirming Stripe session', error);
+    await Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Could not validate the payment session.',
+      buttonsStyling: false,
+      customClass: {
+        confirmButton: 'swal-confirm-theme'
+      }
+    });
+  } finally {
+    this.processingSession = false;
+  }
+}
+async recharge(pkg: CreditPackage) {
+  try {
+    this.buyingCredits = true;
+
+    const user = this.currentUser;
+    if (!user?.id) throw new Error('Usuario no autenticado');
+
+    const professionalProfile = await this.pbService.getProfessionalProfileByUserId(user.id);
+
+    const checkout = await this.walletApi.createCheckout({
+      userId: user.id,
+      professionalProfileId: professionalProfile?.id || null,
+      customer: {
+        name: professionalProfile?.['full_name'] || user.name || 'Professional',
+        email: user.email
+      },
+      packageId: pkg.id,
+      credits: pkg.credits,
+      amountTotal: Math.round(pkg.priceUsd * 100),
+      currency: 'usd'
+    });
+
+    if (!checkout?.ok || !checkout.url) {
+      throw new Error('No se pudo crear la sesión de pago');
+    }
+
+    window.location.href = checkout.url;
+  } catch (error: any) {
+    console.error(error);
+    await Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: error?.message || 'No se pudo iniciar la recarga.',
+      buttonsStyling: false,
+      customClass: {
+        confirmButton: 'swal-confirm-theme'
+      }
+    });
+  } finally {
+    this.buyingCredits = false;
+  }
+}
   async ngOnInit(): Promise<void> {
     try {
       this.currentUser = this.pocketbaseService.getCurrentUser();
 
       if (!this.currentUser) return;
-
+  await this.handleStripeReturn();
       if (this.currentUser['type'] === 'professional') {
         const profile = await this.pbService.pb.collection('professional_profiles').getFirstListItem(
           `userId="${this.currentUser.id}"`
@@ -1272,23 +1429,111 @@ hasPurchasedLead(request: any): boolean {
   //     });
   //   }
   // }
+  async openRechargeOptions(): Promise<void> {
+  const result = await Swal.fire({
+    title: 'Recharge credits',
+    html: `
+      <div class="d-flex flex-column gap-2 text-start">
+        <button id="pkg_5_btn" class="swal-btn-theme" style="display:block; width:100%; margin:8px 0;  width: 100%;
+  margin: 8px 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  background-color: #FF6B35 !important; // 🔥 tu naranja
+  color: #ffffff;
+  transition: all 0.2s ease;color:white;">
+          5 credits — USD 5
+        </button>
+        <button id="pkg_10_btn" class="swal-btn-theme" style="display:block; width:100%; margin:8px 0;  width: 100%;
+  margin: 8px 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  background-color: #FF6B35 !important; // 🔥 tu naranja
+  color: #ffffff;
+  transition: all 0.2s ease;color:white;">
+          10 credits — USD 10
+        </button>
+        <button id="pkg_20_btn" class="swal-btn-theme" style="display:block; width:100%; margin:8px 0;  width: 100%;
+  margin: 8px 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  background-color: #FF6B35 !important; // 🔥 tu naranja
+  color: #ffffff;
+  transition: all 0.2s ease;color:white;">
+          20 credits — USD 20
+        </button>
+      </div>
+    `,
+    showConfirmButton: false,
+    showCancelButton: true,
+    cancelButtonText: 'Close',
+    didOpen: () => {
+      const btn5 = document.getElementById('pkg_5_btn');
+      const btn10 = document.getElementById('pkg_10_btn');
+      const btn20 = document.getElementById('pkg_20_btn');
+
+      btn5?.addEventListener('click', async () => {
+        Swal.close();
+        await this.recharge(this.packages[0]);
+      });
+
+      btn10?.addEventListener('click', async () => {
+        Swal.close();
+        await this.recharge(this.packages[1]);
+      });
+
+      btn20?.addEventListener('click', async () => {
+        Swal.close();
+        await this.recharge(this.packages[2]);
+      });
+    }
+  });
+}
   async purchaseLead(request: any): Promise<void> {
-  if (this.professionalCreditBalance < this.leadPrice) {
-    await Swal.fire({
-      icon: 'warning',
-      title: 'Insufficient credits',
-      text: `You need ${this.leadPrice} credits to unlock this lead.`,
-      confirmButtonText: 'Buy credits',
-      showCancelButton: true,
-      cancelButtonText: 'Cancel',
-      buttonsStyling: false,
-      customClass: {
-        confirmButton: 'swal-confirm-theme',
-        cancelButton: 'swal-cancel-theme'
-      }
-    });
+ if (this.professionalCreditBalance < this.leadPrice) {
+  const result = await Swal.fire({
+    icon: 'warning',
+    title: 'Insufficient credits',
+    html: `
+      <div class="text-start">
+        <p class="mb-2">You need <strong>${this.leadPrice}</strong> credits to unlock this lead.</p>
+        <p class="mb-0">Choose a recharge package:</p>
+      </div>
+    `,
+    showCancelButton: true,
+    showDenyButton: true,
+    confirmButtonText: '5 credits - USD 5',
+    denyButtonText: '10 credits - USD 10',
+    cancelButtonText: 'More options',
+    buttonsStyling: false,
+    customClass: {
+      confirmButton: 'swal-confirm-theme',
+      cancelButton: 'swal-cancel-theme'
+    }
+  });
+
+  if (result.isConfirmed) {
+    await this.recharge(this.packages[0]);
     return;
   }
+
+  if (result.isDenied) {
+    await this.recharge(this.packages[1]);
+    return;
+  }
+
+  if (result.dismiss === Swal.DismissReason.cancel) {
+    await this.openRechargeOptions();
+    return;
+  }
+
+  return;
+}
 
   if (this.getSpotsLeft(request) <= 0) {
     await Swal.fire({
@@ -1447,37 +1692,52 @@ hasPurchasedLead(request: any): boolean {
       this.professionalCreditBalance = 0;
     }
   }
-  async loadClientRequests() {
-    try {
-      const userId = this.currentUser?.id;
-      if (!userId) {
-        this.userRequests = [];
-        return;
-      }
-
-      const requests = await this.pbService.pb
-        .collection('requests')
-        .getFullList({
-          filter: `client_id="${userId}"`,
-          sort: '-created',
-          expand: 'photos,interested_professionals,interested_professionals.userId,selected_professional,selected_professional.userId'
-        });
-
-      this.userRequests = requests.map((request: any) => ({
-        ...request,
-        expand: {
-          photos: request.expand?.photos ?? [],
-          interested_professionals: request.expand?.interested_professionals ?? [],
-          selected_professional: request.expand?.selected_professional ?? null
-        }
-      }));
-
-      console.log('✅ Requests del cliente:', this.userRequests);
-    } catch (error) {
-      console.error('❌ Error cargando requests del cliente:', error);
+async loadClientRequests() {
+  try {
+    const userId = this.currentUser?.id;
+    if (!userId) {
       this.userRequests = [];
+      return;
     }
+
+    const requests = await this.pbService.pb
+      .collection('requests')
+      .getFullList({
+        filter: `client_id="${userId}"`,
+        sort: '-created',
+        expand: 'photos,interested_professionals,interested_professionals.userId,selected_professional,selected_professional.userId'
+      });
+
+    const normalizedRequests = await Promise.all(
+      requests.map(async (request: any) => {
+        const interestedProfessionals = request.expand?.interested_professionals ?? [];
+        const interestedIds = interestedProfessionals.map((pro: any) => pro.id);
+
+        const availableProfessionals = await this.getAvailableProfessionalsByZip(
+          request.zip_code,
+          interestedIds
+        );
+
+        return {
+          ...request,
+          expand: {
+            photos: request.expand?.photos ?? [],
+            interested_professionals: interestedProfessionals,
+            selected_professional: request.expand?.selected_professional ?? null
+          },
+          availableProfessionals
+        };
+      })
+    );
+
+    this.userRequests = normalizedRequests;
+    console.log('✅ Requests del cliente:', this.userRequests);
+  } catch (error) {
+    console.error('❌ Error cargando requests del cliente:', error);
+    this.userRequests = [];
   }
+}
+  
   getProfessionalImage(professional: any): string {
     const user = professional?.expand?.userId;
 
@@ -1503,12 +1763,14 @@ hasPurchasedLead(request: any): boolean {
 
     return 'Professional available';
   }
-  async subscribeToClientRequests() {
-    try {
-      const userId = this.currentUser?.id;
-      if (!userId) return;
+  
+async subscribeToClientRequests() {
+  try {
+    const userId = this.currentUser?.id;
+    if (!userId) return;
 
-      await this.pbService.pb.collection('requests').subscribe('*', async (e) => {
+    await this.pbService.pb.collection('requests').subscribe('*', async (e) => {
+      try {
         const record = e.record as any;
 
         if (record?.client_id !== userId) return;
@@ -1522,15 +1784,27 @@ hasPurchasedLead(request: any): boolean {
           const freshRequest = await this.pbService.pb
             .collection('requests')
             .getOne(record.id, {
-              expand: 'photos,interested_professionals,interested_professionals.userId'
+              expand: 'photos,interested_professionals,interested_professionals.userId,selected_professional,selected_professional.userId'
             });
+
+          const interestedProfessionals =
+            freshRequest.expand?.['interested_professionals'] ?? [];
+
+          const interestedIds = interestedProfessionals.map((pro: any) => pro.id);
+
+          const availableProfessionals = await this.getAvailableProfessionalsByZip(
+            freshRequest['zip_code'],
+            interestedIds
+          );
 
           const normalized = {
             ...freshRequest,
             expand: {
               photos: freshRequest.expand?.['photos'] ?? [],
-              interested_professionals: freshRequest.expand?.['interested_professionals'] ?? []
-            }
+              interested_professionals: interestedProfessionals,
+              selected_professional: freshRequest.expand?.['selected_professional'] ?? null
+            },
+            availableProfessionals
           };
 
           const index = this.userRequests.findIndex((r: any) => r.id === record.id);
@@ -1541,13 +1815,27 @@ hasPurchasedLead(request: any): boolean {
           } else {
             this.userRequests = [normalized, ...this.userRequests];
           }
+
           await this.checkPendingClientReviewRequests();
         }
-      });
-    } catch (error) {
-      console.error('❌ Error en suscripción cliente:', error);
-    }
+      } catch (innerError) {
+        console.error('❌ Error procesando evento realtime del cliente:', innerError);
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error en suscripción cliente:', error);
   }
+}
+
+getAvailableProfessionals(request: any): any[] {
+  return Array.isArray(request?.availableProfessionals)
+    ? request.availableProfessionals
+    : [];
+}
+
+hasAvailableProfessionals(request: any): boolean {
+  return this.getAvailableProfessionals(request).length > 0;
+}
   private async processPayment(professionalId: string, requestId: string): Promise<boolean> {
     try {
       const LEAD_PRICE = 4.99;

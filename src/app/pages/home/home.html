@@ -218,9 +218,55 @@
                     </p>
                 </div>
 
-                <div *ngIf="request.expand?.interested_professionals?.length === 0" class="mt-3">
-                    <p class="content-color mb-0">No professionals interested yet.</p>
-                </div>
+                <div *ngIf="request.expand?.interested_professionals?.length === 0 && !hasAvailableProfessionals(request)" class="mt-3">
+    <p class="content-color mb-0">No professionals available in this area yet.</p>
+</div>
+
+<div *ngIf="request.expand?.interested_professionals?.length === 0 && hasAvailableProfessionals(request)" class="mt-3">
+    <p class="content-color mb-0">No professionals interested yet, but there are professionals available in your area.</p>
+    <div class="mt-4"
+    *ngIf="!hasSelectedProfessional(request) && hasAvailableProfessionals(request)">
+    <h5 class="fw-medium title-color mb-3">Available Professionals in Your Area</h5>
+
+    <ul class="servicemen-listing mt-4">
+        <li class="servicemen-box select-servicemen-box white-background mb-3"
+            *ngFor="let professional of getAvailableProfessionals(request)"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#details"
+            (click)="selectProfessional(professional, request)">
+
+            <div class="form-check form-check-reverse text-start">
+                <label class="form-check-label d-flex align-items-center">
+                    <span class="profile-image">
+                        <img class="img-fluid img"
+                            [src]="getProfessionalImage(professional)"
+                            [alt]="getProfessionalName(professional)">
+                    </span>
+
+                    <span class="profile-content">
+                        <span>
+                            <span class="d-flex align-items-center">
+                                <span class="name fw-medium title-color">
+                                    {{ getProfessionalName(professional) }}
+                                </span>
+
+                                <span class="fw-normal title-color ps-2" *ngIf="professional.rating">
+                                    <img src="../../assets/images/svg/star-fill.svg" alt="star">
+                                    {{ professional.rating }}
+                                </span>
+                            </span>
+
+                            <span class="content-color fw-normal mt-1 d-block">
+                                {{ getProfessionalExperience(professional) }}
+                            </span>
+                        </span>
+                    </span>
+                </label>
+            </div>
+        </li>
+    </ul>
+</div>
+</div>
             </li>
         </ul>
     </div>
@@ -248,7 +294,8 @@
                 <!-- Badge de créditos -->
                 <div class="credit-balance badge bg-success px-3 py-2 d-inline-flex align-items-center gap-1">
                     <i data-feather="dollar-sign" style="width: 14px; height: 14px;"></i>
-                    <span class="fw-medium" style="color:white;">{{ professionalCreditBalance | number:'1.0-2' }} credits</span>
+                    <span class="fw-medium" style="color:white;">{{ professionalCreditBalance | number:'1.0-2' }}
+                        credits</span>
                     <span class="d-none d-sm-inline">credits</span>
                     <a routerLink="/professional/credits"
                         class="text-white ms-1 ms-sm-2 border-start border-white border-opacity-25 ps-1 ps-sm-2">
@@ -493,30 +540,28 @@
                             </button>
                         </div>
                         <!-- ✅ Si NO ha comprado y hay cupo: muestra opción de compra -->
-                      <div *ngIf="!hasPurchasedLead(request) && getSpotsLeft(request) > 0" class="w-100">
+                        <div *ngIf="!hasPurchasedLead(request) && getSpotsLeft(request) > 0" class="w-100">
 
-    <!-- ✅ Tiene créditos suficientes -->
-    <button *ngIf="professionalCreditBalance >= leadPrice"
-        (click)="purchaseLead(request)"
-        class="btn btn-sm theme-btn w-100">
-        <i class="me-1" data-feather="lock"></i>
-        Unlock Contact (${{ leadPrice | number:'1.2-2' }})
-    </button>
+                            <!-- ✅ Tiene créditos suficientes -->
+                            <button *ngIf="professionalCreditBalance >= leadPrice" (click)="purchaseLead(request)"
+                                class="btn btn-sm theme-btn w-100">
+                                <i class="me-1" data-feather="lock"></i>
+                                Unlock Contact (${{ leadPrice | number:'1.2-2' }})
+                            </button>
 
-    <!-- ✅ No tiene créditos: lo diriges a wallet -->
-    <a *ngIf="professionalCreditBalance < leadPrice"
-       [routerLink]="['/profile', { outlets: { panel: ['wallet'] } }]"
-        class="btn btn-sm outline-btn w-100 text-center">
-        <i class="me-1" data-feather="wallet"></i>
-        Add Credits
-    </a>
+                            <!-- ✅ No tiene créditos: lo diriges a wallet -->
+                            <button *ngIf="professionalCreditBalance < leadPrice" type="button"
+                                (click)="openRechargeOptions()" class="btn btn-sm outline-btn w-100 text-center">
+                                <i class="me-1" data-feather="wallet"></i>
+                                Add Credits
+                            </button>
 
-    <small *ngIf="professionalCreditBalance < leadPrice"
-        class="text-danger d-block mt-1 text-center">
-        <i data-feather="alert-circle" style="width: 12px;"></i>
-        Insufficient credits
-    </small>
-</div>
+                            <small *ngIf="professionalCreditBalance < leadPrice"
+                                class="text-danger d-block mt-1 text-center">
+                                <i data-feather="alert-circle" style="width: 12px;"></i>
+                                Insufficient credits
+                            </small>
+                        </div>
 
                         <!-- ✅ Si no hay cupo: muestra mensaje de cerrado -->
                         <div *ngIf="getSpotsLeft(request) === 0" class="w-100">
