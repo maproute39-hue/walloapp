@@ -133,13 +133,12 @@
                             class="btn btn-sm outline-btn  w-100" style="color: #dc3545; border-color: #dc3545;">
                             Cancel Request
                         </a> -->
-<button
-  *ngIf="request.status !== 'closed'"
-  (click)="confirmCancelRequest(request)"
-  class="btn btn-sm outline-btn w-100"
-  style="color: #dc3545; border-color: #dc3545;">
-  Cancel Request
-</button>
+                        <button *ngIf="request.status !== 'closed'"
+                            [disabled]="request.status === 'work_completed_pending_client'"
+                            (click)="confirmCancelRequest(request)" class="btn btn-sm outline-btn w-100"
+                            style="color: #dc3545; border-color: #dc3545;">
+                            Cancel Request
+                        </button>
                         <span *ngIf="request.status === 'closed'" class="btn btn-sm btn-secondary w-100">
                             Request Closed
                         </span>
@@ -224,55 +223,56 @@
                     </p>
                 </div>
 
-                <div *ngIf="request.expand?.interested_professionals?.length === 0 && !hasAvailableProfessionals(request)" class="mt-3">
-    <p class="content-color mb-0">No professionals available in this area yet.</p>
-</div>
+                <div *ngIf="request.expand?.interested_professionals?.length === 0 && !hasAvailableProfessionals(request)"
+                    class="mt-3">
+                    <p class="content-color mb-0">No professionals available in this area yet.</p>
+                </div>
 
-<div *ngIf="request.expand?.interested_professionals?.length === 0 && hasAvailableProfessionals(request)" class="mt-3">
-    <p class="content-color mb-0">No professionals interested yet, but there are professionals available in your area.</p>
-    <div class="mt-4"
-    *ngIf="!hasSelectedProfessional(request) && hasAvailableProfessionals(request)">
-    <h5 class="fw-medium title-color mb-3">Available Professionals in Your Area</h5>
+                <div *ngIf="request.expand?.interested_professionals?.length === 0 && hasAvailableProfessionals(request)"
+                    class="mt-3">
+                    <p class="content-color mb-0">No professionals interested yet, but there are professionals available
+                        in your area.</p>
+                    <div class="mt-4" *ngIf="!hasSelectedProfessional(request) && hasAvailableProfessionals(request)">
+                        <h5 class="fw-medium title-color mb-3">Available Professionals in Your Area</h5>
 
-    <ul class="servicemen-listing mt-4">
-        <li class="servicemen-box select-servicemen-box white-background mb-3"
-            *ngFor="let professional of getAvailableProfessionals(request)"
-            data-bs-toggle="offcanvas"
-            data-bs-target="#details"
-            (click)="selectProfessional(professional, request)">
+                        <ul class="servicemen-listing mt-4">
+                            <li class="servicemen-box select-servicemen-box white-background mb-3"
+                                *ngFor="let professional of getAvailableProfessionals(request)"
+                                data-bs-toggle="offcanvas" data-bs-target="#details"
+                                (click)="selectProfessional(professional, request)">
 
-            <div class="form-check form-check-reverse text-start">
-                <label class="form-check-label d-flex align-items-center">
-                    <span class="profile-image">
-                        <img class="img-fluid img"
-                            [src]="getProfessionalImage(professional)"
-                            [alt]="getProfessionalName(professional)">
-                    </span>
+                                <div class="form-check form-check-reverse text-start">
+                                    <label class="form-check-label d-flex align-items-center">
+                                        <span class="profile-image">
+                                            <img class="img-fluid img" [src]="getProfessionalImage(professional)"
+                                                [alt]="getProfessionalName(professional)">
+                                        </span>
 
-                    <span class="profile-content">
-                        <span>
-                            <span class="d-flex align-items-center">
-                                <span class="name fw-medium title-color">
-                                    {{ getProfessionalName(professional) }}
-                                </span>
+                                        <span class="profile-content">
+                                            <span>
+                                                <span class="d-flex align-items-center">
+                                                    <span class="name fw-medium title-color">
+                                                        {{ getProfessionalName(professional) }}
+                                                    </span>
 
-                                <span class="fw-normal title-color ps-2" *ngIf="professional.rating">
-                                    <img src="../../assets/images/svg/star-fill.svg" alt="star">
-                                    {{ professional.rating }}
-                                </span>
-                            </span>
+                                                    <span class="fw-normal title-color ps-2"
+                                                        *ngIf="professional.rating">
+                                                        <img src="../../assets/images/svg/star-fill.svg" alt="star">
+                                                        {{ professional.rating }}
+                                                    </span>
+                                                </span>
 
-                            <span class="content-color fw-normal mt-1 d-block">
-                                {{ getProfessionalExperience(professional) }}
-                            </span>
-                        </span>
-                    </span>
-                </label>
-            </div>
-        </li>
-    </ul>
-</div>
-</div>
+                                                <span class="content-color fw-normal mt-1 d-block">
+                                                    {{ getProfessionalExperience(professional) }}
+                                                </span>
+                                            </span>
+                                        </span>
+                                    </label>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </li>
         </ul>
     </div>
