@@ -129,11 +129,17 @@
                     <div class="d-flex align-items-center gap-3 mt-3">
                         <!-- <a href="home.html#!" class="btn btn-sm outline-btn w-50">Refuse</a> -->
                         <!-- <a [routerLink]="['/booking', request.id]" class="btn btn-sm theme-btn w-100">Close Request</a> -->
-                        <a *ngIf="request.status !== 'closed'" [routerLink]="['/booking', request.id]"
-                            class="btn btn-sm theme-btn w-100">
+                        <!-- <a *ngIf="request.status !== 'closed'" [routerLink]="['/booking', request.id]"
+                            class="btn btn-sm outline-btn  w-100" style="color: #dc3545; border-color: #dc3545;">
                             Cancel Request
-                        </a>
-
+                        </a> -->
+<button
+  *ngIf="request.status !== 'closed'"
+  (click)="confirmCancelRequest(request)"
+  class="btn btn-sm outline-btn w-100"
+  style="color: #dc3545; border-color: #dc3545;">
+  Cancel Request
+</button>
                         <span *ngIf="request.status === 'closed'" class="btn btn-sm btn-secondary w-100">
                             Request Closed
                         </span>

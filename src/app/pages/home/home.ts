@@ -12,6 +12,7 @@ type CreditPackage = {
   credits: number;
   priceUsd: number;
 };
+
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -26,6 +27,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   { id: 'pkg_10', credits: 10, priceUsd: 10 },
   { id: 'pkg_20', credits: 20, priceUsd: 20 }
 ];
+
 
 buyingCredits = false;
 processingSession = false;
@@ -56,6 +58,100 @@ processingSession = false;
     private router: Router,
     private route: ActivatedRoute,
   ) { }
+
+
+
+async confirmCancelRequest(request: any): Promise<void> {
+  const result = await Swal.fire({
+    title: 'Cancel request?',
+    text: 'This action cannot be undone. All related processes will be stopped.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, cancel request',
+    cancelButtonText: 'No, keep it',
+    didOpen: () => {
+      this.applyThemeToSwalButtons();
+      this.bindThemeHoverToSwalButtons();
+    }
+  });
+
+  if (!result.isConfirmed) return;
+
+  await this.cancelRequest(request);
+}
+async cancelRequest(request: any): Promise<void> {
+  try {
+    // 🔄 Loading
+    Swal.fire({
+      title: 'Cancelling...',
+      text: 'Please wait while we cancel your request.',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      didOpen: () => Swal.showLoading()
+    });
+
+    // ==============================
+    // 1. ACTUALIZAR REQUEST
+    // ==============================
+    await this.pbService.pb.collection('requests').update(request.id, {
+      status: 'closed',
+      closed_at: new Date().toISOString()
+    });
+
+    // ==============================
+    // 2. (OPCIONAL) REEMBOLSOS
+    // ==============================
+    // Si quieres devolver créditos a profesionales:
+    // await this.walletApi.refundLeadOnCancel(request.id);
+
+    // ==============================
+    // 3. TRAER DATA ACTUALIZADA
+    // ==============================
+    const updatedRequest = await this.pbService.pb.collection('requests').getOne(request.id, {
+      expand: 'photos,interested_professionals,selected_professional'
+    });
+
+    // ==============================
+    // 4. ACTUALIZAR UI LOCAL
+    // ==============================
+    const index = this.userRequests.findIndex(r => r.id === request.id);
+    if (index !== -1) {
+      this.userRequests[index] = updatedRequest;
+      this.userRequests = [...this.userRequests]; // 🔥 trigger change detection
+    }
+
+    Swal.close();
+
+    // ==============================
+    // 5. SUCCESS FEEDBACK
+    // ==============================
+    await Swal.fire({
+      icon: 'success',
+      title: 'Request cancelled',
+      text: 'Your request has been successfully cancelled.',
+      didOpen: () => {
+        this.applyThemeToSwalButtons();
+        this.bindThemeHoverToSwalButtons();
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Error cancelling request:', error);
+    Swal.close();
+
+    await Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Could not cancel the request.',
+      didOpen: () => {
+        this.applyThemeToSwalButtons();
+        this.bindThemeHoverToSwalButtons();
+      }
+    });
+  }
+}
+
 async getAvailableProfessionalsByZip(
   zipCode: string,
   excludeIds: string[] = []
