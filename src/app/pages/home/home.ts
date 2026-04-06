@@ -22,6 +22,19 @@ type CreditPackage = {
 })
 
 export class HomeComponent implements OnInit, OnDestroy {
+
+//   requestTab: 'active' | 'in_progress' | 'closed' = 'active';
+
+// readonly activeStatuses = ['sent'];
+// readonly inProgressStatuses = ['reviewing', 'contacted', 'full', 'work_completed_pending_client'];
+// readonly closedStatuses = ['closed'];
+requestTab: 'active' | 'in_progress' | 'pending_review' | 'closed' = 'active';
+
+readonly activeStatuses = ['sent'];
+readonly inProgressStatuses = ['reviewing', 'contacted', 'full'];
+readonly pendingReviewStatuses = ['work_completed_pending_client'];
+readonly closedStatuses = ['closed'];
+
   packages: CreditPackage[] = [
   { id: 'pkg_5', credits: 5, priceUsd: 5 },
   { id: 'pkg_10', credits: 10, priceUsd: 10 },
@@ -60,6 +73,40 @@ processingSession = false;
   ) { }
 
 
+setRequestTab(tab: 'active' | 'in_progress' | 'closed'): void {
+  this.requestTab = tab;
+}
+
+get activeRequests(): any[] {
+  return this.userRequests.filter((request: any) =>
+    this.activeStatuses.includes(request.status)
+  );
+}
+
+get inProgressRequests(): any[] {
+  return this.userRequests.filter((request: any) =>
+    this.inProgressStatuses.includes(request.status)
+  );
+}
+
+get closedRequests(): any[] {
+  return this.userRequests.filter((request: any) =>
+    this.closedStatuses.includes(request.status)
+  );
+}
+
+get filteredClientRequests(): any[] {
+  switch (this.requestTab) {
+    case 'active':
+      return this.activeRequests;
+    case 'in_progress':
+      return this.inProgressRequests;
+    case 'closed':
+      return this.closedRequests;
+    default:
+      return this.userRequests;
+  }
+} 
 
 async confirmCancelRequest(request: any): Promise<void> {
   const result = await Swal.fire({

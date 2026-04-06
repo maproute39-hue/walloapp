@@ -7,9 +7,33 @@ import { provideRouter, withViewTransitions } from '@angular/router';
 import { PortfolioGalleryComponent } from './pages/profile/sections/expert/portfolio-gallery/portfolio-gallery';
 import { Landing } from '@app/pages/landing/landing';
 import { ProfessionalReviews } from './pages/profile/sections/expert/professional-reviews/professional-reviews';
+import { CanMatchFn } from '@angular/router';
+export const deviceGuard: CanMatchFn = (_, segments) => {
+  const url = '/' + segments.map(s => s.path).join('/');
+
+  // excluir rutas que NO quieres redirigir
+  if (url.startsWith('/landing')) {
+    return true;
+  }
+
+  const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+
+  if (!isMobile) {
+    window.location.href = 'https://landing.wallizo.com';
+    return false;
+  }
+
+  return true;
+};
 export const routes: Routes = [
   {
+    path: 'home',
+    canMatch: [deviceGuard],
+    loadComponent: () => import('./pages/landing/landing').then(c => c.Landing)
+  },
+  {
     path: '',
+    
     redirectTo: 'home',
     pathMatch: 'full'
   },

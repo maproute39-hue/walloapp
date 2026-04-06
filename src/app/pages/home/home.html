@@ -4,13 +4,34 @@
         <div class="title">
             <h2>My Service Requests</h2>
         </div>
-        <div *ngIf="userRequests.length === 0" class="text-center mt-4">
-            <p class="content-color">No active requests.</p>
-            <a routerLink="/new" class="btn theme-btn">Create New Request</a>
+        <div class="request-tabs d-flex gap-2 flex-wrap mt-3 mb-4">
+            <button type="button" class="btn btn-sm" [ngClass]="requestTab === 'active' ? 'theme-btn' : 'outline-btn'"
+                (click)="setRequestTab('active')">
+                Active ({{ activeRequests.length }})
+            </button>
+
+            <button type="button" class="btn btn-sm"
+                [ngClass]="requestTab === 'in_progress' ? 'theme-btn' : 'outline-btn'"
+                (click)="setRequestTab('in_progress')">
+                In Progress ({{ inProgressRequests.length }})
+            </button>
+
+            <button type="button" class="btn btn-sm" [ngClass]="requestTab === 'closed' ? 'theme-btn' : 'outline-btn'"
+                (click)="setRequestTab('closed')">
+                Closed ({{ closedRequests.length }})
+            </button>
         </div>
-        <ul class="booking-list">
-            <li class="booking-box" *ngFor="let request of userRequests">
-                <!-- ... tu contenido actual para clientes ... -->
+        <div *ngIf="filteredClientRequests.length === 0" class="text-center mt-4">
+            <p class="content-color" *ngIf="requestTab === 'active'">No active requests.</p>
+            <p class="content-color" *ngIf="requestTab === 'in_progress'">No requests in progress.</p>
+            <p class="content-color" *ngIf="requestTab === 'closed'">No closed requests.</p>
+
+            <a *ngIf="requestTab === 'active'" routerLink="/new" class="btn theme-btn">
+                Create New Request
+            </a>
+        </div>
+        <ul class="booking-list" *ngIf="filteredClientRequests.length > 0">
+            <li class="booking-box" *ngFor="let request of filteredClientRequests">
                 <div class="booking-details">
                     <!-- REQUEST STATUS TRACKER -->
                     <div class="request-tracker mb-3">
