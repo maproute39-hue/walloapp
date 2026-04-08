@@ -665,6 +665,7 @@ private async sendWelcomeEmail(user: any): Promise<void> {
     });
 
     let user = authData.record;
+    console.log('📧 EMAIL USER:', user['email']);
     console.log('✅ Login Google exitoso:', user);
 
     const clientPhone = this.normalizePhone(this.projectForm.value.client_phone || '');
