@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { firstValueFrom } from 'rxjs';
 import {
   ReactiveFormsModule,
   FormBuilder,
@@ -171,88 +172,232 @@ private async checkProfileCompletion(
       this.avatarPreview.set(null);
     }
   }
+  private async sendWelcomeEmail(user: any): Promise<void> {
+  const userType = user['type'] as 'client' | 'professional';
+  const name = user['name'] || user['username'] || user['email'];
 
-  async onSubmit() {
-    this.submitted.set(true);
-    this.errorMsg.set(null);
-
-    if (this.form.invalid) return;
-
-    this.loading.set(true);
-    try {
-      const v = this.form.value;
-
-      const payload: RegisterMinimalPayload = {
-        username: v.username!,
-        email: v.email!,
-        phone: v.phone!,
-        type: v.type!,
-        dni: v.dni || undefined,
-        avatar: (v.avatar ?? undefined) as string | Blob | undefined,
-        password: v.password!,                 // ← usar las del form
-        passwordConfirm: v.passwordConfirm!,   // ← usar las del form
-      };
-
-      await this.auth.registerMinimal(payload);
-
-      this.success.set(true);
-
-      // Emails
-      const createdAt = new Date().toISOString();
-      try {
-        if (v.type === 'client') {
-          await this.email.sendBienvenidaClient(v.email!, v.username!, {
-            name: v.username!,
-            email: v.email!,
-            type: v.type!,
-            phone: v.phone!,
-            created: createdAt,
-          });
-        } else {
-          await this.email.sendBienvenidaProfessional(v.email!, v.username!, {
-            name: v.username!,
-            email: v.email!,
-            type: v.type!,
-            phone: v.phone!,
-            created: createdAt,
-          });
-          await this.email.notifyAdminNuevoProfessional({
-            name: v.username!,
-            email: v.email!,
-            type: v.type!,
-            created: createdAt,
-            phone: v.phone!,
-          });
+  if (userType === 'professional') {
+    await firstValueFrom(
+      this.email.sendProfessionalWelcome({
+        toEmail: user['email'],
+        toName: name,
+        templateId: 2,
+        params: {
+          nombre: name,
+          email: user['email'],
+          type: userType,
+          phone: user['phone'] || '',
+          created: new Date().toISOString(),
         }
-      } catch (mailErr: any) {
-        console.error('Fallo envío de email:', mailErr?.message || mailErr);
+      })
+    );
+  } else {
+    await firstValueFrom(
+      this.email.sendClientWelcome({
+        toEmail: user['email'],
+        toName: name,
+        templateId: 1,
+        params: {
+          nombre: name,
+          email: user['email'],
+          type: userType,
+          phone: user['phone'] || '',
+          created: new Date().toISOString(),
+        }
+      })
+    );
+  }
+
+  console.log('📧 Correo de bienvenida enviado a:', user['email']);
+}
+
+private async sendWelcomeEmailIfNeeded(user: any): Promise<any> {
+  const pb = this.pbService.getInstance();
+
+  if (!user?.['email']) {
+    console.warn('⚠️ Usuario sin email, no se puede enviar bienvenida');
+    return user;
+  }
+
+  if (user['welcome_email_sent'] === true) {
+    console.log('ℹ️ El correo de bienvenida ya fue enviado anteriormente');
+    return user;
+  }
+
+  await this.sendWelcomeEmail(user);
+
+  const updatedUser = await pb.collection('users').update(user.id, {
+    welcome_email_sent: true
+  });
+
+  console.log('✅ Usuario marcado con welcome_email_sent = true');
+  return updatedUser;
+}
+async onSubmit() {
+  this.submitted.set(true);
+  this.errorMsg.set(null);
+
+  if (this.form.invalid) return;
+
+  this.loading.set(true);
+
+  try {
+    const v = this.form.value;
+
+    const payload: RegisterMinimalPayload = {
+      username: v.username!,
+      email: v.email!,
+      phone: v.phone!,
+      type: v.type!,
+      dni: v.dni || undefined,
+      avatar: (v.avatar ?? undefined) as string | Blob | undefined,
+      password: v.password!,
+      passwordConfirm: v.passwordConfirm!,
+    };
+
+    // 🔹 Registrar usuario
+    const authResult = await this.auth.registerMinimal(payload);
+
+    // ⚠️ IMPORTANTE: obtener usuario recién creado
+    let user = authResult?.['record'] || authResult;
+
+    this.success.set(true);
+
+    // 🔹 Enviar correo SOLO si no se ha enviado antes
+    try {
+      user = await this.sendWelcomeEmailIfNeeded(user);
+
+      // 🔹 Email adicional solo para profesionales (NO duplicar bienvenida)
+      if (v.type === 'professional') {
+        await this.email.sendAdminNewProfessional({
+          name: v.username!,
+          email: v.email!,
+          type: v.type!,
+          created: new Date().toISOString(),
+          phone: v.phone!,
+        });
       }
 
-      if (v.type === 'client') {
-        await Swal.fire({
-          title: '¡Cuenta creada!',
-          text: `Bienvenido ${v.username}, tu cuenta de client fue activada correctamente.`,
-          icon: 'success',
-          confirmButtonText: 'Ir al inicio',
-        });
-        this.router.navigate(['/home']);
-      } else {
-        await Swal.fire({
-          title: 'Cuenta en revisión',
-          text: `Gracias ${v.username}. Tu cuenta de proveedor será revisada por el equipo antes de activarse.`,
-          icon: 'info',
-          confirmButtonText: 'Entendido',
-        });
-        // decide si rediriges o lo dejas en la misma pantalla
-      }
-    } catch (e: any) {
-      const msg = e?.response?.message ?? e?.message ?? 'No se pudo crear la cuenta.';
-      this.errorMsg.set(msg);
-      Swal.fire({ title: 'Error', text: msg, icon: 'error', confirmButtonText: 'Revisar' });
-    } finally {
-      this.loading.set(false);
+    } catch (mailErr: any) {
+      console.error('⚠️ Registro exitoso, pero falló el email:', mailErr?.message || mailErr);
     }
+
+    // 🔹 UX según tipo
+    if (v.type === 'client') {
+      await Swal.fire({
+        title: '¡Cuenta creada!',
+        text: `Bienvenido ${v.username}, tu cuenta fue creada correctamente.`,
+        icon: 'success',
+        confirmButtonText: 'Ir al inicio',
+      });
+
+      this.router.navigate(['/home']);
+
+    } else {
+      await Swal.fire({
+        title: 'Cuenta en revisión',
+        text: `Gracias ${v.username}. Tu cuenta será revisada antes de activarse.`,
+        icon: 'info',
+        confirmButtonText: 'Entendido',
+      });
+    }
+
+  } catch (e: any) {
+    const msg = e?.response?.message ?? e?.message ?? 'No se pudo crear la cuenta.';
+    this.errorMsg.set(msg);
+
+    Swal.fire({
+      title: 'Error',
+      text: msg,
+      icon: 'error',
+      confirmButtonText: 'Revisar'
+    });
+
+  } finally {
+    this.loading.set(false);
   }
+}
+  // async onSubmit() {
+  //   this.submitted.set(true);
+  //   this.errorMsg.set(null);
+
+  //   if (this.form.invalid) return;
+
+  //   this.loading.set(true);
+  //   try {
+  //     const v = this.form.value;
+
+  //     const payload: RegisterMinimalPayload = {
+  //       username: v.username!,
+  //       email: v.email!,
+  //       phone: v.phone!,
+  //       type: v.type!,
+  //       dni: v.dni || undefined,
+  //       avatar: (v.avatar ?? undefined) as string | Blob | undefined,
+  //       password: v.password!,                 // ← usar las del form
+  //       passwordConfirm: v.passwordConfirm!,   // ← usar las del form
+  //     };
+
+  //     await this.auth.registerMinimal(payload);
+
+  //     this.success.set(true);
+
+  //     // Emails
+  //     const createdAt = new Date().toISOString();
+  //     try {
+  //       if (v.type === 'client') {
+  //         await this.email.sendBienvenidaClient(v.email!, v.username!, {
+  //           name: v.username!,
+  //           email: v.email!,
+  //           type: v.type!,
+  //           phone: v.phone!,
+  //           created: createdAt,
+  //         });
+  //       } else {
+  //         await this.email.sendBienvenidaProfessional(v.email!, v.username!, {
+  //           name: v.username!,
+  //           email: v.email!,
+  //           type: v.type!,
+  //           phone: v.phone!,
+  //           created: createdAt,
+  //         });
+  //         await this.email.notifyAdminNuevoProfessional({
+  //           name: v.username!,
+  //           email: v.email!,
+  //           type: v.type!,
+  //           created: createdAt,
+  //           phone: v.phone!,
+  //         });
+  //       }
+  //     } catch (mailErr: any) {
+  //       console.error('Fallo envío de email:', mailErr?.message || mailErr);
+  //     }
+
+  //     if (v.type === 'client') {
+  //       await Swal.fire({
+  //         title: '¡Cuenta creada!',
+  //         text: `Bienvenido ${v.username}, tu cuenta de client fue activada correctamente.`,
+  //         icon: 'success',
+  //         confirmButtonText: 'Ir al inicio',
+  //       });
+  //       this.router.navigate(['/home']);
+  //     } else {
+  //       await Swal.fire({
+  //         title: 'Cuenta en revisión',
+  //         text: `Gracias ${v.username}. Tu cuenta de proveedor será revisada por el equipo antes de activarse.`,
+  //         icon: 'info',
+  //         confirmButtonText: 'Entendido',
+  //       });
+  //       // decide si rediriges o lo dejas en la misma pantalla
+  //     }
+  //   } catch (e: any) {
+  //     const msg = e?.response?.message ?? e?.message ?? 'No se pudo crear la cuenta.';
+  //     this.errorMsg.set(msg);
+  //     Swal.fire({ title: 'Error', text: msg, icon: 'error', confirmButtonText: 'Revisar' });
+  //   } finally {
+  //     this.loading.set(false);
+  //   }
+  // }
 
   // Selector visual de tipo
   setType(t: UserType) {
@@ -295,7 +440,67 @@ private async checkProfileCompletion(
       showConfirmButton: false
     });
   }
+async loginWithGoogle() {
+  try {
+    this.loading.set(true);
+    this.errorMsg.set(null);
 
+    const pb = this.pbService.getInstance();
+
+    const authData = await pb.collection('users').authWithOAuth2({
+      provider: 'google',
+    });
+
+    let user = authData.record;
+
+    // PASO 1: asegurar type
+    if (!user['type'] || user['type'] === '') {
+      user = await pb.collection('users').update(user.id, {
+        type: 'professional', // o 'client' según tu flujo por defecto
+      });
+    }
+
+    // PASO 2: enviar correo de bienvenida solo una vez
+    try {
+      user = await this.sendWelcomeEmailIfNeeded(user);
+    } catch (mailErr: any) {
+      console.error('⚠️ Login Google exitoso, pero falló el correo:', mailErr?.message || mailErr);
+    }
+
+    // PASO 3: determinar si necesita completar perfil
+    const userType = user['type'] as 'client' | 'professional';
+    const needsProfileCompletion = await this.checkProfileCompletion(user, userType);
+
+    if (needsProfileCompletion) {
+      sessionStorage.setItem('oauth_user_id', user.id);
+      sessionStorage.setItem('oauth_user_type', userType);
+      sessionStorage.setItem('oauth_user_name', user['name'] || user['username'] || '');
+      sessionStorage.setItem('oauth_user_email', user['email'] || '');
+
+      this.showSuccess('¡Bienvenido! Completa tu perfil para continuar.');
+      setTimeout(() => this.router.navigate(['/complete-profile']), 1500);
+    } else {
+      this.success.set(true);
+      this.showSuccess('¡Bienvenido! ' + (user['name'] || user['username'] || user['email']));
+
+      const redirectPath = this.getRedirectPath(userType);
+      setTimeout(() => this.router.navigate([redirectPath]), 1500);
+    }
+
+  } catch (error: any) {
+    console.error('❌ Error Google:', error);
+
+    if (error?.message?.includes('popup')) {
+      this.errorMsg.set('Permite las ventanas emergentes para continuar con Google.');
+    } else if (error?.message?.includes('cancelled')) {
+      this.errorMsg.set('Inicio con Google cancelado.');
+    } else {
+      this.errorMsg.set('Error con Google. Intenta con email.');
+    }
+  } finally {
+    this.loading.set(false);
+  }
+}
   // ========== LOGIN CON GOOGLE ==========
 // ========== LOGIN CON GOOGLE ==========
 // async loginWithGoogle() {
@@ -355,62 +560,62 @@ private async checkProfileCompletion(
 //     this.loading.set(false);
 //   }
 // }
-async loginWithGoogle() {
-  try {
-    this.loading.set(true);
-    this.errorMsg.set(null);
+// async loginWithGoogle() {
+//   try {
+//     this.loading.set(true);
+//     this.errorMsg.set(null);
 
-    const authData = await this.pbService.getInstance().collection('users').authWithOAuth2({
-      provider: 'google',
-    });
+//     const authData = await this.pbService.getInstance().collection('users').authWithOAuth2({
+//       provider: 'google',
+//     });
 
-    let user = authData.record;
+//     let user = authData.record;
 
-    // 🎯 PASO 1: Si no tiene type, asignar por defecto 'client' 
-    // (o mostrar modal para que elija, según tu flujo)
-    if (!user['type'] || user['type'] === '') {
-      await this.pbService.getInstance().collection('users').update(user.id, {
-        type: 'professional', // ⭐ Default seguro, luego puede cambiar en complete-profile
-      });
-      user['type'] = 'professional';
-    }
+//     // 🎯 PASO 1: Si no tiene type, asignar por defecto 'client' 
+//     // (o mostrar modal para que elija, según tu flujo)
+//     if (!user['type'] || user['type'] === '') {
+//       await this.pbService.getInstance().collection('users').update(user.id, {
+//         type: 'professional', // ⭐ Default seguro, luego puede cambiar en complete-profile
+//       });
+//       user['type'] = 'professional';
+//     }
 
-    // 🎯 PASO 2: Determinar si necesita completar perfil según su tipo
-    const userType = user['type'] as 'client' | 'professional';
-    const needsProfileCompletion = await this.checkProfileCompletion(user, userType);
+//     // 🎯 PASO 2: Determinar si necesita completar perfil según su tipo
+//     const userType = user['type'] as 'client' | 'professional';
+//     const needsProfileCompletion = await this.checkProfileCompletion(user, userType);
     
-    if (needsProfileCompletion) {
-      // Guardar datos temporales para el formulario de completado
-      sessionStorage.setItem('oauth_user_id', user.id);
-      sessionStorage.setItem('oauth_user_type', userType); // ⭐ CLAVE: guardar el tipo
-      sessionStorage.setItem('oauth_user_name', user['name'] || user['username'] || '');
-      sessionStorage.setItem('oauth_user_email', user['email'] || '');
+//     if (needsProfileCompletion) {
+//       // Guardar datos temporales para el formulario de completado
+//       sessionStorage.setItem('oauth_user_id', user.id);
+//       sessionStorage.setItem('oauth_user_type', userType); // ⭐ CLAVE: guardar el tipo
+//       sessionStorage.setItem('oauth_user_name', user['name'] || user['username'] || '');
+//       sessionStorage.setItem('oauth_user_email', user['email'] || '');
       
-      this.showSuccess('¡Bienvenido! Completa tu perfil para continuar.');
-      setTimeout(() => this.router.navigate(['/complete-profile']), 1500);
-    } else {
-      // Usuario completo, redirigir según su rol
-      this.success.set(true);
-      this.showSuccess('¡Bienvenido! ' + (user['name'] || user['username'] || user['email']));
+//       this.showSuccess('¡Bienvenido! Completa tu perfil para continuar.');
+//       setTimeout(() => this.router.navigate(['/complete-profile']), 1500);
+//     } else {
+//       // Usuario completo, redirigir según su rol
+//       this.success.set(true);
+//       this.showSuccess('¡Bienvenido! ' + (user['name'] || user['username'] || user['email']));
       
-      const redirectPath = this.getRedirectPath(userType);
-      setTimeout(() => this.router.navigate([redirectPath]), 1500);
-    }
+//       const redirectPath = this.getRedirectPath(userType);
+//       setTimeout(() => this.router.navigate([redirectPath]), 1500);
+//     }
 
-  } catch (error: any) {
-    console.error('❌ Error Google:', error);
+//   } catch (error: any) {
+//     console.error('❌ Error Google:', error);
     
-    if (error?.message?.includes('popup')) {
-      this.errorMsg.set('Permite las ventanas emergentes para continuar con Google.');
-    } else if (error?.message?.includes('cancelled')) {
-      this.errorMsg.set('Inicio con Google cancelado.');
-    } else {
-      this.errorMsg.set('Error con Google. Intenta con email.');
-    }
-  } finally {
-    this.loading.set(false);
-  }
-}
+//     if (error?.message?.includes('popup')) {
+//       this.errorMsg.set('Permite las ventanas emergentes para continuar con Google.');
+//     } else if (error?.message?.includes('cancelled')) {
+//       this.errorMsg.set('Inicio con Google cancelado.');
+//     } else {
+//       this.errorMsg.set('Error con Google. Intenta con email.');
+//     }
+//   } finally {
+//     this.loading.set(false);
+//   }
+// }
   // ========== LOGIN CON APPLE ==========
   async loginWithApple() {
     try {
