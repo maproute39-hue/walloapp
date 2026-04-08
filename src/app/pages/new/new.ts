@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import Swal from 'sweetalert2';
+import { firstValueFrom } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import {
   FormsModule,
@@ -16,6 +17,7 @@ import {
 import { PocketbaseService } from '../../services/pocketbase.service';
 import { PhoneAuthService } from '../../services/phone-auth.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { EmailService } from '@app/services/email.service';
 
 @Component({
   selector: 'app-new',
@@ -85,7 +87,9 @@ export class NewRequestComponent implements OnInit, OnDestroy {
     private sanitizer: DomSanitizer,
     private router: Router,
     private pbService: PocketbaseService,
-    public phoneAuth: PhoneAuthService
+    public phoneAuth: PhoneAuthService,
+      private emailService: EmailService
+
   ) { }
   private async checkActiveRequests(userId: string): Promise<boolean> {
     try {
@@ -101,6 +105,7 @@ export class NewRequestComponent implements OnInit, OnDestroy {
       throw error;
     }
   }
+  
   ngOnInit(): void {
     this.initForms();
     this.loadZipCodesForAutocomplete();
@@ -338,6 +343,66 @@ export class NewRequestComponent implements OnInit, OnDestroy {
       this.step = 2;
     }
   }
+private async sendWelcomeEmailIfNeeded(user: any): Promise<any> {
+  const pb = this.pbService.getInstance();
+
+  if (!user?.email) {
+    console.warn('⚠️ El usuario no tiene email. No se enviará correo de bienvenida.');
+    return user;
+  }
+
+  if (user.welcome_email_sent === true) {
+    console.log('ℹ️ El correo de bienvenida ya fue enviado anteriormente.');
+    return user;
+  }
+
+  await this.sendWelcomeEmail(user);
+
+  const updatedUser = await pb.collection('users').update(user.id, {
+    welcome_email_sent: true
+  });
+
+  console.log('✅ Campo welcome_email_sent actualizado a true');
+  return updatedUser;
+}
+private async sendWelcomeEmail(user: any): Promise<void> {
+  await firstValueFrom(
+    this.emailService.sendClientWelcome({
+      toEmail: user.email,
+      toName: user.name || user.email,
+      templateId: 1,
+      params: {
+        nombre: user.name || user.email,
+        email: user.email
+      }
+    })
+  );
+
+  console.log('📧 Correo de bienvenida enviado a:', user.email);
+}
+
+//   private async sendWelcomeEmail(user: any): Promise<void> {
+//   try {
+//     const payload = {
+//       toEmail: user.email,
+//       toName: user.name || user.email,
+//       templateId: 1, // <-- coloca aquí el ID real de tu plantilla en Brevo
+//       params: {
+//         nombre: user.name || user.email,
+//         email: user.email
+//       }
+//     };
+
+//     const response: any = await this.http
+//       .post('https://db.wallizo.com:5442/email/bienvenida', payload)
+//       .toPromise();
+
+//     console.log('📧 Correo de bienvenida enviado:', response);
+//   } catch (error) {
+//     console.error('❌ Error enviando correo de bienvenida:', error);
+//     throw error;
+//   }
+// }
   // ========== LOGIN CON APPLE ==========
   async loginWithApple() {
     try {
@@ -495,99 +560,199 @@ export class NewRequestComponent implements OnInit, OnDestroy {
 
 
 
+  // async loginWithGoogle() {
+  //   try {
+  //     this.isLoading = true;
+  //     this.errorMessage = '';
+
+  //     const pb = this.pbService.getInstance();
+
+  //     const authData = await pb.collection('users').authWithOAuth2({
+  //       provider: 'google',
+  //     });
+
+  //     let user = authData.record;
+  //     console.log('✅ Login Google exitoso:', user);
+
+  //     const clientPhone = this.normalizePhone(this.projectForm.value.client_phone || '');
+
+  //     // Preparar actualización del usuario
+  //     const updatePayload: any = {};
+
+  //     if (!user['type'] || user['type'] === '') {
+  //       updatePayload.type = 'client';
+  //     }
+
+  //     if (clientPhone) {
+  //       updatePayload.phone = clientPhone;
+  //     }
+
+  //     // Actualizar usuario si hace falta
+  //     if (Object.keys(updatePayload).length > 0) {
+  //       try {
+  //         user = await pb.collection('users').update(user.id, updatePayload);
+  //         console.log('🔄 Usuario actualizado:', updatePayload);
+  //       } catch (updateError: any) {
+  //         console.warn('⚠️ No se pudo actualizar el usuario:', updateError?.message);
+  //       }
+  //     }
+
+  //     // Solo crear request si viene del flujo de creación
+  //     if (this.step === 2) {
+  //       if (!this.projectForm.valid) {
+  //         this.showError('Please complete the project form first.');
+  //         this.step = 1;
+  //         return;
+  //       }
+
+  //       // Verificar si ya tiene una request activa
+  //       const activeRequests = await pb.collection('requests').getList(1, 1, {
+  //         filter: `client_id="${user.id}" && (status="sent" || status="reviewing")`
+  //       });
+
+  //       if (activeRequests.totalItems > 0) {
+  //         this.hasActiveRequest = true;
+
+  //         await Swal.fire({
+  //           icon: 'warning',
+  //           title: 'Active request found',
+  //           text: 'You already have an active request. You can create a new one only when the current request is closed.',
+  //           confirmButtonText: 'OK',
+  //           confirmButtonColor: '#3085d6'
+  //         });
+
+  //         this.step = 1;
+  //         return;
+  //       }
+
+  //       // Crear request
+  //       await this.submitRequestToBackend(user.id);
+
+  //       this.hasActiveRequest = false;
+  //       this.step = 4;
+  //       this.showSuccess('¡Request created successfully! Redirecting...');
+
+  //       setTimeout(() => {
+  //         this.router.navigate(['/home']);
+  //       }, 2000);
+  //     } else {
+  //       this.showSuccess('Welcome! ' + (user['name'] || user['email']));
+  //     }
+
+  //   } catch (error: any) {
+  //     console.error('❌ Error en login Google:', error);
+
+  //     if (error?.message?.includes('popup')) {
+  //       this.showError('The popup was blocked. Allow pop-ups to continue.');
+  //     } else if (error?.message?.includes('cancelled')) {
+  //       this.showError('Login cancelled by user');
+  //     } else {
+  //       this.showError('Error signing in with Google. Try again.');
+  //     }
+  //   } finally {
+  //     this.isLoading = false;
+  //   }
+  // }
   async loginWithGoogle() {
+  try {
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    const pb = this.pbService.getInstance();
+
+    const authData = await pb.collection('users').authWithOAuth2({
+      provider: 'google',
+    });
+
+    let user = authData.record;
+    console.log('✅ Login Google exitoso:', user);
+
+    const clientPhone = this.normalizePhone(this.projectForm.value.client_phone || '');
+
+    // Preparar actualización del usuario
+    const updatePayload: any = {};
+
+    if (!user['type'] || user['type'] === '') {
+      updatePayload.type = 'client';
+    }
+
+    if (clientPhone) {
+      updatePayload.phone = clientPhone;
+    }
+
+    // Actualizar usuario si hace falta
+    if (Object.keys(updatePayload).length > 0) {
+      try {
+        user = await pb.collection('users').update(user.id, updatePayload);
+        console.log('🔄 Usuario actualizado:', updatePayload);
+      } catch (updateError: any) {
+        console.warn('⚠️ No se pudo actualizar el usuario:', updateError?.message);
+      }
+    }
+
+    // Enviar correo de bienvenida solo una vez
     try {
-      this.isLoading = true;
-      this.errorMessage = '';
+      user = await this.sendWelcomeEmailIfNeeded(user);
+    } catch (emailError: any) {
+      console.warn('⚠️ Login exitoso, pero falló el envío del correo de bienvenida:', emailError?.message || emailError);
+    }
 
-      const pb = this.pbService.getInstance();
+    // Solo crear request si viene del flujo de creación
+    if (this.step === 2) {
+      if (!this.projectForm.valid) {
+        this.showError('Please complete the project form first.');
+        this.step = 1;
+        return;
+      }
 
-      const authData = await pb.collection('users').authWithOAuth2({
-        provider: 'google',
+      // Verificar si ya tiene una request activa
+      const activeRequests = await pb.collection('requests').getList(1, 1, {
+        filter: `client_id="${user.id}" && (status="sent" || status="reviewing")`
       });
 
-      let user = authData.record;
-      console.log('✅ Login Google exitoso:', user);
+      if (activeRequests.totalItems > 0) {
+        this.hasActiveRequest = true;
 
-      const clientPhone = this.normalizePhone(this.projectForm.value.client_phone || '');
-
-      // Preparar actualización del usuario
-      const updatePayload: any = {};
-
-      if (!user['type'] || user['type'] === '') {
-        updatePayload.type = 'client';
-      }
-
-      if (clientPhone) {
-        updatePayload.phone = clientPhone;
-      }
-
-      // Actualizar usuario si hace falta
-      if (Object.keys(updatePayload).length > 0) {
-        try {
-          user = await pb.collection('users').update(user.id, updatePayload);
-          console.log('🔄 Usuario actualizado:', updatePayload);
-        } catch (updateError: any) {
-          console.warn('⚠️ No se pudo actualizar el usuario:', updateError?.message);
-        }
-      }
-
-      // Solo crear request si viene del flujo de creación
-      if (this.step === 2) {
-        if (!this.projectForm.valid) {
-          this.showError('Please complete the project form first.');
-          this.step = 1;
-          return;
-        }
-
-        // Verificar si ya tiene una request activa
-        const activeRequests = await pb.collection('requests').getList(1, 1, {
-          filter: `client_id="${user.id}" && (status="sent" || status="reviewing")`
+        await Swal.fire({
+          icon: 'warning',
+          title: 'Active request found',
+          text: 'You already have an active request. You can create a new one only when the current request is closed.',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#3085d6'
         });
 
-        if (activeRequests.totalItems > 0) {
-          this.hasActiveRequest = true;
-
-          await Swal.fire({
-            icon: 'warning',
-            title: 'Active request found',
-            text: 'You already have an active request. You can create a new one only when the current request is closed.',
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#3085d6'
-          });
-
-          this.step = 1;
-          return;
-        }
-
-        // Crear request
-        await this.submitRequestToBackend(user.id);
-
-        this.hasActiveRequest = false;
-        this.step = 4;
-        this.showSuccess('¡Request created successfully! Redirecting...');
-
-        setTimeout(() => {
-          this.router.navigate(['/home']);
-        }, 2000);
-      } else {
-        this.showSuccess('Welcome! ' + (user['name'] || user['email']));
+        this.step = 1;
+        return;
       }
 
-    } catch (error: any) {
-      console.error('❌ Error en login Google:', error);
+      // Crear request
+      await this.submitRequestToBackend(user.id);
 
-      if (error?.message?.includes('popup')) {
-        this.showError('The popup was blocked. Allow pop-ups to continue.');
-      } else if (error?.message?.includes('cancelled')) {
-        this.showError('Login cancelled by user');
-      } else {
-        this.showError('Error signing in with Google. Try again.');
-      }
-    } finally {
-      this.isLoading = false;
+      this.hasActiveRequest = false;
+      this.step = 4;
+      this.showSuccess('¡Request created successfully! Redirecting...');
+
+      setTimeout(() => {
+        this.router.navigate(['/home']);
+      }, 2000);
+    } else {
+      this.showSuccess('Welcome! ' + (user['name'] || user['email']));
     }
+
+  } catch (error: any) {
+    console.error('❌ Error en login Google:', error);
+
+    if (error?.message?.includes('popup')) {
+      this.showError('The popup was blocked. Allow pop-ups to continue.');
+    } else if (error?.message?.includes('cancelled')) {
+      this.showError('Login cancelled by user');
+    } else {
+      this.showError('Error signing in with Google. Try again.');
+    }
+  } finally {
+    this.isLoading = false;
   }
+}
   onClientPhoneInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     const cleanValue = input.value.replace(/[^0-9]/g, '');

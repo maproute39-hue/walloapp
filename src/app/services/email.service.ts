@@ -1,57 +1,29 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { firstValueFrom, catchError, timeout, throwError } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../environments/environment';
-
-interface BrevoBody {
-  toEmail: string;
-  toName: string;
-  templateId: number;
-  params?: Record<string, any>;
-}
 
 @Injectable({ providedIn: 'root' })
 export class EmailService {
   private http = inject(HttpClient);
-  private base = environment.brevoApiBaseUrl; 
+  private base = environment.apiEmailUrl;
 
-  private TEMPLATE_CLIENTE   = 1;
-  private TEMPLATE_PROVEEDOR = 2;
-  private TEMPLATE_ADMIN     = 3;
-
-  private post<T>(path: string, body: any) {
-    return this.http.post<T>(`${this.base}${path}`, body).pipe(
-      timeout(10000),
-      catchError((err: HttpErrorResponse) => {
-        const msg = err?.error?.message || err?.message || 'Error enviando email';
-        return throwError(() => new Error(msg));
-      })
-    );
-  }
-
-  async sendBienvenidaClient(toEmail: string, toName: string, params?: Record<string, any>) {
-    const body: BrevoBody = { toEmail, toName, templateId: this.TEMPLATE_CLIENTE, params };
-    await firstValueFrom(this.post(`/bienvenidacliente`, body));
-  }
-
-  async sendBienvenidaProfessional(toEmail: string, toName: string, params?: Record<string, any>) {
-    const body: BrevoBody = { toEmail, toName, templateId: this.TEMPLATE_PROVEEDOR, params };
-    await firstValueFrom(this.post(`/bienvenidaexperto`, body));
-  }
-
-  async notifyAdminNuevoProfessional(params: { 
-    name: string; 
-    email: string; 
-    type: string; 
-    created: string;
-    phone?: string;
+  sendClientWelcome(dto: {
+    toEmail: string;
+    toName: string;
+    templateId: number;
+    params?: any;
   }) {
-    const body = {
-      toEmail: 'Wallo.com@gmail.com',
-      toName: 'Equipo',
-      templateId: this.TEMPLATE_ADMIN,
-      params
-    };
-    await firstValueFrom(this.post(`/nuevoregistroadministrador`, body));
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this.http.post(`${this.base}/email/clientWelcome`, dto, { headers });
+  }
+
+  sendProfessionalWelcome(dto: {
+    toEmail: string;
+    toName: string;
+    templateId: number;
+    params?: any;
+  }) {
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this.http.post(`${this.base}/email/professionalWelcome`, dto, { headers });
   }
 }
