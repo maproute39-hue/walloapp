@@ -32,7 +32,7 @@ sendAdminNewProfessional(dto: {
  
   sendClientWelcome(dto: { toEmail: string; toName: string; templateId: 1; params?: any }) {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    return this.http.post(`${this.base}/email/clientWelcome`, dto, { headers });
+    return this.http.post(`${this.base}/email/clientWellcome`, dto, { headers });
   }
   
   sendProfessionalWelcome(dto: { toEmail: string; toName: string; templateId: 2; params?: any }) {
